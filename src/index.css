@@ -1,0 +1,169 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource/bagel-fat-one/400.css";
+@import "@fontsource-variable/dm-sans/index.css";
+@import "@fontsource-variable/dm-sans/wght-italic.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Sticker — die-cut vinyl stickers (sister language of Paper Cut)
+   Source of truth: docs/PAPER-CUT-LANGUAGES.md → "Sticker".
+   Colours belong to the language: change them here, never one component at a time.
+   ───────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Raw Sticker palette (mirrors the Figma "Sticker" variables) */
+  --sticker-cream: #ede2c2; /* border + highlights */
+  --sticker-orange: #fd6117; /* primary */
+  --sticker-teal: #0b7563; /* secondary */
+  --sticker-periwinkle: #8ba1ef; /* accent */
+  --sticker-pink: #ec70bb; /* accent 2 + blush */
+  --sticker-ink: #112f29; /* ground, eyes, marks */
+  --sticker-gold: #91781e; /* detail */
+  --sticker-paper: #f7f2e6; /* warm off-white sheet */
+
+  /* Die-cut geometry */
+  --sticker-border: 9px; /* cream border */
+  --sticker-kiss: 3.5px; /* coloured kiss-cut edge */
+  --sticker-shadow: 0.38; /* 0.2 on light sheets */
+
+  /* shadcn/ui semantic tokens, mapped onto Sticker (ink sheet = default) */
+  --radius: 1.25rem;
+  --background: var(--sticker-ink);
+  --foreground: var(--sticker-cream);
+  --card: var(--sticker-cream);
+  --card-foreground: var(--sticker-ink);
+  --popover: var(--sticker-cream);
+  --popover-foreground: var(--sticker-ink);
+  --primary: var(--sticker-orange);
+  --primary-foreground: var(--sticker-ink);
+  --secondary: var(--sticker-teal);
+  --secondary-foreground: var(--sticker-cream);
+  --muted: color-mix(in srgb, var(--sticker-cream) 10%, var(--sticker-ink));
+  --muted-foreground: color-mix(in srgb, var(--sticker-cream) 70%, var(--sticker-ink));
+  --accent: var(--sticker-periwinkle);
+  --accent-foreground: var(--sticker-ink);
+  --destructive: var(--sticker-pink);
+  --border: color-mix(in srgb, var(--sticker-cream) 22%, transparent);
+  --input: color-mix(in srgb, var(--sticker-cream) 22%, transparent);
+  --ring: var(--sticker-periwinkle);
+}
+
+/* Light sheet (parent web + off-white variant). Shadow drops to 20%. */
+[data-sheet="paper"] {
+  --sticker-shadow: 0.2;
+  --background: var(--sticker-paper);
+  --foreground: var(--sticker-ink);
+  --muted: color-mix(in srgb, var(--sticker-ink) 6%, var(--sticker-paper));
+  --muted-foreground: color-mix(in srgb, var(--sticker-ink) 68%, var(--sticker-paper));
+  --border: color-mix(in srgb, var(--sticker-ink) 14%, transparent);
+  --input: color-mix(in srgb, var(--sticker-ink) 18%, transparent);
+  --ring: var(--sticker-teal);
+}
+
+@theme inline {
+  --font-display: "Bagel Fat One", "DM Sans Variable", system-ui, sans-serif;
+  --font-sans: "DM Sans Variable", "DM Sans", system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-cream: var(--sticker-cream);
+  --color-orange: var(--sticker-orange);
+  --color-teal: var(--sticker-teal);
+  --color-periwinkle: var(--sticker-periwinkle);
+  --color-pink: var(--sticker-pink);
+  --color-ink: var(--sticker-ink);
+  --color-gold: var(--sticker-gold);
+  --color-paper: var(--sticker-paper);
+
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+
+  --animate-pop-in: pop-in 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-wiggle: wiggle 1.6s ease-in-out infinite;
+  --animate-float: float 3.2s ease-in-out infinite;
+  --animate-slide-down: slide-down 480ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes pop-in {
+  0% { transform: scale(0.2) rotate(var(--tilt, 0deg)); opacity: 0; }
+  100% { transform: scale(1) rotate(var(--tilt, 0deg)); opacity: 1; }
+}
+@keyframes wiggle {
+  0%, 70%, 100% { transform: rotate(var(--tilt, 0deg)) scale(1); }
+  76% { transform: rotate(calc(var(--tilt, 0deg) - 4deg)) scale(1.04); }
+  84% { transform: rotate(calc(var(--tilt, 0deg) + 4deg)) scale(1.04); }
+  92% { transform: rotate(calc(var(--tilt, 0deg) - 2deg)) scale(1.02); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }
+  50% { transform: translateY(-8px) rotate(var(--tilt, 0deg)); }
+}
+@keyframes slide-down {
+  0% { transform: translateY(-140%); }
+  100% { transform: translateY(0); }
+}
+
+/* A sticker made from a CSS box: cream border + kiss-cut edge + lift, following border-radius. */
+@utility sticker {
+  box-shadow:
+    0 0 0 var(--sticker-border) var(--sticker-cream),
+    0 0 0 calc(var(--sticker-border) + var(--sticker-kiss)) var(--kiss, var(--sticker-teal)),
+    0 7px 5px calc(var(--sticker-border) + var(--sticker-kiss)) rgb(0 0 0 / var(--sticker-shadow));
+}
+/* Same sticker, pressed flat onto the sheet (used for the :active state). */
+@utility sticker-pressed {
+  box-shadow:
+    0 0 0 var(--sticker-border) var(--sticker-cream),
+    0 0 0 calc(var(--sticker-border) + var(--sticker-kiss)) var(--kiss, var(--sticker-teal)),
+    0 2px 2px calc(var(--sticker-border) + var(--sticker-kiss)) rgb(0 0 0 / var(--sticker-shadow));
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+/* Die-cut layers drawn by <StickerArt>: the art is painted three times — kiss-cut edge,
+   cream border, then the art itself. CSS overrides the SVG presentation attributes. */
+.st-kiss *, .st-border * {
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 1;
+}
+.st-kiss * { fill: var(--st-kiss); stroke: var(--st-kiss); stroke-width: var(--st-kw); }
+.st-border * { fill: var(--sticker-cream); stroke: var(--sticker-cream); stroke-width: var(--st-bw); }

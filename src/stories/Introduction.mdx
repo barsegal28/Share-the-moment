@@ -1,0 +1,29 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Introduction" />
+
+# Share the Moment — component library
+
+When a kid earns 3 stars on a song, they can send the recording to family, and a parent can send a surprise back.
+This Storybook holds every component of the prototype and each of its states.
+
+**Base:** [shadcn/ui](https://ui.shadcn.com) components, re-themed with the **Sticker** language and extended with kid sizes.
+**Language:** Sticker — die-cut vinyl stickers on an ink sheet. Every object gets a 9px cream border, a 3.5px kiss-cut edge in a contrasting colour, and a soft lift (7px down, 5px blur, 38% black; 20% on light sheets). Riso grain sits on the sheet only.
+
+## Sections
+
+- **Foundations** — palette, type and the die-cut.
+- **UI (shadcn)** — the base components with Sticker tokens. `Button` adds a `sticker` variant and `kid`, `kid-lg`, `kid-icon` sizes (80px+ targets; the rule is at least 64pt).
+- **Sticker** — `StickerArt`, the art library and the sheet.
+- **Kid** — the iPad components: stars, share prompt, send overlay, parent gate, reply notification and reveal.
+- **Parent** — the phone web components: message, listen widget, reply composer.
+- **Screens** — full screens and the interactive flows (sound on).
+
+## Design rules for ages 6–9
+
+- Voice-over on every prompt; text is a backup.
+- People are faces, not names.
+- One obvious action per screen; no typing.
+- Every tap gets sound and motion.
+- No negative signals for the kid.
+- The kid always chooses to send; recordings are audio only.
