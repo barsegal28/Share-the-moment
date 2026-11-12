@@ -3,7 +3,8 @@
  *
  * Everything is synthesised in the browser so the prototype needs no audio files:
  * - tap / pop / chime / whoosh: short Web Audio tones (every tap gets sound — design rule)
- * - the recording: "Twinkle Twinkle Little Star" (public domain) played on a soft piano-ish synth
+ * - the recording: a short original tune played on a soft piano-ish synth (a stand-in for the kid's take;
+ *   the song title shown in the UI comes from DEMO_SONG in config.ts)
  * - voice-over: the Web Speech API, with every line also published as a caption (text is a backup, never the only cue)
  */
 import { useSyncExternalStore } from "react"
@@ -64,18 +65,16 @@ export const sfx = {
 }
 
 // ─── The kid's recording ──────────────────────────────────────────────────────
-// Twinkle Twinkle Little Star (traditional, public domain). [midi, beats]
-const TWINKLE: [number, number][] = [
-  [60, 1], [60, 1], [67, 1], [67, 1], [69, 1], [69, 1], [67, 2],
-  [65, 1], [65, 1], [64, 1], [64, 1], [62, 1], [62, 1], [60, 2],
-  [67, 1], [67, 1], [65, 1], [65, 1], [64, 1], [64, 1], [62, 2],
-  [67, 1], [67, 1], [65, 1], [65, 1], [64, 1], [64, 1], [62, 2],
-  [60, 1], [60, 1], [67, 1], [67, 1], [69, 1], [69, 1], [67, 2],
-  [65, 1], [65, 1], [64, 1], [64, 1], [62, 1], [62, 1], [60, 2],
+// An original 8-bar demo tune in C major. [midi, beats]
+const MELODY: [number, number][] = [
+  [64, 1], [67, 1], [69, 1], [67, 1], [64, 1], [62, 1], [60, 2],
+  [62, 1], [64, 1], [67, 1], [64, 1], [62, 2], [60, 1], [62, 1],
+  [64, 1], [67, 1], [69, 1], [72, 1], [71, 1], [69, 1], [67, 2],
+  [69, 1], [67, 1], [64, 1], [62, 1], [60, 4],
 ]
-const BASS: Record<number, number> = { 0: 48, 8: 53, 16: 48, 24: 48, 32: 48, 40: 53 }
+const BASS: Record<number, number> = { 0: 48, 7: 43, 14: 53, 22: 45, 26: 48 }
 const BEAT = 0.42
-export const RECORDING_SECONDS = TWINKLE.reduce((s, [, b]) => s + b, 0) * BEAT
+export const RECORDING_SECONDS = MELODY.reduce((s, [, b]) => s + b, 0) * BEAT
 
 let recording: { stop: () => void; startedAt: number; volume: number } | null = null
 
@@ -90,7 +89,7 @@ export function playRecording({ volume = 1, loop = false, onEnd }: { volume?: nu
   let t = 0.05
   const timers: number[] = []
   const schedule = () => {
-    TWINKLE.forEach(([n, beats], i) => {
+    MELODY.forEach(([n, beats], i) => {
       const f = 440 * 2 ** ((n - 69) / 12)
       tone(f, t, beats * BEAT * 1.6, 0.18, "triangle", master)
       tone(f * 2, t, beats * BEAT * 0.6, 0.03, "sine", master)

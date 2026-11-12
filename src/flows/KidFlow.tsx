@@ -11,6 +11,7 @@ import type { ShareVariant } from "@/components/kid/SharePrompt"
 import type { Contact } from "@/components/kid/FamilyAvatars"
 import { playRecording, sfx, speak, stopAll } from "@/lib/audio"
 import { SAMPLE_REPLIES } from "@/lib/types"
+import { DEMO_SONG } from "@/config"
 
 /**
  * Kid flow (iPad landscape):
@@ -55,7 +56,7 @@ export function KidFlow({ initialVariant = "first", replies = 1, autostart = fal
       sfx.success()
       await wait(250)
       if (!alive()) return
-      await speak("You did it!")
+      await speak(`You did it! You played ${DEMO_SONG.title} with almost no mistakes!`)
       if (!alive()) return
       await speak((Object.keys(earned) as StarKey[]).map((k) => STAR_INFO[k].voice).join(" "))
       if (!alive()) return

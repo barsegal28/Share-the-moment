@@ -3,6 +3,7 @@ import { Sticker } from "@/art/stickers"
 import { StarScore } from "@/components/kid/StarScore"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { DEMO_SONG } from "@/config"
 
 /**
  * How the parent hears about it — chosen at setup.
@@ -20,7 +21,7 @@ export interface MessagePreviewProps {
   className?: string
 }
 
-export function MessagePreview({ channel = "sms", kid = "Noa", song = "Twinkle Twinkle Little Star", firstTime = false, more = 0, onOpen, className }: MessagePreviewProps) {
+export function MessagePreview({ channel = "sms", kid = "Noa", song = DEMO_SONG.title, firstTime = false, more = 0, onOpen, className }: MessagePreviewProps) {
   return channel === "sms" ? (
     <SmsThread kid={kid} song={song} firstTime={firstTime} onOpen={onOpen} className={className} />
   ) : (

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { Sticker, STICKERS, type StickerName } from "@/art/stickers"
+import { ALL_STICKERS, Sticker } from "@/art/stickers"
+import { FIGMA_STICKERS } from "@/art/figma-stickers"
 
 const meta: Meta = { title: "Foundations/Sticker language" }
 export default meta
@@ -30,6 +31,35 @@ export const Palette: StoryObj = {
   ),
 }
 
+const PC_VARS = [
+  ["ground", "--pc-ground", "sticker/ink"], ["ground/light", "--pc-ground-light", "sticker/paper"], ["ground/notebook", "--pc-ground-notebook", "sticker/notebook"],
+  ["piece/primary", "--pc-piece-primary", "sticker/orange"], ["piece/secondary", "--pc-piece-secondary", "sticker/teal"], ["piece/accent", "--pc-piece-accent", "sticker/periwinkle"],
+  ["piece/accent-2", "--pc-piece-accent-2", "sticker/pink"], ["piece/dark", "--pc-piece-dark", "sticker/gold"], ["mark/ink", "--pc-mark-ink", "sticker/ink"],
+  ["mark/knockout", "--pc-mark-knockout", "sticker/cream"], ["detail/rule", "--pc-detail-rule", "sticker/periwinkle"], ["detail/margin", "--pc-detail-margin", "sticker/pink"],
+  ["text/primary", "--pc-text-primary", "sticker/ink"], ["sticker/border", "--pc-sticker-border", "sticker/cream"], ["system/surface", "--pc-system-surface", "sticker/system-white"],
+  ["system/ink", "--pc-system-ink", "mark/ink"],
+]
+
+export const Variables: StoryObj = {
+  name: "Figma variables (Sticker mode)",
+  render: () => (
+    <div className="max-w-3xl">
+      <p className="mb-6 text-cream/75">The “Paper Cut” collection in its Sticker mode, as CSS variables with the same names as the Figma code syntax.</p>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {PC_VARS.map(([name, v, alias]) => (
+          <div key={name} className="flex items-center gap-3 rounded-xl bg-muted p-2.5">
+            <span className="size-10 shrink-0 rounded-lg ring-2 ring-cream/20" style={{ background: `var(${v})` }} />
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-cream">{name}</p>
+              <p className="truncate font-mono text-[11px] text-cream/60">{v} → {alias}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ),
+}
+
 export const Type: StoryObj = {
   render: () => (
     <div className="flex flex-col gap-6 text-cream">
@@ -37,6 +67,8 @@ export const Type: StoryObj = {
       <p className="font-display text-5xl">Bagel Fat One · headlines</p>
       <p className="text-2xl font-semibold">DM Sans 600 · labels and buttons</p>
       <p className="max-w-xl text-lg">DM Sans 400 · text. For kids, text is always a backup to voice; for parents it carries the context.</p>
+      <p className="text-pc-label">Paper Cut/Label · DM Sans 700 · 11 / 130% · +12%</p>
+      <p className="text-pc-body max-w-md">Paper Cut/Body · DM Sans 400 · 14 / 150%. The two text styles shared by every language in the Figma file.</p>
     </div>
   ),
 }
@@ -60,10 +92,11 @@ export const AllStickers: StoryObj = {
   name: "Art library",
   render: () => (
     <div className="flex flex-wrap gap-10">
-      {(Object.keys(STICKERS) as StickerName[]).map((n, i) => (
-        <div key={n} className="flex w-32 flex-col items-center gap-3">
-          <Sticker name={n} size={96} tilt={i % 2 ? 9 : -9} />
+      {ALL_STICKERS.map((n, i) => (
+        <div key={n} className="flex w-36 flex-col items-center gap-3">
+          <Sticker name={n} size={110} tilt={i % 2 ? 9 : -9} />
           <span className="font-mono text-xs text-cream/70">{n}</span>
+          <span className="-mt-2 text-[10px] font-semibold tracking-wider text-cream/45 uppercase">{n in FIGMA_STICKERS ? "Figma · app assets" : "local"}</span>
         </div>
       ))}
     </div>

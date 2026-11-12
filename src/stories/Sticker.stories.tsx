@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { StickerArt } from "@/components/sticker/StickerArt"
 import { Sheet } from "@/components/sticker/Sheet"
-import { Sticker, STICKERS, type StickerName } from "@/art/stickers"
+import { ALL_STICKERS, Sticker } from "@/art/stickers"
 
 const meta: Meta<typeof Sticker> = {
   title: "Sticker/Sticker",
   component: Sticker,
-  args: { name: "star", size: 200, tilt: -8, motion: "none", lift: true },
+  args: { name: "ringedPlanet", size: 200, tilt: -8, motion: "none", lift: true },
   argTypes: {
-    name: { control: "select", options: Object.keys(STICKERS) as StickerName[] },
+    name: { control: "select", options: ALL_STICKERS },
     kiss: { control: "select", options: ["cream", "orange", "teal", "periwinkle", "pink", "ink", "gold"] },
     motion: { control: "inline-radio", options: ["none", "pop", "float", "wiggle"] },
     tilt: { control: { type: "range", min: -15, max: 15 } },
@@ -36,7 +36,7 @@ export const Sheets: StoryObj = {
     <div className="grid grid-cols-3">
       {(["ink", "paper", "notebook"] as const).map((g, i) => (
         <Sheet key={g} ground={g} className="flex h-[420px] flex-col items-center justify-center gap-6">
-          <Sticker name={(["sun", "rocket", "rainbow"] as const)[i]} size={140} tilt={i * 7 - 7} />
+          <Sticker name={(["stripedPlanet", "drippyComet", "ringedPlanet"] as const)[i]} size={140} tilt={i * 7 - 7} />
           <span className="font-display text-xl">{g}</span>
         </Sheet>
       ))}

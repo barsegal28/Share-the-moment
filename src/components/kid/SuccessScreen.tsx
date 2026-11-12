@@ -9,6 +9,7 @@ import { VoiceCaption } from "./VoiceCaption"
 import { ReadyShelf } from "./ParentGate"
 import type { Contact } from "./FamilyAvatars"
 import { cn } from "@/lib/utils"
+import { DEMO_SONG } from "@/config"
 
 /**
  * The main "Share the moment" screen (iPad landscape, 1180 × 820).
@@ -40,11 +41,11 @@ export interface SuccessScreenProps {
 
 const DECOR = [
   { name: "sparkle", x: 560, y: 92, s: 44, t: 10 },
-  { name: "note", x: 1076, y: 196, s: 52, t: 14 },
+  { name: "eighthNotes", x: 1066, y: 190, s: 64, t: 12 },
 ] as const
 
 export function SuccessScreen({
-  song = "Twinkle Twinkle Little Star",
+  song = DEMO_SONG.title,
   variant = "first",
   earned,
   contacts = ["mom", "dad"],

@@ -21,6 +21,26 @@
   --sticker-ink: #112f29; /* ground, eyes, marks */
   --sticker-gold: #91781e; /* detail */
   --sticker-paper: #f7f2e6; /* warm off-white sheet */
+  --sticker-notebook: #fbf9f2; /* notebook sheet */
+  --sticker-system-white: #fffdf7; /* system surfaces (OS-like chrome, inputs) */
+
+  /* Figma "Paper Cut" collection, Sticker mode — same names as the variables' code syntax */
+  --pc-ground: var(--sticker-ink);
+  --pc-ground-light: var(--sticker-paper);
+  --pc-ground-notebook: var(--sticker-notebook);
+  --pc-piece-primary: var(--sticker-orange);
+  --pc-piece-secondary: var(--sticker-teal);
+  --pc-piece-accent: var(--sticker-periwinkle);
+  --pc-piece-accent-2: var(--sticker-pink);
+  --pc-piece-dark: var(--sticker-gold);
+  --pc-mark-ink: var(--sticker-ink);
+  --pc-mark-knockout: var(--sticker-cream);
+  --pc-detail-rule: var(--sticker-periwinkle);
+  --pc-detail-margin: var(--sticker-pink);
+  --pc-text-primary: var(--sticker-ink);
+  --pc-sticker-border: var(--sticker-cream);
+  --pc-system-surface: var(--sticker-system-white);
+  --pc-system-ink: var(--pc-mark-ink);
 
   /* Die-cut geometry */
   --sticker-border: 9px; /* cream border */
@@ -92,6 +112,13 @@
   --color-ink: var(--sticker-ink);
   --color-gold: var(--sticker-gold);
   --color-paper: var(--sticker-paper);
+  --color-notebook: var(--sticker-notebook);
+  --color-surface: var(--sticker-system-white);
+
+  /* Figma effect styles: the drop-shadow half of each "lifted" style (the grain half is <FigmaEffect>) */
+  --shadow-pc-snip-lifted: 0 5px 10px rgb(0 0 0 / 0.22);
+  --shadow-pc-scrapbook-lifted: 0 5px 10px rgb(0 0 0 / 0.2);
+  --shadow-pc-scrapbook-dark-card: 0 5px 10px rgb(0 0 0 / 0.28);
 
   --radius-sm: calc(var(--radius) - 8px);
   --radius-md: calc(var(--radius) - 4px);
@@ -121,6 +148,22 @@
 @keyframes slide-down {
   0% { transform: translateY(-140%); }
   100% { transform: translateY(0); }
+}
+
+/* Figma text styles shared by every language */
+@utility text-pc-body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+@utility text-pc-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 /* A sticker made from a CSS box: cream border + kiss-cut edge + lift, following border-radius. */

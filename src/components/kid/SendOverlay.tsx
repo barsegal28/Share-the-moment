@@ -5,7 +5,7 @@ import { sfx, speak } from "@/lib/audio"
 import { cn } from "@/lib/utils"
 
 /**
- * Transient overlay on the success screen: the recording flies to Mom and Dad.
+ * Transient overlay on the success screen: the recording flies to Mom and Dad as a shooting star.
  * No actions — it closes on its own.
  *
  * status
@@ -81,10 +81,10 @@ export function SendOverlay({ contacts = ["mom", "dad"], status, firstTime = fal
       {phase === "sending" && (
         <div
           className="absolute top-0 left-0"
-          style={{ offsetPath: `path("${FLIGHT}")`, offsetRotate: "auto 24deg", animation: "fly 1.7s cubic-bezier(.45,.05,.4,1) both" }}
+          style={{ offsetPath: `path("${FLIGHT}")`, offsetRotate: "auto 90deg", animation: "fly 1.7s cubic-bezier(.45,.05,.4,1) both" }}
         >
           <div className="-translate-x-1/2 -translate-y-1/2">
-            <Sticker name="plane" size={120} />
+            <Sticker name="drippyComet" size={170} />
           </div>
         </div>
       )}

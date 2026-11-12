@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import { StickerArt, type StickerArtProps, type StickerColor } from "@/components/sticker/StickerArt"
+import { FIGMA_STICKERS, type FigmaLayer, type FigmaSticker, type FigmaStickerName } from "./figma-stickers"
 
 /*
  * Sticker art library — flat palette shapes; <StickerArt> adds the die-cut.
@@ -62,28 +63,6 @@ export const STICKERS = {
     label: "Star to earn",
     kiss: "periwinkle",
     art: <polygon points={starPoints(50, 54, 46, 22)} fill={C.ink} stroke={C.ink} strokeWidth={8} strokeLinejoin="round" />,
-  },
-  heart: {
-    label: "Heart",
-    kiss: "orange",
-    art: (
-      <g>
-        <path d="M50 88 C20 68 6 50 12 32 C18 14 40 12 50 30 C60 12 82 14 88 32 C94 50 80 68 50 88 Z" fill={C.pink} />
-        <Face cx={50} cy={48} s={0.9} blush={C.orange} />
-      </g>
-    ),
-  },
-  note: {
-    label: "Music note",
-    kiss: "orange",
-    art: (
-      <g>
-        <rect x={52} y={12} width={11} height={62} rx={5.5} fill={C.peri} />
-        <path d="M58 12 C74 14 84 24 86 40 C78 32 70 30 60 30 Z" fill={C.peri} />
-        <ellipse cx={42} cy={74} rx={22} ry={18} fill={C.peri} />
-        <Face cx={42} cy={72} s={0.62} />
-      </g>
-    ),
   },
   drum: {
     label: "Drum",
@@ -212,11 +191,6 @@ export const STICKERS = {
       </g>
     ),
   },
-  sparkle: {
-    label: "Sparkle",
-    kiss: "pink",
-    art: <path d="M50 4 C54 38 62 46 96 50 C62 54 54 62 50 96 C46 62 38 54 4 50 C38 46 46 38 50 4 Z" fill={C.gold} />,
-  },
   // ── People: avatars, never names alone ("Mom" is her face) ─────────────────
   mom: {
     label: "Mom",
@@ -273,12 +247,81 @@ export const STICKERS = {
   },
 } satisfies Record<string, Def>
 
-export type StickerName = keyof typeof STICKERS
+/** Hand-drawn stickers that the Figma file doesn't have yet (people, drum, hands, plane…). */
+export type LocalStickerName = keyof typeof STICKERS
+export type StickerName = LocalStickerName | FigmaStickerName | "note"
+
+/** Older names that now point at Figma art. */
+const ALIASES: Partial<Record<string, FigmaStickerName>> = { note: "eighthNote" }
+
+export const STICKER_LABELS: Record<FigmaStickerName, string> = {
+  stripedPlanet: "Striped planet", ringedPlanet: "Ringed planet", drippyComet: "Shooting star", cloudComet: "Comet",
+  burst: "Burst", sparkle: "Sparkle", heart: "Heart", ratingStar1: "Star", ratingStar2: "Star", ratingStar3: "Star",
+  trebleClef: "Treble clef", eighthNotes: "Notes", sixteenthNotes: "Notes", eighthNote: "Music note", quarterNote: "Music note",
+  playS: "Play", play: "Play",
+}
+
+/** Every sticker name, Figma ones first. */
+export const ALL_STICKERS = [...(Object.keys(FIGMA_STICKERS) as FigmaStickerName[]), ...(Object.keys(STICKERS) as LocalStickerName[])]
+
 /** Stickers a parent can send back. */
-export const REPLY_STICKERS: StickerName[] = ["heart", "star", "trophy", "rocket", "sun", "rainbow", "crown", "note"]
+export const REPLY_STICKERS: StickerName[] = ["heart", "ratingStar1", "ringedPlanet", "stripedPlanet", "drippyComet", "cloudComet", "burst", "eighthNotes"]
+
+export const stickerLabel = (name: StickerName) => {
+  const f = (ALIASES[name] ?? name) as FigmaStickerName
+  return f in FIGMA_STICKERS ? STICKER_LABELS[f] : (STICKERS[name as LocalStickerName] as Def).label
+}
+
+function FigmaLayers({ layers }: { layers: FigmaLayer[] }) {
+  return (
+    <>
+      {layers.map((l, i) => (
+        <path
+          key={i}
+          d={l.d}
+          fill={l.f ? `var(--sticker-${l.f})` : "none"}
+          stroke={l.s ? `var(--sticker-${l.s})` : undefined}
+          strokeWidth={l.w}
+          strokeLinecap={l.s ? "round" : undefined}
+          fillRule={l.e ? "evenodd" : undefined}
+          transform={l.m ? `matrix(${l.m.join(" ")})` : l.t ? `translate(${l.t[0]} ${l.t[1]})` : undefined}
+        />
+      ))}
+    </>
+  )
+}
+
+/**
+ * The play button from Figma: a cream disc with a teal ring, and an orange triangle with its own
+ * small die-cut (3.75px cream border, 5.2px teal edge). It's a button, not a stuck-on sticker.
+ */
+function PlayArt({ art }: { art: FigmaSticker }) {
+  const [ring, disc, tri] = art.layers
+  const scale = art.w === 100 ? 1 : 0.65
+  return (
+    <>
+      <FigmaLayers layers={[ring, disc]} />
+      <g strokeLinejoin="round">
+        <path d={tri.d} transform={`translate(${tri.t![0]} ${tri.t![1]})`} fill="var(--sticker-teal)" stroke="var(--sticker-teal)" strokeWidth={10.4 * scale} />
+        <path d={tri.d} transform={`translate(${tri.t![0]} ${tri.t![1]})`} fill="var(--sticker-cream)" stroke="var(--sticker-cream)" strokeWidth={7.5 * scale} />
+      </g>
+      <FigmaLayers layers={[tri]} />
+    </>
+  )
+}
 
 export function Sticker({ name, ...props }: { name: StickerName } & Omit<StickerArtProps, "children">) {
-  const d = STICKERS[name] as Def
+  const key = ALIASES[name] ?? name
+  if (key in FIGMA_STICKERS) {
+    const art = FIGMA_STICKERS[key as FigmaStickerName] as FigmaSticker
+    const isPlay = key === "play" || key === "playS"
+    return (
+      <StickerArt kiss={art.kiss} viewBox={[art.w, art.h]} title={props.title ?? STICKER_LABELS[key as FigmaStickerName]} diecut={!isPlay} {...props}>
+        {isPlay ? <PlayArt art={art} /> : <FigmaLayers layers={art.layers} />}
+      </StickerArt>
+    )
+  }
+  const d = STICKERS[key as LocalStickerName] as Def
   return (
     <StickerArt kiss={d.kiss} viewBox={d.viewBox} title={props.title ?? d.label} {...props}>
       {d.art}

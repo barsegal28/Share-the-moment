@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { Mic, Square, Sticker as StickerIcon, Video, Check, RotateCcw, CameraOff } from "lucide-react"
-import { REPLY_STICKERS, Sticker, STICKERS, type StickerName } from "@/art/stickers"
+import { REPLY_STICKERS, Sticker, stickerLabel, type StickerName } from "@/art/stickers"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -17,7 +17,7 @@ export function StickerPicker({ value, onChange, className }: { value?: StickerN
             key={s}
             role="radio"
             aria-checked={on}
-            aria-label={STICKERS[s].label}
+            aria-label={stickerLabel(s)}
             onClick={() => onChange?.(s)}
             className={cn(
               "relative grid aspect-square place-items-center rounded-2xl bg-ink transition active:scale-95",

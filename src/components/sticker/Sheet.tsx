@@ -48,7 +48,7 @@ export function Sheet({
     <div
       data-sheet={light ? "paper" : undefined}
       className={cn("relative isolate overflow-hidden text-foreground", light ? "bg-paper" : "bg-ink", className)}
-      style={ground === "notebook" ? { backgroundColor: "#FBF9F2" } : undefined}
+      style={ground === "notebook" ? { backgroundColor: "var(--sticker-notebook)" } : undefined}
     >
       {ground === "notebook" && <NotebookRules />}
       {grain > 0 && <RisoGrain amount={light ? grain * 0.6 : grain} className="-z-10" />}

@@ -19,6 +19,8 @@ export interface StickerArtProps {
   kiss?: StickerColor
   /** Lift shadow; turn off for stickers drawn on a card. */
   lift?: boolean
+  /** Generate the cream border and kiss-cut edge (off for art that is a button, like Play). */
+  diecut?: boolean
   motion?: StickerMotion
   /** Animation delay in ms (for staggered pop-ins). */
   delay?: number
@@ -39,6 +41,7 @@ export function StickerArt({
   tilt = 0,
   kiss = "teal",
   lift = true,
+  diecut = true,
   motion = "none",
   delay = 0,
   className,
@@ -84,8 +87,8 @@ export function StickerArt({
           } as CSSProperties
         }
       >
-        <g className="st-kiss">{children}</g>
-        <g className="st-border">{children}</g>
+        {diecut && <g className="st-kiss">{children}</g>}
+        {diecut && <g className="st-border">{children}</g>}
         <g>{children}</g>
       </svg>
     </span>

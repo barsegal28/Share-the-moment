@@ -22,11 +22,11 @@ export interface ReplyRevealProps {
 }
 
 const CONFETTI = [
-  { name: "sparkle", x: 120, y: 120, s: 60, t: -12 },
-  { name: "star", x: 980, y: 110, s: 80, t: 14 },
-  { name: "note", x: 160, y: 560, s: 76, t: 10 },
-  { name: "sparkle", x: 1010, y: 540, s: 52, t: 8 },
-  { name: "heart", x: 300, y: 300, s: 48, t: -6 },
+  { name: "sparkle", x: 110, y: 110, s: 90, t: -12 },
+  { name: "ratingStar2", x: 970, y: 90, s: 110, t: 14 },
+  { name: "eighthNote", x: 150, y: 540, s: 100, t: 10 },
+  { name: "sparkle", x: 1000, y: 520, s: 80, t: 8 },
+  { name: "heart", x: 290, y: 280, s: 70, t: -6 },
 ] as const
 
 export function ReplyReveal({ reply, index = 0, total = 1, autoplay = true, onNext, onDone, className }: ReplyRevealProps) {

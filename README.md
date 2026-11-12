@@ -53,7 +53,8 @@ Parent flow: `#/parent?channel=sms|email&first=1`
 - **Base:** [shadcn/ui](https://ui.shadcn.com) (new-york, Tailwind v4) in `src/components/ui`. `components.json` is set up, so `npx shadcn@latest add <component>` adds more.
 - **Language:** Sticker (die-cut vinyl on the ink sheet). Tokens live in `src/index.css`: the raw palette (`--sticker-*`) and the shadcn semantic tokens mapped onto it. See `docs/STICKER-LANGUAGE.md`.
 - **Kid extensions:** `Button` gets a `sticker` variant with `tone`, and `kid` / `kid-lg` / `kid-icon` sizes (80px+ targets). The `sticker` utility die-cuts any box: cream border, kiss-cut edge, lift.
-- **Art:** `src/art/stickers.tsx` holds original flat SVG art; `<StickerArt>` generates the die-cut from each silhouette.
+- **Art:** sticker assets from the Figma file's **app assets** page (`src/art/figma-stickers.ts`), plus a few local hand-drawn ones (`src/art/stickers.tsx`). `<StickerArt>` generates the die-cut from each silhouette.
+- **From Figma:** the Sticker-mode variables as `--pc-*` CSS variables, the shared text styles (`text-pc-body`, `text-pc-label`) and every effect style, other languages' included (`src/lib/effects.ts`, `<FigmaEffect>`). See `docs/STICKER-LANGUAGE.md`.
 
 ## Structure
 
@@ -74,4 +75,4 @@ src/
 
 ## What's simulated
 
-Voice-over uses the browser's speech voice, the kid's recording is synthesised in the browser ("Twinkle Twinkle Little Star", public domain), and the parent's reply arrives on a timer. Flows, states, layout and timing are the real design.
+The example song is "Let It Go" (set in `src/config.ts` as `DEMO_SONG`). Only its title is used: the kid's "recording" is a short original tune synthesised in the browser. Voice-over uses the browser's speech voice, and the parent's reply arrives on a timer. Flows, states, layout and timing are the real design.

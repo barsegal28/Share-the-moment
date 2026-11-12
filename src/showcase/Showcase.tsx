@@ -49,7 +49,7 @@ export function Showcase() {
       <header className="sticky top-0 z-40 border-b border-cream/10 bg-ink/90 backdrop-blur">
         <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <a href="#top" className="flex items-center gap-3">
-            <Sticker name="star" size={34} tilt={-8} lift={false} />
+            <Sticker name="ratingStar1" size={40} tilt={-8} lift={false} />
             <span className="font-display text-xl text-cream">{PROJECT.title}</span>
           </a>
           <nav className="hidden items-center gap-1 text-sm font-semibold text-cream/75 md:flex">
@@ -80,11 +80,11 @@ export function Showcase() {
             </div>
           </div>
           <div className="relative hidden min-h-[360px] md:block" aria-hidden>
-            <Sticker name="kid" size={170} tilt={-10} motion="float" className="absolute top-4 left-8" />
-            <Sticker name="plane" size={120} tilt={8} className="absolute top-24 left-[52%]" />
-            <Sticker name="mom" size={130} tilt={8} motion="float" className="absolute top-52 right-4" style={{ animationDelay: "600ms" }} />
-            <Sticker name="heart" size={110} tilt={-6} className="absolute bottom-0 left-20" />
-            <Sticker name="sparkle" size={46} tilt={0} className="absolute top-0 right-24" />
+            <Sticker name="stripedPlanet" size={230} tilt={-8} motion="float" className="absolute -top-4 left-0" />
+            <Sticker name="kid" size={130} tilt={8} className="absolute top-40 left-[44%]" />
+            <Sticker name="drippyComet" size={170} tilt={-20} className="absolute top-0 right-0" />
+            <Sticker name="ringedPlanet" size={190} tilt={6} motion="float" className="absolute right-6 bottom-0" style={{ animationDelay: "600ms" }} />
+            <Sticker name="sparkle" size={80} tilt={0} className="absolute bottom-6 left-16" />
           </div>
         </section>
 
@@ -162,7 +162,7 @@ export function Showcase() {
               <figcaption className="p-4 text-sm text-cream/70">1 · The brainstorm: the kid and parent flows, metrics, and three reasons a 6–9 year old plays.</figcaption>
             </figure>
             <div className="grid gap-4">
-              <Step n={2} sticker="note" title="Personas → rules">Wants to learn, parents said so, it's a game. Each one shaped the rules: voice first, faces not names, one action per screen, no negative signals.</Step>
+              <Step n={2} sticker="eighthNote" title="Personas → rules">Wants to learn, parents said so, it's a game. Each one shaped the rules: voice first, faces not names, one action per screen, no negative signals.</Step>
               <Step n={3} sticker="drum" title="States, not screens">Every step designed in layers (screen, sound, motion, actions) and every sub-state mapped: first share to habitual, offline, no contact, reply queues.</Step>
               <Step n={4} sticker="sparkle" title="Visual language">Sticker: die-cut vinyl on an ink sheet. Playful and tactile for kids, calm enough for parents.</Step>
               <Step n={5} sticker="piano" title="Design system → code">shadcn/ui as the base, re-themed with Sticker tokens and kid sizes, documented in Storybook, mirrored in Figma.</Step>
@@ -201,7 +201,7 @@ export function Showcase() {
             </div>
             <a href={LINKS.storybook} target="_blank" rel="noreferrer" className="group relative flex min-h-[320px] flex-col justify-end overflow-hidden rounded-[28px] bg-teal p-6">
               <div className="absolute inset-0 flex flex-wrap content-start gap-4 p-6 opacity-95" aria-hidden>
-                {(["star", "heart", "trophy", "rocket", "sun", "rainbow", "crown", "note", "drum", "hands"] as StickerName[]).map((s, i) => (
+                {(["stripedPlanet", "heart", "ratingStar1", "eighthNotes", "drippyComet", "sparkle", "trebleClef", "ringedPlanet", "burst", "cloudComet"] as StickerName[]).map((s, i) => (
                   <Sticker key={s} name={s} size={64} tilt={i % 2 ? 10 : -10} />
                 ))}
               </div>

@@ -15,6 +15,7 @@ export const STAR_INFO: Record<StarKey, { icon: StickerName; label: string; voic
 }
 const ORDER: StarKey[] = ["notes", "beat", "hands"]
 const TILTS = [-10, 4, 12]
+const STAR_ART = ["ratingStar1", "ratingStar2", "ratingStar3"] as const
 
 export interface StarScoreProps {
   earned?: Partial<Record<StarKey, boolean>>
@@ -46,7 +47,7 @@ export function StarScore({ earned = { notes: true, beat: true, hands: true }, a
           <div key={k} className="flex flex-col items-center gap-3" style={{ marginBottom: size !== "sm" && i === 1 ? px * 0.22 : 0 }}>
             <div className="relative">
               <Sticker
-                name={got ? "star" : "starEmpty"}
+                name={got ? STAR_ART[i] : "starEmpty"}
                 size={px}
                 tilt={TILTS[i]}
                 motion={animate ? "pop" : "none"}

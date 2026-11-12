@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react"
-import { Pause, Play, Sparkles } from "lucide-react"
+import { Pause, Sparkles } from "lucide-react"
 import { Sticker } from "@/art/stickers"
 import { STAR_INFO, type StarKey } from "@/components/kid/StarScore"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { playRecording, RECORDING_SECONDS, stopRecording } from "@/lib/audio"
 import { cn } from "@/lib/utils"
+import { DEMO_SONG } from "@/config"
 
 /**
  * The parent's listen page: the kid's recording with its context — the song, the same three
@@ -22,7 +23,7 @@ export interface ListenWidgetProps {
   className?: string
 }
 
-export function ListenWidget({ kid = "Noa", song = "Twinkle Twinkle Little Star", attempts = 6, replied = false, onReply, className }: ListenWidgetProps) {
+export function ListenWidget({ kid = "Noa", song = DEMO_SONG.title, attempts = 6, replied = false, onReply, className }: ListenWidgetProps) {
   const [playing, setPlaying] = useState(false)
   const [t, setT] = useState(0)
   const timer = useRef<number | null>(null)
@@ -67,10 +68,16 @@ export function ListenWidget({ kid = "Noa", song = "Twinkle Twinkle Little Star"
         <div className="mt-5 flex items-center gap-4">
           <button
             onClick={toggle}
-            className="grid size-16 shrink-0 place-items-center rounded-full bg-orange text-ink transition active:scale-95"
+            className="grid size-16 shrink-0 place-items-center rounded-full transition active:scale-95"
             aria-label={playing ? "Pause" : `Play ${kid}'s recording`}
           >
-            {playing ? <Pause className="size-7 fill-ink" /> : <Play className="ml-1 size-7 fill-ink" />}
+            {playing ? (
+              <span className="grid size-16 place-items-center rounded-full bg-cream text-orange ring-[3px] ring-teal">
+                <Pause className="size-7 fill-orange" />
+              </span>
+            ) : (
+              <Sticker name="playS" size={64} lift={false} />
+            )}
           </button>
           <div className="flex-1">
             <Progress value={(t / RECORDING_SECONDS) * 100} className="h-2.5 bg-cream/20" indicatorClassName="bg-orange" />

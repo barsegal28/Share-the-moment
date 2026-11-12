@@ -36,3 +36,11 @@ Dot eyes with a small cream highlight, pink blush ovals and a line smile.
 
 ## Type
 Bagel Fat One for headlines, DM Sans for text (both self-hosted via Fontsource).
+
+## From Figma
+Source: the Figma file "Share the moment".
+
+- **Assets** come only from the **app assets** page, component set **Sticker / Shape**: planets, comets, burst, sparkle, heart, the three rating stars, music notes, treble clef and the play button. They live in `src/art/figma-stickers.ts` (art layers only; `<StickerArt>` regenerates the die-cut). Local hand-drawn stickers (family faces, drum, hands, piano…) fill the gaps.
+- **Variables:** the "Paper Cut" collection in its **Sticker** mode, as `--pc-*` CSS variables with the Figma code-syntax names (`src/index.css`).
+- **Text styles:** the shared ones, Paper Cut/Body and Paper Cut/Label (`text-pc-body`, `text-pc-label`). The other languages' display styles aren't used.
+- **Effects:** every effect style in the file, including other languages': Riso grain, Ground grain, Snip/Lifted grain, Overprint/Ink grain, Scrapbook/Lifted paper, Scrapbook/Lifted dark card (`src/lib/effects.ts`, `<FigmaEffect>`, `shadow-pc-*`).

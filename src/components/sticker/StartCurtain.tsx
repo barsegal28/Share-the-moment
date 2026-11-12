@@ -7,7 +7,7 @@ import { unlockAudio } from "@/lib/audio"
 export function StartCurtain({ title, subtitle, onStart, light = false }: { title: string; subtitle?: string; onStart: () => void; light?: boolean }) {
   return (
     <div className={"absolute inset-0 z-50 flex flex-col items-center justify-center gap-6 text-center " + (light ? "bg-paper text-ink" : "bg-ink text-cream")}>
-      <Sticker name="star" size={110} tilt={-10} motion="float" />
+      <Sticker name="ratingStar1" size={130} tilt={-10} motion="float" />
       <p className="font-display max-w-[80%] text-4xl">{title}</p>
       {subtitle && <p className="max-w-[70%] text-lg opacity-75">{subtitle}</p>}
       <Button
