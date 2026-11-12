@@ -34,5 +34,8 @@ The riso grain goes on the sheet only. The stickers stay clean. It matches the F
 ## Faces
 Dot eyes with a small cream highlight, pink blush ovals and a line smile.
 
+## Motion
+The glow-up celebration keeps the character a sticker and makes the light effects torn paper, moving like stop-motion. See `MOTION-GLOW-UP.md`.
+
 ## Type
 Bagel Fat One for headlines, DM Sans for text (both self-hosted via Fontsource).

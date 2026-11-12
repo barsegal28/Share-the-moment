@@ -12,7 +12,7 @@ const preview: Preview = {
     controls: { matchers: { color: /(background|color)$/i } },
     backgrounds: { disable: true },
     options: {
-      storySort: { order: ["Introduction", "Foundations", "UI (shadcn)", "Sticker", "Kid", "Parent", "Screens"] },
+      storySort: { order: ["Introduction", "Foundations", "UI (shadcn)", "Sticker", "Motion", "Kid", "Parent", "Screens"] },
     },
   },
   decorators: [

@@ -54,6 +54,7 @@ Parent flow: `#/parent?channel=sms|email&first=1`
 - **Language:** Sticker (die-cut vinyl on the ink sheet). Tokens live in `src/index.css`: the raw palette (`--sticker-*`) and the shadcn semantic tokens mapped onto it. See `docs/STICKER-LANGUAGE.md`.
 - **Kid extensions:** `Button` gets a `sticker` variant with `tone`, and `kid` / `kid-lg` / `kid-icon` sizes (80px+ targets). The `sticker` utility die-cuts any box: cream border, kiss-cut edge, lift.
 - **Art:** `src/art/stickers.tsx` holds original flat SVG art; `<StickerArt>` generates the die-cut from each silhouette.
+- **Motion:** `src/motion/` holds animation definitions. `<GlowUp>` (sticker character + torn-paper light, stop-motion) is specced in `docs/MOTION-GLOW-UP.md` and shown in Storybook under Motion.
 
 ## Structure
 
@@ -63,8 +64,10 @@ src/
   components/
     ui/           shadcn/ui base, Sticker-themed
     sticker/      StickerArt, Sheet (riso grain), FitStage, StartCurtain
+    motion/       GlowUp
     kid/          StarScore, SharePrompt, SendOverlay, ParentGate, ReplyNotification, ReplyReveal, SuccessScreen…
     parent/       MessagePreview, ListenWidget, ReplyComposer, StickerPicker…
+  motion/         animation definitions (glowUp.ts)
   flows/          KidFlow, ParentFlow (the playable prototypes)
   showcase/       the page you send
   stories/        Storybook stories
