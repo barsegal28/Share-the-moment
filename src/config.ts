@@ -14,7 +14,7 @@ export const LINKS = {
   /** Paste the Figma file link ("Share the moment"). The page embeds it automatically. */
   figma: "",
   /** Your GitHub repo URL. */
-  repo: "",
+  repo: "https://github.com/barsegal28/Share-the-moment",
   /** Storybook is deployed next to the app. */
   storybook: "./storybook/",
 }
