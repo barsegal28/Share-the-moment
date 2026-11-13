@@ -31,6 +31,8 @@ export interface MotionCfg {
   idleAmp: number
   /** seconds per idle cycle */
   idleSpeed: number
+  /** Start with a voice line of the step (its index), instead of from the step start. -1 = off. `delay` then counts from that line. */
+  syncLine: number
 }
 
 export interface ObjCfg {
@@ -104,7 +106,7 @@ export type Script = Record<StepId, StepCfg>
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 const M = (p: Partial<MotionCfg> = {}): MotionCfg => ({
-  enter: "pop", delay: 0, duration: 520, ease: "overshoot", distance: 80, scaleFrom: 0.3, rotateFrom: 0, idle: "none", idleAmp: 6, idleSpeed: 3.2, ...p,
+  enter: "pop", delay: 0, duration: 520, ease: "overshoot", distance: 80, scaleFrom: 0.3, rotateFrom: 0, idle: "none", idleAmp: 6, idleSpeed: 3.2, syncLine: -1, ...p,
 })
 const O = (label: string, motion: Partial<MotionCfg> = {}, extra: Partial<Omit<ObjCfg, "label" | "motion">> = {}): ObjCfg => ({
   label, motion: M(motion), enterSound: "none", enterVolume: 0.7, enterPitch: 1, tapSound: "none", ...extra,
@@ -161,11 +163,11 @@ export const DEFAULT_SCRIPT: Script = {
       progress: O("Reward progress", { enter: "slideDown", delay: 180, duration: 480, distance: 120, ease: "spring" }),
       card: O("Card", { enter: "zoom", delay: 200, duration: 620, ease: "spring", scaleFrom: 0.6 }, { enterSound: "paper", enterVolume: 0.6 }),
       title: O("Title · You are a star!", { enter: "pop", delay: 520, duration: 560, ease: "overshoot", scaleFrom: 0.4, rotateFrom: -6, idle: "boil", idleAmp: 1, idleSpeed: 0.35 }, { enterSound: "bubble", enterVolume: 0.5 }),
-      star1: O("Star 1 · every note", { enter: "stamp", delay: 1300, duration: 420, ease: "overshoot", scaleFrom: 2.4, rotateFrom: -30, idle: "wiggle", idleAmp: 4, idleSpeed: 2.6 }, { enterSound: "star", enterVolume: 0.8, enterPitch: 1, tapSound: "sparkle" }),
-      star2: O("Star 2 · on the beat", { enter: "stamp", delay: 2400, duration: 420, ease: "overshoot", scaleFrom: 2.4, rotateFrom: 25, idle: "wiggle", idleAmp: 4, idleSpeed: 2.9 }, { enterSound: "star", enterVolume: 0.8, enterPitch: 1.26, tapSound: "sparkle" }),
-      star3: O("Star 3 · both hands", { enter: "stamp", delay: 3500, duration: 420, ease: "overshoot", scaleFrom: 2.4, rotateFrom: -20, idle: "wiggle", idleAmp: 4, idleSpeed: 2.3 }, { enterSound: "star", enterVolume: 0.8, enterPitch: 1.5, tapSound: "sparkle" }),
-      share: O("Share button", { enter: "slideUp", delay: 4300, duration: 460, distance: 40, ease: "spring" }, { tapSound: "pop" }),
-      next: O("Play next button", { enter: "slideUp", delay: 4420, duration: 460, distance: 40, ease: "spring" }, { tapSound: "tap" }),
+      star1: O("Star 1 · every note", { enter: "stamp", syncLine: 1, delay: 0, duration: 420, ease: "overshoot", scaleFrom: 2.4, rotateFrom: -30, idle: "wiggle", idleAmp: 4, idleSpeed: 2.6 }, { enterSound: "star", enterVolume: 0.8, enterPitch: 1, tapSound: "sparkle" }),
+      star2: O("Star 2 · on the beat", { enter: "stamp", syncLine: 2, delay: 0, duration: 420, ease: "overshoot", scaleFrom: 2.4, rotateFrom: 25, idle: "wiggle", idleAmp: 4, idleSpeed: 2.9 }, { enterSound: "star", enterVolume: 0.8, enterPitch: 1.26, tapSound: "sparkle" }),
+      star3: O("Star 3 · both hands", { enter: "stamp", syncLine: 3, delay: 0, duration: 420, ease: "overshoot", scaleFrom: 2.4, rotateFrom: -20, idle: "wiggle", idleAmp: 4, idleSpeed: 2.3 }, { enterSound: "star", enterVolume: 0.8, enterPitch: 1.5, tapSound: "sparkle" }),
+      share: O("Share button", { enter: "slideUp", syncLine: 3, delay: 900, duration: 460, distance: 40, ease: "spring" }, { tapSound: "pop" }),
+      next: O("Play next button", { enter: "slideUp", syncLine: 3, delay: 1020, duration: 460, distance: 40, ease: "spring" }, { tapSound: "tap" }),
     },
     params: { layoutMs: 900 },
   }),

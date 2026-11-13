@@ -30,6 +30,8 @@ export interface FlowCtx {
   /** Set of steps already played this session. */
   seen: (id: StepId) => boolean
   hold: boolean
+  /** Call `cb` when voice line `i` of the current step starts (at once if it already has). */
+  whenLine: (i: number, cb: () => void) => () => void
 }
 
 const Ctx = createContext<FlowCtx | null>(null)
@@ -72,6 +74,30 @@ export function FlowProvider({
   const [animate, setAnimate] = useState(true)
   const seenRef = useRef(new Set<StepId>())
   const motionDone = useRef<() => void>(() => {})
+  // Voice lines that have started in this run, and who is waiting for them (objects synced to a line).
+  const linesRef = useRef(new Set<number>())
+  const lineWaiters = useRef(new Map<number, Set<() => void>>())
+  const runKey = `${step}:${run}`
+  const keyRef = useRef("")
+  if (keyRef.current !== runKey) {
+    keyRef.current = runKey
+    linesRef.current = new Set()
+  }
+  const startLine = (i: number) => {
+    linesRef.current.add(i)
+    lineWaiters.current.get(i)?.forEach((cb) => cb())
+    lineWaiters.current.delete(i)
+  }
+  const whenLine = useCallback((i: number, cb: () => void) => {
+    if (linesRef.current.has(i)) {
+      cb()
+      return () => {}
+    }
+    const set = lineWaiters.current.get(i) ?? new Set()
+    set.add(cb)
+    lineWaiters.current.set(i, set)
+    return () => set.delete(cb)
+  }, [])
   const cfg = script[step]
 
   // Keep the editor's chosen step in sync.
@@ -127,9 +153,10 @@ export function FlowProvider({
 
     // Voice-over: lines in order, each after its own pause.
     ;(async () => {
-      for (const line of s.voice) {
+      for (const [i, line] of s.voice.entries()) {
         await wait(line.delay)
         if (!alive) return
+        startLine(i)
         await speak(line.text, line.voice, { rate: line.rate, pitch: line.pitch, claudeVoice: line.claudeVoice })
         if (!alive) return
       }
@@ -174,8 +201,9 @@ export function FlowProvider({
       signal: (n) => n === "motionDone" && motionDone.current(),
       seen: (id) => seenRef.current.has(id),
       hold,
+      whenLine,
     }),
-    [script, step, cfg, run, animate, edit, selecting, selected, onSelect, go, replay, restart, hold],
+    [script, step, cfg, run, animate, edit, selecting, selected, onSelect, go, replay, restart, hold, whenLine],
   )
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

@@ -5,7 +5,7 @@
 import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { playSound } from "./sounds"
-import { cancelLater } from "@/lib/clock"
+import { cancelLater, later } from "@/lib/clock"
 import { useFlow } from "./runtime"
 import type { Ease, MotionCfg, StepId } from "./script"
 
@@ -133,21 +133,41 @@ export function Obj({
           origin = [(p.originX ?? 597) - cx, (p.originY ?? 417) - cy]
         }
       }
-      anims.push(el.animate(enterKeyframes(m, origin), { duration: Math.max(1, m.duration), delay: m.delay, easing: EASING[m.ease], fill: "backwards" }))
-      if (cfg.enterSound !== "none") {
-        const t = playSound(cfg.enterSound, { volume: cfg.enterVolume, pitch: cfg.enterPitch, delayMs: m.delay + Math.min(120, m.duration * 0.25) })
+      const synced = (m.syncLine ?? -1) >= 0
+      const enter = el.animate(enterKeyframes(m, origin), { duration: Math.max(1, m.duration), delay: synced ? 0 : m.delay, easing: EASING[m.ease], fill: "backwards" })
+      anims.push(enter)
+      const sound = () => {
+        if (cfg.enterSound === "none") return
+        const t = playSound(cfg.enterSound, { volume: cfg.enterVolume, pitch: cfg.enterPitch, delayMs: Math.min(120, m.duration * 0.25) })
         if (t) anims.push({ cancel: () => cancelLater(t) } as unknown as Animation)
       }
-    }
-    if (m.idle !== "none" && !reduced()) {
-      anims.push(
-        inEl.animate(idleKeyframes(m), {
-          duration: Math.max(200, m.idleSpeed * 1000),
-          delay: animating ? m.delay + m.duration : 0,
-          iterations: Infinity,
-          easing: m.idle === "spin" ? "linear" : m.idle === "boil" ? "linear" : "ease-in-out",
-        }),
-      )
+      if (synced) {
+        // Hold on the first frame until the voice line starts, then play after `delay`.
+        enter.pause()
+        enter.currentTime = 0
+        let t = 0
+        const off = flow.whenLine(m.syncLine, () => {
+          t = later(() => {
+            enter.play()
+            sound()
+          }, m.delay)
+        })
+        anims.push({ cancel: () => { off(); cancelLater(t) } } as unknown as Animation)
+      } else if (cfg.enterSound !== "none") {
+        const t = later(sound, m.delay)
+        anims.push({ cancel: () => cancelLater(t) } as unknown as Animation)
+      }
+      if (m.idle !== "none" && !reduced()) {
+        enter.finished.then(
+          () => {
+            const a = inEl.animate(idleKeyframes(m), { duration: Math.max(200, m.idleSpeed * 1000), iterations: Infinity, easing: m.idle === "spin" || m.idle === "boil" ? "linear" : "ease-in-out" })
+            anims.push(a)
+          },
+          () => {},
+        )
+      }
+    } else if (m.idle !== "none" && !reduced()) {
+      anims.push(inEl.animate(idleKeyframes(m), { duration: Math.max(200, m.idleSpeed * 1000), iterations: Infinity, easing: m.idle === "spin" || m.idle === "boil" ? "linear" : "ease-in-out" }))
     }
     return () => anims.forEach((a) => a.cancel())
     // eslint-disable-next-line react-hooks/exhaustive-deps

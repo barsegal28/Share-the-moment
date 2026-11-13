@@ -245,7 +245,7 @@ function Timeline() {
                     onPointerDown={(e) => drag(e, (ms) => setObj(id, { delay: ms }), m.delay)}
                     title={`${m.enter} · ${m.delay} ms + ${m.duration} ms`}
                   >
-                    <span className="pointer-events-none absolute inset-y-0 left-1.5 truncate text-[10px] leading-4">{m.enter}</span>
+                    <span className="pointer-events-none absolute inset-y-0 left-1.5 truncate text-[10px] leading-4">{(m.syncLine ?? -1) >= 0 ? `♪${m.syncLine + 1} · ` : ""}{m.enter}</span>
                     <span className="absolute inset-y-0 right-0 w-1.5 cursor-ew-resize" onPointerDown={(e) => drag(e, (ms) => setObj(id, { duration: Math.max(40, ms) }), m.duration)} />
                   </div>
                 ) : (
@@ -503,7 +503,13 @@ function ObjectProps({ stepId, id, cfg, onBack }: { stepId: StepId; id: string; 
           <Select value={m.ease} onChange={(e) => setM({ ease: e.target.value as MotionCfg["ease"] })} title="Easing">
             {EASES.map((x) => <option key={x}>{x}</option>)}
           </Select>
-          <ScrubInput label="Delay" suffix="ms" value={m.delay} min={0} max={10000} step={10} onChange={(x) => setM({ delay: x })} />
+          <Select className="col-span-2" value={String(m.syncLine ?? -1)} onChange={(e) => setM({ syncLine: Number(e.target.value) })} title="When it starts">
+            <option value="-1">Starts: from the step start</option>
+            {flow.script[stepId].voice.map((v, i) => (
+              <option key={i} value={i}>Starts with line {i + 1}: “{v.text.slice(0, 28)}{v.text.length > 28 ? "…" : ""}”</option>
+            ))}
+          </Select>
+          <ScrubInput label="Delay" suffix="ms" title={(m.syncLine ?? -1) >= 0 ? "After the voice line starts" : "After the step starts"} value={m.delay} min={0} max={10000} step={10} onChange={(x) => setM({ delay: x })} />
           <ScrubInput label="Dur" suffix="ms" title="Duration" value={m.duration} min={40} max={4000} step={10} onChange={(x) => setM({ duration: x })} />
           {usesDistance && <ScrubInput label="Dist" suffix="px" title="Distance" value={m.distance} min={0} max={1200} step={5} onChange={(x) => setM({ distance: x })} />}
           {usesScale && <ScrubInput label="Scale" title="Start scale" value={m.scaleFrom} min={0} max={5} step={0.05} onChange={(x) => setM({ scaleFrom: x })} />}

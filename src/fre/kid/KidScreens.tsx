@@ -123,8 +123,15 @@ function TopBar() {
   useEffect(() => {
     if (flow.step !== "k-success" || !flow.animate) return setN(18)
     setN(17)
-    const t = later(() => setN(18), flow.script["k-success"].objects.star3.motion.delay + 500)
-    return () => cancelLater(t)
+    // The level goes up as the last star lands.
+    const m = flow.script["k-success"].objects.star3.motion
+    let t = 0
+    const go = () => (t = later(() => setN(18), m.delay + 500))
+    const off = m.syncLine >= 0 ? flow.whenLine(m.syncLine, go) : (go(), () => {})
+    return () => {
+      off()
+      cancelLater(t)
+    }
   }, [flow.step, flow.run, flow.animate, flow.script])
   return (
     <>
