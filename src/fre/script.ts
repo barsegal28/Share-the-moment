@@ -126,7 +126,7 @@ export const DEFAULT_SCRIPT: Script = {
     id: "k-glow", title: "You did it! · glow-up", node: "kid-success", device: "ipad",
     note: "Figma 1. The planet glows, condenses and bursts into light. The narration plays with the kid's recording very quietly underneath.",
     advance: "motion", after: 0, next: "k-scatter",
-    voice: [V("You did it!", "guide", 250, { rate: 0.95, pitch: 1.45 }), V("You played Let It Go with almost no mistakes!", "guide", 150)],
+    voice: [V("You did it!", "guide", 250, { rate: 0.95 }), V("You played Let It Go with almost no mistakes!", "guide", 150)],
     sounds: [S("success", 0, 0.7), S("glow", 2050, 0.8), S("burst", 3850, 0.9), S("sparkle", 4300, 0.6)],
     recording: { mode: "background", volume: 0.14 },
     params: { fps: 17, endFrame: 78, loopIdle: 0 },
@@ -154,7 +154,7 @@ export const DEFAULT_SCRIPT: Script = {
     id: "k-success", title: "You are a star!", node: "kid-success", device: "ipad",
     note: "Figma 3. The success card pops up and each star is stamped in with what it means.",
     advance: "voice", after: 700, next: "k-share",
-    voice: [V("You are a star!", "guide", 500, { pitch: 1.45 }), V("Every note right!", "guide", 250), V("Right on the beat!", "guide", 150), V("Both hands together!", "guide", 150)],
+    voice: [V("You are a star!", "guide", 500), V("Every note right!", "guide", 250), V("Right on the beat!", "guide", 150), V("Both hands together!", "guide", 150)],
     sounds: [S("fanfare", 350, 0.45)],
     objects: {
       avatar: O("Profile avatar", { enter: "slideDown", delay: 100, duration: 480, distance: 120, ease: "spring" }),

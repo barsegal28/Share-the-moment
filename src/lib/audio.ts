@@ -188,6 +188,30 @@ if (typeof window !== "undefined") {
     .catch(() => {})
 }
 
+// Browser voices load late, and their order differs per machine (on a Mac the first English voice is a
+// novelty voice). So pick one by name, once, and keep it: the same role always gets the same voice.
+const PREFERRED = ["Samantha", "Google US English", "Microsoft Aria Online (Natural) - English (United States)", "Microsoft Jenny Online (Natural) - English (United States)", "Microsoft Zira - English (United States)", "Karen", "Moira", "Tessa", "Google UK English Female"]
+const PREFERRED_MALE = ["Daniel", "Google UK English Male", "Microsoft Guy Online (Natural) - English (United States)", "Microsoft David - English (United States)", "Alex", "Aaron"]
+const chosen: Partial<Record<"f" | "m", SpeechSynthesisVoice>> = {}
+function pickVoice(role: Voice): SpeechSynthesisVoice | null {
+  const key = role === "dad" ? "m" : "f"
+  if (chosen[key]) return chosen[key]!
+  const all = window.speechSynthesis.getVoices()
+  if (!all.length) return null
+  const names = key === "m" ? PREFERRED_MALE : PREFERRED
+  const found =
+    names.map((n) => all.find((v) => v.name === n)).find(Boolean) ??
+    all.find((v) => v.lang === "en-US" && v.localService && !/albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|junior|ralph|kathy|princess/i.test(v.name)) ??
+    all.find((v) => v.lang.startsWith("en")) ??
+    null
+  if (found) chosen[key] = found
+  return found
+}
+if (typeof window !== "undefined" && "speechSynthesis" in window) {
+  window.speechSynthesis.getVoices()
+  window.speechSynthesis.addEventListener?.("voiceschanged", () => window.speechSynthesis.getVoices())
+}
+
 /** Speak a line and show it as a caption. Resolves when done (or after a reading-time fallback). */
 export function speak(text: string, voice: Voice = "guide", opts: { rate?: number; pitch?: number; claudeVoice?: ClaudeVoice } = {}): Promise<void> {
   setCaption({ text, voice })
@@ -211,14 +235,30 @@ export function speak(text: string, voice: Voice = "guide", opts: { rate?: numbe
       return
     }
     if (ttsBlocked || !("speechSynthesis" in window)) return
+    // Voices load asynchronously: wait (briefly) so the first line doesn't use a different default voice.
+    if (!window.speechSynthesis.getVoices().length) {
+      let once = false
+      const go = () => {
+        window.speechSynthesis.removeEventListener("voiceschanged", go)
+        if (once) return
+        once = true
+        speakBrowser()
+      }
+      window.speechSynthesis.addEventListener("voiceschanged", go)
+      window.setTimeout(go, 700)
+      return
+    }
+    speakBrowser()
+    function speakBrowser() {
     const u = new SpeechSynthesisUtterance(text)
     u.rate = opts.rate ?? (voice === "guide" ? 1.02 : 0.98)
     u.pitch = opts.pitch ?? (voice === "guide" ? 1.35 : voice === "dad" ? 0.8 : voice === "kid" ? 1.6 : 1.15)
-    const en = window.speechSynthesis.getVoices().filter((v) => v.lang.startsWith("en"))
-    if (en.length) u.voice = en[voice === "dad" ? Math.min(1, en.length - 1) : 0]
+    const v = pickVoice(voice)
+    if (v) u.voice = v
     u.onend = done
     u.onerror = done
     window.speechSynthesis.speak(u)
+    }
   })
 }
 export function stopSpeech() {
