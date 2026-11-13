@@ -226,7 +226,7 @@
   70% { box-shadow: 0 0 0 22px rgb(253 97 23 / 0); }
   100% { box-shadow: 0 0 0 0 rgb(253 97 23 / 0); }
 }
-.fre-hint { border-radius: inherit; animation: fre-hint-ring 1.6s ease-out 2.5s infinite; }
+.fre-hint { border-radius: inherit; }
 .fre-selectable:hover { outline: 2px dashed rgb(139 161 239 / 0.8); outline-offset: 4px; }
 .fre-selected { outline: 3px solid #8ba1ef !important; outline-offset: 4px; }
 .fre-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
