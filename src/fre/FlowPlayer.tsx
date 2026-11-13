@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, Hand, RotateCcw, SlidersHorizontal, Volume2,
 import { setMuted, unlockAudio } from "@/lib/audio"
 import { FlowProvider, useFlow } from "./runtime"
 import { FlowStage } from "./FlowStage"
-import { FlowChart } from "./FlowChart"
 import { useScript } from "./store"
 import { STEP_IDS, type StepId } from "./script"
 import { Badge, Btn, btnClass } from "./ui"
@@ -86,9 +85,6 @@ function Header() {
           <SlidersHorizontal /> Edit this step
         </a>
       </div>
-      <div className="px-6 pb-4">
-        <FlowChart script={flow.script} step={flow.step} onPick={(s) => flow.go(s)} />
-      </div>
     </header>
   )
 }
@@ -114,7 +110,6 @@ function Footer() {
             </Badge>
           )}
         </div>
-        <p className="truncate text-xs text-zinc-500">{flow.cfg.note}</p>
       </div>
       <Btn
         variant="ghost"
