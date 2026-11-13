@@ -12,7 +12,8 @@ import { useSyncExternalStore } from "react"
 let ctx: AudioContext | null = null
 let muted = false
 
-function ac(): AudioContext | null {
+/** The shared AudioContext (null before the first gesture on some browsers). */
+export function ac(): AudioContext | null {
   if (typeof window === "undefined") return null
   if (!ctx) {
     const C = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
@@ -33,6 +34,8 @@ export function unlockAudio() {
     window.speechSynthesis.speak(u)
   }
 }
+
+export const isMuted = () => muted
 
 export function setMuted(m: boolean) {
   muted = m
@@ -66,17 +69,17 @@ export const sfx = {
 
 // ─── The kid's recording ──────────────────────────────────────────────────────
 // An original 8-bar demo tune in C major. [midi, beats]
-const MELODY: [number, number][] = [
+export const MELODY: [number, number][] = [
   [64, 1], [67, 1], [69, 1], [67, 1], [64, 1], [62, 1], [60, 2],
   [62, 1], [64, 1], [67, 1], [64, 1], [62, 2], [60, 1], [62, 1],
   [64, 1], [67, 1], [69, 1], [72, 1], [71, 1], [69, 1], [67, 2],
   [69, 1], [67, 1], [64, 1], [62, 1], [60, 4],
 ]
 const BASS: Record<number, number> = { 0: 48, 7: 43, 14: 53, 22: 45, 26: 48 }
-const BEAT = 0.42
+export const BEAT = 0.42
 export const RECORDING_SECONDS = MELODY.reduce((s, [, b]) => s + b, 0) * BEAT
 
-let recording: { stop: () => void; startedAt: number; volume: number } | null = null
+let recording: { stop: () => void; setVolume: (v: number) => void; startedAt: number; volume: number } | null = null
 
 /** Play the recording. volume 1 = listening, ~0.18 = "very quietly in the background". */
 export function playRecording({ volume = 1, loop = false, onEnd }: { volume?: number; loop?: boolean; onEnd?: () => void } = {}) {
@@ -107,6 +110,7 @@ export function playRecording({ volume = 1, loop = false, onEnd }: { volume?: nu
   recording = {
     startedAt: performance.now(),
     volume,
+    setVolume: (v: number) => master.gain.setTargetAtTime(v, c.currentTime, 0.15),
     stop: () => {
       timers.forEach((id) => { clearTimeout(id); clearInterval(id) })
       master.gain.setTargetAtTime(0, c.currentTime, 0.05)
@@ -114,6 +118,15 @@ export function playRecording({ volume = 1, loop = false, onEnd }: { volume?: nu
     },
   }
   emitRec()
+}
+/** 0–1 through the current recording, or null when nothing is playing. */
+export function recordingProgress(): number | null {
+  if (!recording) return null
+  return (((performance.now() - recording.startedAt) / 1000) % (RECORDING_SECONDS + 0.6)) / RECORDING_SECONDS
+}
+/** Change the volume of the recording that is playing (e.g. duck it under the voice-over). */
+export function setRecordingVolume(v: number) {
+  recording?.setVolume(v)
 }
 export function stopRecording() {
   recording?.stop()
@@ -131,7 +144,7 @@ export function useRecordingPlaying() {
 }
 
 // ─── Voice-over ───────────────────────────────────────────────────────────────
-export type Voice = "guide" | "mom" | "dad" | "grandma"
+export type Voice = "guide" | "mom" | "dad" | "grandma" | "kid"
 type Caption = { text: string; voice: Voice } | null
 let caption: Caption = null
 const capListeners = new Set<() => void>()
@@ -145,15 +158,15 @@ export function useCaption() {
 }
 
 /** Speak a line and show it as a caption. Resolves when done (or after a reading-time fallback). */
-export function speak(text: string, voice: Voice = "guide"): Promise<void> {
+export function speak(text: string, voice: Voice = "guide", opts: { rate?: number; pitch?: number } = {}): Promise<void> {
   setCaption({ text, voice })
   return new Promise((resolve) => {
     const fallback = window.setTimeout(done, 900 + text.length * 55)
     function done() { clearTimeout(fallback); setCaption(null); resolve() }
     if (muted || !("speechSynthesis" in window)) return
     const u = new SpeechSynthesisUtterance(text)
-    u.rate = voice === "guide" ? 1.02 : 0.98
-    u.pitch = voice === "guide" ? 1.35 : voice === "dad" ? 0.8 : 1.15
+    u.rate = opts.rate ?? (voice === "guide" ? 1.02 : 0.98)
+    u.pitch = opts.pitch ?? (voice === "guide" ? 1.35 : voice === "dad" ? 0.8 : voice === "kid" ? 1.6 : 1.15)
     const en = window.speechSynthesis.getVoices().filter((v) => v.lang.startsWith("en"))
     if (en.length) u.voice = en[voice === "dad" ? Math.min(1, en.length - 1) : 0]
     u.onend = done
