@@ -265,14 +265,15 @@ function SongPlayer({ active }: { active: boolean }) {
   return (
     <div className="flex items-center gap-8 rounded-[60px] bg-[#c0cdfb] px-10 py-[30px] shadow-[0_5px_10px_rgb(0_0_0/0.22)]">
       <button type="button" onClick={toggle} aria-label={playing ? "Pause" : "Play"} className="relative shrink-0 transition-transform active:scale-90">
-        <Sticker name="play" size={118} lift={false} />
-        {playing && (
-          <span className="absolute inset-[22px] grid place-items-center rounded-full bg-cream">
-            <span className="flex h-9 gap-2.5">
-              <span className="w-3 rounded-sm bg-orange" />
-              <span className="w-3 rounded-sm bg-orange" />
-            </span>
-          </span>
+        {playing ? (
+          // Pause: the same disc as the play button (teal ring, cream face), with orange bars instead of the triangle.
+          <svg width={118} height={118} viewBox="0 0 118 118" aria-hidden>
+            <circle cx="59" cy="59" r="54" fill="var(--sticker-cream)" stroke="var(--sticker-teal)" strokeWidth="7" />
+            <rect x="41" y="36" width="12" height="46" rx="6" fill="var(--sticker-orange)" />
+            <rect x="65" y="36" width="12" height="46" rx="6" fill="var(--sticker-orange)" />
+          </svg>
+        ) : (
+          <Sticker name="play" size={118} lift={false} />
         )}
       </button>
       <div className="flex w-[318px] flex-col gap-5">
