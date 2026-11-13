@@ -1,30 +1,33 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@fontsource/bagel-fat-one/400.css";
-@import "@fontsource-variable/dm-sans/index.css";
-@import "@fontsource-variable/dm-sans/wght-italic.css";
+@import "@fontsource/dm-mono/500.css";
 
 @custom-variant dark (&:is(.dark *));
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Sticker — die-cut vinyl stickers (sister language of Paper Cut)
-   Source of truth: docs/PAPER-CUT-LANGUAGES.md → "Sticker".
-   Colours belong to the language: change them here, never one component at a time.
+   Design tokens — source of truth: Figma "Share the moment", page "app asets".
+   Only what those components use is here. Audit + outliers: docs/FIGMA-AUDIT.md.
+   Change a value in Figma first, then mirror it here. Never per component.
    ───────────────────────────────────────────────────────────────────────────── */
 :root {
-  /* Raw Sticker palette (mirrors the Figma "Sticker" variables) */
-  --sticker-cream: #ede2c2; /* border + highlights */
-  --sticker-orange: #fd6117; /* primary */
-  --sticker-teal: #0b7563; /* secondary */
-  --sticker-periwinkle: #8ba1ef; /* accent */
-  --sticker-pink: #ec70bb; /* accent 2 + blush */
-  --sticker-ink: #112f29; /* ground, eyes, marks */
-  --sticker-gold: #91781e; /* detail */
-  --sticker-paper: #f7f2e6; /* warm off-white sheet */
-  --sticker-notebook: #fbf9f2; /* notebook sheet */
-  --sticker-system-white: #fffdf7; /* system surfaces (OS-like chrome, inputs) */
+  /* Colour primitives — Figma collection "Paper Cut / Primitives", group sticker/* */
+  --sticker-cream: #ede2c2;
+  --sticker-orange: #fd6117;
+  --sticker-teal: #0b7563;
+  --sticker-periwinkle: #8ba1ef;
+  --sticker-pink: #ec70bb;
+  --sticker-ink: #112f29;
+  --sticker-gold: #91781e;
+  --sticker-paper: #f7f2e6;
+  --sticker-notebook: #fbf9f2;
+  --sticker-system-white: #fffdf7;
+  --sticker-periwinkle-light: #c0cdfb;
+  --sticker-blue: #006ee7;
+  --sticker-grey: #818181;
+  --sticker-gold-light: #c8b880;
 
-  /* Figma "Paper Cut" collection, Sticker mode — same names as the variables' code syntax */
+  /* Colour semantics — Figma collection "Paper Cut", mode Sticker (names = Figma code syntax) */
   --pc-ground: var(--sticker-ink);
   --pc-ground-light: var(--sticker-paper);
   --pc-ground-notebook: var(--sticker-notebook);
@@ -42,68 +45,33 @@
   --pc-system-surface: var(--sticker-system-white);
   --pc-system-ink: var(--pc-mark-ink);
 
-  /* Die-cut geometry */
-  --sticker-border: 9px; /* cream border */
-  --sticker-kiss: 3.5px; /* coloured kiss-cut edge */
-  --sticker-shadow: 0.38; /* 0.2 on light sheets */
+  /* Library overrides — Figma collection "Library overrides". Colours that override the defaults of
+     the Flex Web Button and the Fluent icons. Components from those libraries read only these. */
+  --flex-web-button-primary-background: var(--sticker-ink);
+  --flex-web-button-primary-label: #fafafa;
+  --flex-web-button-outline-background: var(--sticker-paper);
+  --flex-web-button-outline-border: var(--sticker-orange);
+  --flex-web-button-outline-label: var(--sticker-orange);
+  --flex-web-button-outline-light-background: rgb(255 255 255 / 0.8);
+  --fluent-icon-default: var(--sticker-ink);
+  --fluent-icon-rating: var(--sticker-orange);
 
-  /* shadcn/ui semantic tokens, mapped onto Sticker (ink sheet = default) */
-  --radius: 1.25rem;
-  --background: var(--sticker-ink);
-  --foreground: var(--sticker-cream);
-  --card: var(--sticker-cream);
-  --card-foreground: var(--sticker-ink);
-  --popover: var(--sticker-cream);
-  --popover-foreground: var(--sticker-ink);
-  --primary: var(--sticker-orange);
-  --primary-foreground: var(--sticker-ink);
-  --secondary: var(--sticker-teal);
-  --secondary-foreground: var(--sticker-cream);
-  --muted: color-mix(in srgb, var(--sticker-cream) 10%, var(--sticker-ink));
-  --muted-foreground: color-mix(in srgb, var(--sticker-cream) 70%, var(--sticker-ink));
-  --accent: var(--sticker-periwinkle);
-  --accent-foreground: var(--sticker-ink);
-  --destructive: var(--sticker-pink);
-  --border: color-mix(in srgb, var(--sticker-cream) 22%, transparent);
-  --input: color-mix(in srgb, var(--sticker-cream) 22%, transparent);
-  --ring: var(--sticker-periwinkle);
-}
+  /* Die-cut — the "die-cut border" (9px, outside) and "kiss-cut edge" (12.5px, outside) layers */
+  --sticker-border: 9px;
+  --sticker-kiss: 3.5px; /* 12.5 − 9: the visible coloured edge */
 
-/* Light sheet (parent web + off-white variant). Shadow drops to 20%. */
-[data-sheet="paper"] {
-  --sticker-shadow: 0.2;
-  --background: var(--sticker-paper);
-  --foreground: var(--sticker-ink);
-  --muted: color-mix(in srgb, var(--sticker-ink) 6%, var(--sticker-paper));
-  --muted-foreground: color-mix(in srgb, var(--sticker-ink) 68%, var(--sticker-paper));
-  --border: color-mix(in srgb, var(--sticker-ink) 14%, transparent);
-  --input: color-mix(in srgb, var(--sticker-ink) 18%, transparent);
-  --ring: var(--sticker-teal);
+  /* Sticker lift — drop shadow on every sticker's kiss-cut edge: x 0, y 7, blur 10, black 30% */
+  --sticker-lift-y: 7px;
+  --sticker-lift-blur: 10px;
+  --sticker-lift-alpha: 0.3;
 }
 
 @theme inline {
-  --font-display: "Bagel Fat One", "DM Sans Variable", system-ui, sans-serif;
-  --font-sans: "DM Sans Variable", "DM Sans", system-ui, sans-serif;
+  /* Type families: Bagel Fat One for display, DM Mono Medium for everything else */
+  --font-display: "Bagel Fat One", system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
 
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-
+  /* Colour utilities: bg-ink, text-cream, … (primitives) and bg-pc-ground, … (semantics) */
   --color-cream: var(--sticker-cream);
   --color-orange: var(--sticker-orange);
   --color-teal: var(--sticker-teal);
@@ -113,22 +81,145 @@
   --color-gold: var(--sticker-gold);
   --color-paper: var(--sticker-paper);
   --color-notebook: var(--sticker-notebook);
-  --color-surface: var(--sticker-system-white);
+  --color-system-white: var(--sticker-system-white);
+  --color-periwinkle-light: var(--sticker-periwinkle-light);
+  --color-blue: var(--sticker-blue);
+  --color-grey: var(--sticker-grey);
+  --color-gold-light: var(--sticker-gold-light);
 
-  /* Figma effect styles: the drop-shadow half of each "lifted" style (the grain half is <FigmaEffect>) */
-  --shadow-pc-snip-lifted: 0 5px 10px rgb(0 0 0 / 0.22);
-  --shadow-pc-scrapbook-lifted: 0 5px 10px rgb(0 0 0 / 0.2);
-  --shadow-pc-scrapbook-dark-card: 0 5px 10px rgb(0 0 0 / 0.28);
+  --color-pc-ground: var(--pc-ground);
+  --color-pc-ground-light: var(--pc-ground-light);
+  --color-pc-ground-notebook: var(--pc-ground-notebook);
+  --color-pc-piece-primary: var(--pc-piece-primary);
+  --color-pc-piece-secondary: var(--pc-piece-secondary);
+  --color-pc-piece-accent: var(--pc-piece-accent);
+  --color-pc-piece-accent-2: var(--pc-piece-accent-2);
+  --color-pc-piece-dark: var(--pc-piece-dark);
+  --color-pc-mark-ink: var(--pc-mark-ink);
+  --color-pc-mark-knockout: var(--pc-mark-knockout);
+  --color-pc-detail-rule: var(--pc-detail-rule);
+  --color-pc-detail-margin: var(--pc-detail-margin);
+  --color-pc-text-primary: var(--pc-text-primary);
+  --color-pc-sticker-border: var(--pc-sticker-border);
+  --color-pc-system-surface: var(--pc-system-surface);
+  --color-pc-system-ink: var(--pc-system-ink);
 
-  --radius-sm: calc(var(--radius) - 8px);
-  --radius-md: calc(var(--radius) - 4px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 6px);
+  /* Radii used by the Figma components: rounded-12, rounded-20, rounded-40, rounded-60 (+ rounded-full) */
+  --radius-12: 12px;
+  --radius-20: 20px;
+  --radius-40: 40px;
+  --radius-60: 60px;
 
+  /* Effects */
+  --shadow-sticker: 0 var(--sticker-lift-y) var(--sticker-lift-blur) rgb(0 0 0 / var(--sticker-lift-alpha));
+
+  /* Motion (kept from the prototype) */
   --animate-pop-in: pop-in 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-wiggle: wiggle 1.6s ease-in-out infinite;
   --animate-float: float 3.2s ease-in-out infinite;
   --animate-slide-down: slide-down 480ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ─── Type scale — one utility per Figma text style "Sticker/*" (see docs/FIGMA-AUDIT.md §2) ───
+   Single-line styles: 98% line-height. Text that wraps uses text-paragraph-*. */
+@utility text-display-hero { /* Sticker/Display/Hero */
+  font-family: var(--font-display);
+  font-size: 102.74px;
+  line-height: 0.98;
+  letter-spacing: 0;
+}
+@utility text-display { /* Sticker/Display/Large */
+  font-family: var(--font-display);
+  font-size: 60px;
+  line-height: 0.98;
+  letter-spacing: 0;
+}
+@utility text-title-lg { /* Sticker/Title/Large */
+  font-family: var(--font-display);
+  font-size: 36px;
+  line-height: 0.98;
+  letter-spacing: 0.04em;
+}
+@utility text-title-md { /* Sticker/Title/Medium — Sticker/Title/Medium Caps = text-title-md uppercase */
+  font-family: var(--font-display);
+  font-size: 32px;
+  line-height: 0.98;
+  letter-spacing: 0.04em;
+}
+@utility text-title-sm { /* Sticker/Title/Small */
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 0.98;
+  letter-spacing: 0.04em;
+}
+@utility text-mono-xl { /* Sticker/Mono/XL */
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 0.98;
+}
+@utility text-mono-lg { /* Sticker/Mono/Large */
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 0.98;
+}
+@utility text-mono-md { /* Sticker/Mono/Medium */
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 0.98;
+}
+@utility text-mono-sm { /* Sticker/Mono/Small */
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 0.98;
+}
+/* Paragraph styles — Figma text styles Sticker/Paragraph/*. For text that wraps; the scale above is for single lines. */
+@utility text-paragraph-title { /* Sticker/Paragraph/Title */
+  font-family: var(--font-display);
+  font-size: 36px;
+  line-height: 40px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+@utility text-paragraph-body { /* Sticker/Paragraph/Body */
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: 0;
+}
+/* From the external library's text styles (Functional/Title Small, Functional/Subtitle) — used by its Button. Outlier, see audit §2. */
+@utility text-functional-title-sm {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 28px;
+  letter-spacing: -0.15px;
+}
+@utility text-functional-subtitle {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.15px;
+}
+
+/* A sticker made from a CSS box: cream border + kiss-cut edge + lift, following border-radius. */
+@utility sticker {
+  box-shadow:
+    0 0 0 var(--sticker-border) var(--sticker-cream),
+    0 0 0 calc(var(--sticker-border) + var(--sticker-kiss)) var(--kiss, var(--sticker-teal)),
+    0 var(--sticker-lift-y) var(--sticker-lift-blur) calc(var(--sticker-border) + var(--sticker-kiss)) rgb(0 0 0 / var(--sticker-lift-alpha));
+}
+/* Same sticker, pressed flat onto the sheet (used for the :active state). */
+@utility sticker-pressed {
+  box-shadow:
+    0 0 0 var(--sticker-border) var(--sticker-cream),
+    0 0 0 calc(var(--sticker-border) + var(--sticker-kiss)) var(--kiss, var(--sticker-teal)),
+    0 2px 3px calc(var(--sticker-border) + var(--sticker-kiss)) rgb(0 0 0 / var(--sticker-lift-alpha));
 }
 
 @keyframes pop-in {
@@ -150,46 +241,16 @@
   100% { transform: translateY(0); }
 }
 
-/* Figma text styles shared by every language */
-@utility text-pc-body {
-  font-family: var(--font-sans);
-  font-size: 14px;
-  line-height: 1.5;
-  font-weight: 400;
-}
-@utility text-pc-label {
-  font-family: var(--font-sans);
-  font-size: 11px;
-  line-height: 1.3;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-/* A sticker made from a CSS box: cream border + kiss-cut edge + lift, following border-radius. */
-@utility sticker {
-  box-shadow:
-    0 0 0 var(--sticker-border) var(--sticker-cream),
-    0 0 0 calc(var(--sticker-border) + var(--sticker-kiss)) var(--kiss, var(--sticker-teal)),
-    0 7px 5px calc(var(--sticker-border) + var(--sticker-kiss)) rgb(0 0 0 / var(--sticker-shadow));
-}
-/* Same sticker, pressed flat onto the sheet (used for the :active state). */
-@utility sticker-pressed {
-  box-shadow:
-    0 0 0 var(--sticker-border) var(--sticker-cream),
-    0 0 0 calc(var(--sticker-border) + var(--sticker-kiss)) var(--kiss, var(--sticker-teal)),
-    0 2px 2px calc(var(--sticker-border) + var(--sticker-kiss)) rgb(0 0 0 / var(--sticker-shadow));
-}
-
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
   html, body, #root {
     height: 100%;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    background: var(--pc-ground);
+    color: var(--pc-mark-knockout);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
@@ -210,3 +271,70 @@
 }
 .st-kiss * { fill: var(--st-kiss); stroke: var(--st-kiss); stroke-width: var(--st-kw); }
 .st-border * { fill: var(--sticker-cream); stroke: var(--sticker-cream); stroke-width: var(--st-bw); }
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   LEGACY — shadcn/ui semantic names the current components still read.
+   Not in Figma. Mapped onto the tokens above so the app keeps running;
+   delete this whole block when the components are rebuilt from Figma.
+   ═════════════════════════════════════════════════════════════════════════════ */
+:root {
+  --radius: 1.25rem;
+  --background: var(--pc-ground);
+  --foreground: var(--pc-mark-knockout);
+  --card: var(--sticker-cream);
+  --card-foreground: var(--pc-mark-ink);
+  --popover: var(--sticker-cream);
+  --popover-foreground: var(--pc-mark-ink);
+  --primary: var(--pc-piece-primary);
+  --primary-foreground: var(--pc-mark-ink);
+  --secondary: var(--pc-piece-secondary);
+  --secondary-foreground: var(--pc-mark-knockout);
+  --muted: color-mix(in srgb, var(--sticker-cream) 10%, var(--sticker-ink));
+  --muted-foreground: color-mix(in srgb, var(--sticker-cream) 70%, var(--sticker-ink));
+  --accent: var(--pc-piece-accent);
+  --accent-foreground: var(--pc-mark-ink);
+  --destructive: var(--pc-piece-accent-2);
+  --border: color-mix(in srgb, var(--sticker-cream) 22%, transparent);
+  --input: color-mix(in srgb, var(--sticker-cream) 22%, transparent);
+  --ring: var(--pc-piece-accent);
+}
+[data-sheet="paper"] {
+  --background: var(--pc-ground-light);
+  --foreground: var(--pc-mark-ink);
+  --muted: color-mix(in srgb, var(--sticker-ink) 6%, var(--sticker-paper));
+  --muted-foreground: color-mix(in srgb, var(--sticker-ink) 68%, var(--sticker-paper));
+  --border: color-mix(in srgb, var(--sticker-ink) 14%, transparent);
+  --input: color-mix(in srgb, var(--sticker-ink) 18%, transparent);
+  --ring: var(--pc-piece-secondary);
+}
+@theme inline {
+  --font-sans: var(--font-mono); /* legacy alias: font-sans now renders DM Mono */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-surface: var(--sticker-system-white);
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+}
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+}
