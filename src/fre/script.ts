@@ -168,11 +168,12 @@ export const DEFAULT_SCRIPT: Script = {
   }),
   "k-share": step({
     id: "k-share", title: "Share the moment (first time)", node: "kid-success", device: "ipad",
-    note: "Figma 4. FRE: the card turns into the share screen on its own. The kid's recording plays in the player, and the share suggestion is voiced over it.",
+    note: "Figma 4. FRE: the card turns into the share screen on its own. The player waits at 0:00 (tap to listen) while the share suggestion is voiced over the quiet background take.",
     advance: "tap", after: 0, next: "k-send",
     voice: [V("Want Mom and Dad to hear you play?", "guide", 900), V("Tap Share, and it goes straight to them!", "guide", 250)],
     sounds: [S("sheet", 0, 0.5)],
-    recording: { mode: "play", volume: 0.5 },
+    recording: { mode: "keep", volume: 0.14 },
+    params: { playerVolume: 0.6 },
     objects: {
       stars: O("Small stars", { enter: "pop", delay: 0, duration: 480, ease: "overshoot", scaleFrom: 1.8 }),
       player: O("Recording player", { enter: "unfold", delay: 220, duration: 620, ease: "spring", scaleFrom: 0.7, distance: 40 }, { enterSound: "bubble", enterVolume: 0.5, enterPitch: 0.8 }),

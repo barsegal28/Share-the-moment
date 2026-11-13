@@ -5,7 +5,7 @@
 import { useSyncExternalStore } from "react"
 import { DEFAULT_SCRIPT, STEP_IDS, type Script, type StepCfg, type StepId, type ObjCfg } from "./script"
 
-const KEY = "share-the-moment/fre-script/v1"
+const KEY = "share-the-moment/fre-script/v2"
 const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v))
 
 /** Merge a saved/imported script onto the defaults, so new fields and objects added later still show up. */
@@ -47,9 +47,34 @@ let script: Script = typeof window === "undefined" ? clone(DEFAULT_SCRIPT) : loa
 const listeners = new Set<() => void>()
 const emit = () => listeners.forEach((l) => l())
 
+/** Only the fields that differ from the defaults (objects and motion field by field). */
+function diff(sc: Script) {
+  const out: Record<string, Record<string, unknown>> = {}
+  for (const id of STEP_IDS) {
+    const a = sc[id] as unknown as Record<string, unknown>
+    const d = DEFAULT_SCRIPT[id] as unknown as Record<string, unknown>
+    const o: Record<string, unknown> = {}
+    for (const k of Object.keys(a)) {
+      if (k === "objects") {
+        const objs: Record<string, unknown> = {}
+        for (const [oid, ob] of Object.entries(sc[id].objects)) {
+          const dob = DEFAULT_SCRIPT[id].objects[oid]
+          if (!dob || JSON.stringify(ob) === JSON.stringify(dob)) continue
+          const od: Record<string, unknown> = {}
+          for (const [f, v] of Object.entries(ob)) if (JSON.stringify(v) !== JSON.stringify((dob as unknown as Record<string, unknown>)[f])) od[f] = f === "motion" ? Object.fromEntries(Object.entries(v as object).filter(([mk, mv]) => mv !== (dob.motion as unknown as Record<string, unknown>)[mk])) : v
+          objs[oid] = od
+        }
+        if (Object.keys(objs).length) o.objects = objs
+      } else if (JSON.stringify(a[k]) !== JSON.stringify(d[k])) o[k] = a[k]
+    }
+    if (Object.keys(o).length) out[id] = o
+  }
+  return out
+}
+
 function save() {
   try {
-    localStorage.setItem(KEY, JSON.stringify(script))
+    localStorage.setItem(KEY, JSON.stringify(diff(script)))
   } catch {
     /* private mode: edits last for this visit only */
   }

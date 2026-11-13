@@ -245,21 +245,35 @@ function PaperGrain() {
 
 /** Figma "Player": the kid's recording, playing quietly while the share suggestion is voiced. */
 function SongPlayer({ active }: { active: boolean }) {
-  const p = useRecordingProgress(active)
-  const [paused, setPaused] = useState(false)
   const flow = useFlow()
-  const vol = flow.script["k-share"].recording.volume
+  // The player starts stopped, at 0:00; the kid can tap play to hear it.
+  const [playing, setPlaying] = useState(false)
+  const p = useRecordingProgress(active && playing)
+  useEffect(() => setPlaying(false), [flow.run, flow.step])
+  const vol = flow.script["k-share"].params.playerVolume ?? 0.6
+  const bg = flow.script["k-glow"].recording
   const toggle = () => {
-    if (paused) playRecording({ volume: vol, loop: true })
-    else stopRecording()
-    setPaused(!paused)
+    if (playing) {
+      // Back to the quiet background take, as the success screen had it.
+      if (bg.mode === "background") playRecording({ volume: bg.volume, loop: true })
+      else stopRecording()
+    } else playRecording({ volume: vol, loop: true })
+    setPlaying(!playing)
     playSound("tap", { volume: 0.7 })
   }
-  const shown = active ? p : 0.38
+  const shown = playing ? p : 0
   return (
     <div className="flex items-center gap-8 rounded-[60px] bg-[#c0cdfb] px-10 py-[30px] shadow-[0_5px_10px_rgb(0_0_0/0.22)]">
-      <button type="button" onClick={toggle} aria-label={paused ? "Play" : "Pause"} className="shrink-0 transition-transform active:scale-90">
+      <button type="button" onClick={toggle} aria-label={playing ? "Pause" : "Play"} className="relative shrink-0 transition-transform active:scale-90">
         <Sticker name="play" size={118} lift={false} />
+        {playing && (
+          <span className="absolute inset-[22px] grid place-items-center rounded-full bg-cream">
+            <span className="flex h-9 gap-2.5">
+              <span className="w-3 rounded-sm bg-orange" />
+              <span className="w-3 rounded-sm bg-orange" />
+            </span>
+          </span>
+        )}
       </button>
       <div className="flex w-[318px] flex-col gap-5">
         <div className="flex flex-col gap-4 leading-[0.98]">
@@ -270,7 +284,7 @@ function SongPlayer({ active }: { active: boolean }) {
         </div>
         <div className="flex flex-col gap-3">
           <div className="h-[18px] w-full overflow-hidden rounded-full bg-surface">
-            <div className="h-full rounded-full bg-pink" style={{ width: `${shown * 100}%` }} />
+            <div className="h-full min-w-[18px] rounded-full bg-pink" style={{ width: `${shown * 100}%` }} />
           </div>
           <div className="flex justify-between font-mono text-[16px] font-medium text-gold">
             <span>{fmt(shown * SONG_SECONDS)}</span>
