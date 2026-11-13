@@ -82,7 +82,7 @@ export interface StepCfg {
   params: Record<string, number>
 }
 
-export const STEP_IDS = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "p-notify", "p-message", "p-listen", "p-reply", "p-sent", "k-notify", "k-reveal"] as const
+export const STEP_IDS = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "p-notify", "p-sms", "p-message", "p-listen", "p-reply", "p-sent", "k-notify", "k-reveal"] as const
 export type StepId = (typeof STEP_IDS)[number]
 
 /** The flow chart from the plan doc. */
@@ -200,12 +200,23 @@ export const DEFAULT_SCRIPT: Script = {
   "p-notify": step({
     id: "p-notify", title: "Parent gets an SMS", node: "parent-message", device: "phone",
     note: "First message to a parent: it explains what this is. Later messages are compact.",
-    advance: "tap", next: "p-message",
+    advance: "tap", next: "p-sms",
     sounds: [S("notify", 650, 0.7)],
     recording: { mode: "off", volume: 0 },
     objects: {
       clock: O("Lock-screen clock", { enter: "fade", duration: 400, ease: "out" }),
       notif: O("SMS notification", { enter: "slideDown", delay: 600, duration: 520, distance: 160, ease: "spring" }),
+    },
+  }),
+  "p-sms": step({
+    id: "p-sms", title: "Mom opens the SMS", node: "parent-message", device: "phone",
+    note: "The message thread: a short line from Noa's piano app and a link preview. Tapping the link opens the listen page in the browser.",
+    advance: "tap", next: "p-message",
+    recording: { mode: "off", volume: 0 },
+    objects: {
+      header: O("Thread header", { enter: "fade", duration: 300, ease: "out" }),
+      bubble: O("Message bubble", { enter: "slideUp", delay: 250, duration: 420, distance: 24, ease: "spring" }),
+      link: O("Link preview", { enter: "slideUp", delay: 450, duration: 460, distance: 24, ease: "spring" }, { tapSound: "tap" }),
     },
   }),
   "p-message": step({

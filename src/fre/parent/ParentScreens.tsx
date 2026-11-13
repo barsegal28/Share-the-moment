@@ -16,13 +16,14 @@ import { playSound } from "../sounds"
 import type { StepId } from "../script"
 
 export const PHONE = { w: 393, h: 852 }
-const PARENT_STEPS: StepId[] = ["p-notify", "p-message", "p-listen", "p-reply", "p-sent"]
+const PARENT_STEPS: StepId[] = ["p-notify", "p-sms", "p-message", "p-listen", "p-reply", "p-sent"]
 export const isParentStep = (s: StepId) => PARENT_STEPS.includes(s)
 
 export function ParentScreens() {
   const flow = useFlow()
   const s = flow.step
   if (s === "p-notify") return <LockScreen />
+  if (s === "p-sms") return <SmsThread />
   return (
     <PhoneChrome dark={s === "p-message" || s === "p-listen"}>
       {(s === "p-message" || s === "p-listen") && <MessagePage />}
@@ -87,7 +88,7 @@ function LockScreen() {
         <p className="text-[19px] font-semibold opacity-90">Friday, November 13</p>
         <p className="text-[96px] leading-none font-bold tracking-tight">14:05</p>
       </Obj>
-      <Obj step="p-notify" id="notif" hint onTap={() => flow.go("p-message")} className="absolute rounded-[22px]" style={{ left: 10, top: 300, width: 373 }}>
+      <Obj step="p-notify" id="notif" hint onTap={() => flow.go("p-sms")} className="absolute rounded-[22px]" style={{ left: 10, top: 300, width: 373 }}>
         <div className="flex gap-3 rounded-[22px] bg-white/75 p-3.5 text-black shadow-[0_8px_30px_rgb(0_0_0/0.18)] backdrop-blur-xl">
           <div className="grid size-[38px] shrink-0 place-items-center rounded-[9px] bg-[#34c759]">
             <svg viewBox="0 0 24 24" className="size-6 fill-white" aria-hidden>
@@ -100,7 +101,7 @@ function LockScreen() {
               <p className="text-[13px] text-black/50">now</p>
             </div>
             <p className="text-[15px] leading-snug">
-              🎹 Noa just got 3 stars on “{DEMO_SONG.title}” and wants you to hear it! Tap to listen, no app needed. You can send a little surprise back.
+              🎹 Noa just got 3 stars on “{DEMO_SONG.title}” and wants you to hear it! Tap to listen. You can send a little surprise back.
             </p>
             <p className="mt-0.5 text-[13px] text-black/50">pianopals.app/noa</p>
           </div>
@@ -108,6 +109,58 @@ function LockScreen() {
       </Obj>
       <p className="absolute inset-x-0 bottom-10 text-center text-[13px] opacity-70">Tap the message to open it</p>
       <div className="absolute bottom-2 left-1/2 h-[5px] w-[134px] -translate-x-1/2 rounded-full bg-white" />
+    </div>
+  )
+}
+
+// ─── The SMS thread (Messages app) ───
+function SmsThread() {
+  const flow = useFlow()
+  return (
+    <div className="relative flex h-[852px] w-[393px] flex-col overflow-hidden bg-white font-sans text-black">
+      <StatusBar />
+      <Obj step="p-sms" id="header" className="border-b border-black/10 bg-[#f6f6f6]/90 pb-2">
+        <div className="relative flex flex-col items-center gap-1 pt-1">
+          <ChevronLeft className="absolute top-3 left-2 size-8 text-[#0a84ff]" />
+          <span className="grid size-[54px] place-items-center rounded-full bg-gradient-to-b from-[#b4b4bb] to-[#8e8e93]">
+            <Sticker name="ratingStar1" size={40} lift={false} />
+          </span>
+          <span className="flex items-center gap-0.5 text-[12px]">
+            Piano Pals <ChevronRight className="size-3 text-black/40" />
+          </span>
+        </div>
+      </Obj>
+      <div className="flex flex-1 flex-col gap-1.5 px-3 pt-4">
+        <p className="mb-2 text-center text-[11px] text-black/45">
+          <span className="font-semibold">Text Message</span> · Today 14:05
+        </p>
+        <Obj step="p-sms" id="bubble" className="max-w-[78%]">
+          <p className="rounded-[18px] rounded-bl-[4px] bg-[#e9e9eb] px-3 py-2 text-[16px] leading-snug">
+            🎹 Noa just got 3 stars on “{DEMO_SONG.title}” and wants you to hear it! Tap to listen. You can send a little surprise back.
+          </p>
+        </Obj>
+        <Obj step="p-sms" id="link" hint onTap={() => flow.go("p-message")} className="w-[78%] rounded-[18px]">
+          <div className="overflow-hidden rounded-[18px] rounded-bl-[4px] bg-[#e9e9eb]">
+            <div className="relative h-[150px] overflow-hidden bg-pink">
+              <svg className="absolute inset-0" width="100%" height="100%" viewBox="0 0 300 150" preserveAspectRatio="none" aria-hidden>
+                <path d="M-10 70 L320 140 V160 H-10 Z" fill="var(--sticker-cream)" />
+              </svg>
+              <span className="absolute top-2 left-4"><Sticker name="cloudComet" size={96} tilt={-8} /></span>
+              <span className="absolute top-3 right-20"><Sticker name="sparkle" size={44} tilt={12} /></span>
+              <span className="absolute top-8 right-4"><Sticker name="burst" size={84} tilt={10} /></span>
+            </div>
+            <div className="px-3 py-2">
+              <p className="text-[15px] leading-tight font-semibold">Listen to Noa play “{DEMO_SONG.title}”</p>
+              <p className="text-[13px] text-black/50">pianopals.app</p>
+            </div>
+          </div>
+        </Obj>
+      </div>
+      <div className="flex items-center gap-2 px-3 pb-8">
+        <span className="grid size-9 place-items-center rounded-full bg-[#e9e9eb] text-[22px] leading-none text-black/50">+</span>
+        <span className="flex h-9 flex-1 items-center rounded-full border border-black/15 px-3 text-[15px] text-black/35">Text Message</span>
+      </div>
+      <div className="absolute bottom-2 left-1/2 h-[5px] w-[134px] -translate-x-1/2 rounded-full bg-black" />
     </div>
   )
 }
