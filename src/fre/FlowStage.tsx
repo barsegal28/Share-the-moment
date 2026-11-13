@@ -30,7 +30,7 @@ export function FlowStage({ className, captions = true }: { className?: string; 
         style={{ width: outer.w, height: outer.h, transform: `translate(-50%, -50%) scale(${k})` }}
       >
         <div
-          className="h-full w-full bg-[#0a1714] shadow-[0_30px_80px_rgb(0_0_0/0.5),inset_0_0_0_2px_rgb(237_226_194/0.14)]"
+          className="h-full w-full bg-[#111] shadow-[0_24px_60px_rgb(0_0_0/0.18),0_0_0_1px_rgb(0_0_0/0.08),inset_0_0_0_2px_rgb(255_255_255/0.08)]"
           style={{ padding: bezel, borderRadius: device === "ipad" ? 52 : 64 }}
         >
           <div data-fre-stage data-w={size.w} className="relative overflow-hidden bg-black" style={{ width: size.w, height: size.h, borderRadius: device === "ipad" ? 28 : 52 }}>
@@ -49,8 +49,8 @@ function Caption({ device }: { device: "ipad" | "phone" }) {
   if (!c) return null
   return (
     <div className={cn("pointer-events-none absolute inset-x-0 bottom-3 flex justify-center px-6", device === "phone" && "bottom-1")}>
-      <p className="max-w-[720px] rounded-2xl bg-black/70 px-5 py-2.5 text-center text-[17px] font-semibold text-cream shadow-lg backdrop-blur">
-        <span className="mr-2 text-[13px] font-bold tracking-wider text-periwinkle uppercase">{c.voice === "guide" ? "Voice-over" : c.voice}</span>
+      <p className="flex max-w-[720px] items-center gap-2.5 rounded-lg border border-zinc-200 bg-white/95 px-3.5 py-2 text-sm text-zinc-900 shadow-md backdrop-blur [font-family:var(--font-ui)]">
+        <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] font-medium text-white uppercase">{c.voice === "guide" ? "Voice-over" : c.voice}</span>
         {c.text}
       </p>
     </div>

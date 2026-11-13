@@ -4,6 +4,8 @@
 @import "@fontsource-variable/dm-sans/index.css";
 @import "@fontsource-variable/dm-sans/wght-italic.css";
 @import "@fontsource/dm-mono/400.css";
+@import "@fontsource-variable/geist/index.css";
+@import "@fontsource-variable/geist-mono/index.css";
 @import "@fontsource/dm-mono/500.css";
 
 @custom-variant dark (&:is(.dark *));
@@ -88,6 +90,9 @@
   --font-sans: "DM Sans Variable", "DM Sans", system-ui, sans-serif;
   /* Figma "Functional" text style: DM Mono Medium */
   --font-mono: "DM Mono", ui-monospace, monospace;
+  /* Tool chrome (editor + flow page): neutral, shadcn-like */
+  --font-ui: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-ui-mono: "Geist Mono Variable", ui-monospace, monospace;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -228,3 +233,12 @@
 .fre-scroll::-webkit-scrollbar-thumb { background: rgb(237 226 194 / 0.18); border-radius: 8px; }
 @keyframes fre-device-in { from { opacity: 0; translate: 0 40px; } to { opacity: 1; translate: 0 0; } }
 @keyframes fre-gulp { 0% { transform: scale(1); } 40% { transform: scale(1.12, 0.92); } 70% { transform: scale(0.96, 1.05); } 100% { transform: scale(1); } }
+
+/* Tool chrome: neutral scrollbars + number inputs without spinners */
+.ui-root { font-family: var(--font-ui); color: #09090b; -webkit-font-smoothing: antialiased; }
+.ui-root ::-webkit-scrollbar { width: 10px; height: 10px; }
+.ui-root ::-webkit-scrollbar-thumb { background: #e4e4e7; border-radius: 10px; border: 3px solid #fff; }
+.ui-root input[type=number]::-webkit-inner-spin-button, .ui-root input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.ui-root input[type=number] { -moz-appearance: textfield; }
+.ui-root .fre-selectable:hover { outline: 1px solid #a1a1aa; outline-offset: 3px; }
+.ui-root .fre-selected { outline: 2px solid #18181b !important; outline-offset: 3px; }
