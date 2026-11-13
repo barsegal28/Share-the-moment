@@ -191,7 +191,8 @@ function MessagePage() {
       </Obj>
       <Obj step="p-message" id="headline" className="absolute" style={{ left: 39, top: 279, width: 306 }}>
         <p className="font-display text-[36px] leading-[40px] text-teal uppercase">
-          I got 3 stars on this song, <span className="text-orange">mom!</span>
+          I got 3 stars on this song,
+          <span className="block text-orange">mom!</span>
         </p>
       </Obj>
       <Obj step="p-message" id="player" hint={!listened} onTap={() => flow.go("p-listen")} className="absolute rounded-[60px]" style={{ left: 36, top: 417, width: 340 }}>
