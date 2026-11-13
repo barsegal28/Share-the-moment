@@ -178,14 +178,22 @@ export function useVoiceEngine() {
     () => "browser",
   )
 }
+/** Resolves once we know whether Claude voices are available (so the first lines don't use the browser voice). */
+let ttsReady: Promise<void> = Promise.resolve()
 if (typeof window !== "undefined") {
   const c = (window as unknown as { claude?: { use: (n: string) => Promise<unknown> } }).claude
-  c?.use("tts")
-    .then((t) => {
-      tts = (t as Tts | null) ?? null
-      engineListeners.forEach((l) => l())
-    })
-    .catch(() => {})
+  if (c?.use) {
+    ttsReady = Promise.race([
+      c
+        .use("tts")
+        .then((t) => {
+          tts = (t as Tts | null) ?? null
+          engineListeners.forEach((l) => l())
+        })
+        .catch(() => {}),
+      new Promise<void>((r) => setTimeout(r, 4000)),
+    ])
+  }
 }
 
 // Browser voices load late, and their order differs per machine (on a Mac the first English voice is a
@@ -213,8 +221,9 @@ if (typeof window !== "undefined" && "speechSynthesis" in window) {
 }
 
 /** Speak a line and show it as a caption. Resolves when done (or after a reading-time fallback). */
-export function speak(text: string, voice: Voice = "guide", opts: { rate?: number; pitch?: number; claudeVoice?: ClaudeVoice } = {}): Promise<void> {
+export async function speak(text: string, voice: Voice = "guide", opts: { rate?: number; pitch?: number; claudeVoice?: ClaudeVoice } = {}): Promise<void> {
   setCaption({ text, voice })
+  await ttsReady
   return new Promise((resolve) => {
     let fallback = window.setTimeout(done, 900 + text.length * 55)
     function done() { clearTimeout(fallback); setCaption(null); resolve() }

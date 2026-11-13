@@ -328,6 +328,8 @@ function StepProps() {
         <TextArea rows={3} value={s.note} onChange={(e) => set((st) => ({ ...st, note: e.target.value }), false)} />
       </PanelSection>
 
+      {engine === "claude" && <VoicePicker />}
+
       <PanelSection title={<span className="flex items-center gap-2">Voice-over <Badge variant={engine === "claude" ? "default" : "outline"}>{engine === "claude" ? "Claude voices" : "Browser voice"}</Badge></span>} action={<Btn variant="ghost" size="icon-sm" title="Add a line" onClick={() => set((st) => ({ ...st, voice: [...st.voice, { text: "New line", voice: "guide", delay: 200, rate: 1.02, pitch: 1.35 }] }), false)}><Plus /></Btn>}>
         {engine === "browser" && <Hint>Natural Claude voices play when this page is open on claude.ai in Chrome or Edge. Here it uses the browser's own voice.</Hint>}
         {s.voice.length === 0 && <Hint>No voice-over in this step.</Hint>}
@@ -412,6 +414,48 @@ function StepProps() {
     </>
   )
 }
+/** One voice per role for the whole flow: sets the Claude voice on every line of that role, in every step. */
+const ROLES: { role: Voice; label: string }[] = [
+  { role: "guide", label: "Narrator" },
+  { role: "mom", label: "Mom" },
+]
+const VOICE_SAMPLE: Record<Voice, string> = { guide: "You did it! You are a star!", mom: "Proud of you, Noa! I loved hearing you play!", dad: "Wow!", grandma: "Bravo!", kid: "I did it!" }
+function VoicePicker() {
+  const script = useScript()
+  const flow = useFlow()
+  const current = (role: Voice) => {
+    const vs = STEP_IDS.flatMap((id) => script[id].voice.filter((v) => v.voice === role).map((v) => v.claudeVoice ?? ROLE_VOICE[role]))
+    return vs.every((v) => v === vs[0]) ? (vs[0] ?? ROLE_VOICE[role]) : "mixed"
+  }
+  const setAll = (role: Voice, cv: ClaudeVoice) => {
+    for (const id of STEP_IDS) {
+      if (!script[id].voice.some((v) => v.voice === role)) continue
+      scriptStore.setStep(id, (st) => ({ ...st, voice: st.voice.map((v) => (v.voice === role ? { ...v, claudeVoice: cv } : v)) }))
+    }
+    stopSpeech()
+    void speak(VOICE_SAMPLE[role], role, { claudeVoice: cv })
+  }
+  return (
+    <PanelSection title="Voices for the whole flow">
+      <Hint>Pick one Claude voice per speaker; it's used for all their lines. A line can still pick its own below.</Hint>
+      {ROLES.map(({ role, label }) => {
+        const cur = current(role)
+        return (
+          <div key={role} className="grid grid-cols-[64px_1fr_auto] items-center gap-1.5">
+            <span className="text-xs text-zinc-600">{label}</span>
+            <Select value={cur} onChange={(e) => setAll(role, e.target.value as ClaudeVoice)}>
+              {cur === "mixed" && <option value="mixed">Mixed</option>}
+              {CLAUDE_VOICES.map((x) => <option key={x} value={x}>{x}</option>)}
+            </Select>
+            <Btn variant="ghost" size="icon-sm" title="Hear it" onClick={() => { stopSpeech(); void speak(VOICE_SAMPLE[role], role, { claudeVoice: cur === "mixed" ? undefined : (cur as ClaudeVoice) }) }}><Volume2 /></Btn>
+          </div>
+        )
+      })}
+      <span className="hidden">{flow.step}</span>
+    </PanelSection>
+  )
+}
+
 const PARAM_LABELS: Record<string, string> = { fps: "Glow-up frame rate", endFrame: "Cut to scatter at frame", loopIdle: "Idle loops", originX: "Scatter from x", originY: "Scatter from y", layoutMs: "Sticker glide (ms)", flyAt: "Fly starts (ms)", flyMs: "Fly time (ms)", playerVolume: "Player volume (on tap)" }
 const PARAM_MAX: Record<string, number> = { playerVolume: 1, fps: 30, endFrame: 107, loopIdle: 4, originX: 1194, originY: 834 }
 const PARAM_STEP: Record<string, number> = { playerVolume: 0.05, fps: 1, endFrame: 1, loopIdle: 1, originX: 1, originY: 1 }
