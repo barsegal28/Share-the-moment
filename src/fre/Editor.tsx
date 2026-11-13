@@ -8,12 +8,12 @@ import {
   ChevronLeft, ChevronRight, Copy, Download, Frame, Hand, Minus, MousePointer2, Play, Plus, RotateCcw, Upload, Volume2, X,
   Square, Music2, MessageSquareText, Smartphone, Tablet, ArrowLeft,
 } from "lucide-react"
-import { speak, stopSpeech, unlockAudio } from "@/lib/audio"
+import { speak, stopSpeech } from "@/lib/audio"
 import { cn } from "@/lib/utils"
 import { FlowProvider, useFlow } from "./runtime"
 import { FlowStage } from "./FlowStage"
 import { firstStepOf } from "./FlowChart"
-import { Brand } from "./FlowPlayer"
+import { Brand, SoundUnlock } from "./FlowPlayer"
 import { scriptStore, useScript } from "./store"
 import { playSound, SOUND_LABELS, SOUND_NAMES, type SoundName } from "./sounds"
 import {
@@ -21,7 +21,7 @@ import {
   type Advance, type MotionCfg, type ObjCfg, type RecordingMode, type SoundCue, type StepCfg, type StepId, type VoiceLine,
 } from "./script"
 import type { Voice } from "@/lib/audio"
-import { Badge, Btn, btnClass, Hint, Kbd, PanelSection, ScrubInput, Segmented, Select, Switch, TextArea, TextInput } from "./ui"
+import { Badge, Btn, btnClass, Hint, PanelSection, ScrubInput, Segmented, Select, Switch, TextArea, TextInput } from "./ui"
 
 type Sel = { step: StepId; obj: string } | null
 
@@ -31,7 +31,6 @@ export function Editor({ initial = "k-success" }: { initial?: StepId }) {
   const [sel, setSel] = useState<Sel>(null)
   const [hold, setHold] = useState(true)
   const [selecting, setSelecting] = useState(true)
-  const [started, setStarted] = useState(false)
   const onStep = useCallback((s: StepId) => setStep(s), [])
   const onSelect = useCallback((s: Sel) => setSel(s), [])
 
@@ -57,11 +56,12 @@ export function Editor({ initial = "k-success" }: { initial?: StepId }) {
   }, [])
 
   return (
-    <FlowProvider script={script} initial={initial} started={started} edit selecting={selecting} hold={hold} selected={sel} onSelect={onSelect} onStep={onStep}>
+    <FlowProvider script={script} initial={initial} edit selecting={selecting} hold={hold} selected={sel} onSelect={onSelect} onStep={onStep}>
       <div className="ui-root grid h-dvh grid-cols-[240px_minmax(0,1fr)_288px] grid-rows-[48px_minmax(0,1fr)] bg-white text-zinc-950">
+        <SoundUnlock />
         <Toolbar hold={hold} setHold={setHold} selecting={selecting} setSelecting={setSelecting} />
         <Layers sel={sel} setSel={setSel} />
-        <Center started={started} onStart={() => { unlockAudio(); setStarted(true) }} />
+        <Center />
         <Properties sel={sel} setSel={setSel} />
       </div>
     </FlowProvider>
@@ -165,7 +165,7 @@ function Layers({ sel, setSel }: { sel: Sel; setSel: (s: Sel) => void }) {
 }
 
 // ─── Canvas + timeline ───────────────────────────────────────────────────
-function Center({ started, onStart }: { started: boolean; onStart: () => void }) {
+function Center() {
   const flow = useFlow()
   return (
     <main className="flex min-h-0 flex-col bg-zinc-100">
@@ -174,21 +174,6 @@ function Center({ started, onStart }: { started: boolean; onStart: () => void })
           {flow.cfg.device === "ipad" ? "iPad · 1194 × 834" : "iPhone · 393 × 852"} · <span className="text-zinc-900">{flow.cfg.title}</span>
         </span>
         <FlowStage />
-        {!started && (
-          <div className="absolute inset-0 z-50 grid place-items-center bg-zinc-100/70 backdrop-blur-sm">
-            <div className="w-[360px] rounded-xl border border-zinc-200 bg-white p-5 shadow-lg">
-              <p className="text-sm font-semibold">Start editing</p>
-              <p className="mt-1 text-sm text-zinc-500">Browsers need a click before they play sound. Edits replay the step so you can see and hear them.</p>
-              <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-xs text-zinc-500">
-                <span className="flex items-center gap-1"><Kbd>V</Kbd> select</span>
-                <span className="flex items-center gap-1"><Kbd>H</Kbd> interact</span>
-                <span className="flex items-center gap-1"><Kbd>Space</Kbd> replay</span>
-                <span className="flex items-center gap-1"><Kbd>←</Kbd><Kbd>→</Kbd> steps</span>
-              </div>
-              <Btn variant="default" size="default" className="mt-5 w-full" onClick={onStart}><Volume2 /> Start with sound</Btn>
-            </div>
-          </div>
-        )}
       </div>
       <Timeline />
     </main>

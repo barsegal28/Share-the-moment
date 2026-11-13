@@ -46,7 +46,7 @@ export function Brand({ sub }: { sub: string }) {
  * the first interaction turns sound on and, if nothing has moved on yet, replays the step with sound.
  */
 let audioUnlocked = false
-function SoundUnlock() {
+export function SoundUnlock() {
   const flow = useFlow()
   const [, force] = useState(0)
   useEffect(() => {
