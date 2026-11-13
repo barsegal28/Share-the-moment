@@ -163,7 +163,7 @@ export function useCaption() {
 export type ClaudeVoice = "buttery" | "airy" | "glassy" | "rounded"
 export const CLAUDE_VOICES: ClaudeVoice[] = ["airy", "buttery", "glassy", "rounded"]
 /** Default Claude voice for each role; a voice-over line can pick another. */
-export const ROLE_VOICE: Record<Voice, ClaudeVoice> = { guide: "airy", mom: "rounded", dad: "buttery", grandma: "glassy", kid: "airy" }
+export const ROLE_VOICE: Record<Voice, ClaudeVoice> = { guide: "rounded", mom: "buttery", dad: "glassy", grandma: "airy", kid: "airy" }
 type Tts = {
   speak: (what: string, o?: { voice?: ClaudeVoice; rate?: number; language?: string }) => Promise<unknown>
   stop: () => Promise<void>
@@ -233,7 +233,7 @@ export async function speak(text: string, voice: Voice = "guide", opts: { rate?:
     if (tts && !ttsBlocked) {
       clearTimeout(fallback)
       tts
-        .speak(text, { voice: cv, rate: Math.min(1.5, Math.max(0.7, opts.rate ?? 1)), language: "en" })
+        .speak(text, { voice: cv, rate: Math.min(1.5, Math.max(0.7, opts.rate ?? 1)), language: "en-US" })
         .then(done, (e: { code?: string; reason?: string }) => {
           // The viewer turned reading aloud off: respect it (caption only), don't switch to another voice.
           if (e?.code === "not_granted" || e?.code === "unavailable") {

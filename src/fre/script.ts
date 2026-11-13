@@ -110,7 +110,7 @@ const O = (label: string, motion: Partial<MotionCfg> = {}, extra: Partial<Omit<O
   label, motion: M(motion), enterSound: "none", enterVolume: 0.7, enterPitch: 1, tapSound: "none", ...extra,
 })
 const V = (text: string, voice: Voice = "guide", delay = 0, p: Partial<VoiceLine> = {}): VoiceLine => ({
-  text, voice, delay, rate: voice === "guide" ? 1.02 : 0.98, pitch: voice === "guide" ? 1.35 : voice === "mom" ? 1.15 : voice === "dad" ? 0.8 : 1.6, ...p,
+  text, voice, delay, rate: 1, pitch: voice === "guide" ? 1.35 : voice === "mom" ? 1.15 : voice === "dad" ? 0.8 : 1.6, ...p,
 })
 const S = (sound: SoundName, at: number, volume = 0.8, pitch = 1): SoundCue => ({ sound, at, volume, pitch })
 const step = (s: Omit<StepCfg, "sounds" | "voice" | "objects" | "params" | "recording" | "after"> & Partial<StepCfg>): StepCfg => ({
@@ -126,7 +126,7 @@ export const DEFAULT_SCRIPT: Script = {
     id: "k-glow", title: "You did it! · glow-up", node: "kid-success", device: "ipad",
     note: "Figma 1. The planet glows, condenses and bursts into light. The narration plays with the kid's recording very quietly underneath.",
     advance: "motion", after: 0, next: "k-scatter",
-    voice: [V("You did it!", "guide", 250, { rate: 0.95 }), V("You played Let It Go with almost no mistakes!", "guide", 150)],
+    voice: [V("You did it!", "guide", 250), V("You played Let It Go with almost no mistakes!", "guide", 150)],
     sounds: [S("success", 0, 0.7), S("glow", 2050, 0.8), S("burst", 3850, 0.9), S("sparkle", 4300, 0.6)],
     recording: { mode: "background", volume: 0.14 },
     params: { fps: 17, endFrame: 78, loopIdle: 0 },

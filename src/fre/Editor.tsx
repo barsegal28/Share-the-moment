@@ -314,6 +314,9 @@ function StepProps() {
     if (replay) replaySoon()
   }
   const engine = useVoiceEngine()
+  const speaker = (role: Voice) => STEP_IDS.flatMap((id) => flow.script[id].voice).find((l) => l.voice === role)
+  const voiceOf = (role: Voice) => speaker(role)?.claudeVoice ?? ROLE_VOICE[role]
+  const rateOf = (role: Voice) => speaker(role)?.rate ?? 1
   const setVoice = (i: number, p: Partial<VoiceLine>) => set((st) => ({ ...st, voice: st.voice.map((v, j) => (j === i ? { ...v, ...p } : v)) }), false)
   const setCue = (i: number, p: Partial<SoundCue>) => set((st) => ({ ...st, sounds: st.sounds.map((c, j) => (j === i ? { ...c, ...p } : c)) }))
   return (
@@ -328,10 +331,11 @@ function StepProps() {
         <TextArea rows={3} value={s.note} onChange={(e) => set((st) => ({ ...st, note: e.target.value }), false)} />
       </PanelSection>
 
-      {engine === "claude" && <VoicePicker />}
+      <VoicePicker />
 
       <PanelSection title={<span className="flex items-center gap-2">Voice-over <Badge variant={engine === "claude" ? "default" : "outline"}>{engine === "claude" ? "Claude voices" : "Browser voice"}</Badge></span>} action={<Btn variant="ghost" size="icon-sm" title="Add a line" onClick={() => set((st) => ({ ...st, voice: [...st.voice, { text: "New line", voice: "guide", delay: 200, rate: 1.02, pitch: 1.35 }] }), false)}><Plus /></Btn>}>
         {engine === "browser" && <Hint>Natural Claude voices play when this page is open on claude.ai in Chrome or Edge. Here it uses the browser's own voice.</Hint>}
+        <Hint>Each speaker has one voice and pace for the whole flow: set them in "Voices for the whole flow" above.</Hint>
         {s.voice.length === 0 && <Hint>No voice-over in this step.</Hint>}
         {s.voice.map((v, i) => (
           <div key={i} className="flex flex-col gap-1.5 rounded-lg border border-zinc-200 p-2">
@@ -343,16 +347,10 @@ function StepProps() {
             </div>
             <TextArea rows={2} value={v.text} onChange={(e) => setVoice(i, { text: e.target.value })} />
             <div className="grid grid-cols-2 gap-1.5">
-              <Select value={v.voice} onChange={(e) => setVoice(i, { voice: e.target.value as Voice })} title="Who is speaking (caption label)">
+              <Select value={v.voice} onChange={(e) => setVoice(i, { voice: e.target.value as Voice, claudeVoice: voiceOf(e.target.value as Voice), rate: rateOf(e.target.value as Voice) })} title="Who is speaking">
                 {(["guide", "mom", "dad", "grandma", "kid"] as Voice[]).map((x) => <option key={x} value={x}>{SPEAKER_LABEL[x]}</option>)}
               </Select>
-              <Select value={v.claudeVoice ?? ""} onChange={(e) => setVoice(i, { claudeVoice: (e.target.value || undefined) as ClaudeVoice | undefined })} title="Claude voice">
-                <option value="">{ROLE_VOICE[v.voice]} (default)</option>
-                {CLAUDE_VOICES.map((x) => <option key={x} value={x}>{x}</option>)}
-              </Select>
               <ScrubInput label="Wait" suffix="ms" title="Pause before this line" value={v.delay} min={0} max={6000} step={50} onChange={(x) => setVoice(i, { delay: x })} />
-              <ScrubInput label="Rate" title="Speaking speed (Claude voices: 0.7–1.5)" value={v.rate} min={0.5} max={1.6} step={0.02} onChange={(x) => setVoice(i, { rate: x })} />
-              {engine === "browser" && <ScrubInput label="Pitch" title="Pitch (browser voice only)" value={v.pitch} min={0.4} max={2} step={0.05} onChange={(x) => setVoice(i, { pitch: x })} />}
             </div>
           </div>
         ))}
@@ -429,27 +427,32 @@ function VoicePicker() {
     const vs = STEP_IDS.flatMap((id) => script[id].voice.filter((v) => v.voice === role).map((v) => v.claudeVoice ?? ROLE_VOICE[role]))
     return vs.every((v) => v === vs[0]) ? (vs[0] ?? ROLE_VOICE[role]) : "mixed"
   }
-  const setAll = (role: Voice, cv: ClaudeVoice) => {
+  const rate = (role: Voice) => STEP_IDS.flatMap((id) => script[id].voice).find((v) => v.voice === role)?.rate ?? 1
+  const apply = (role: Voice, p: { claudeVoice?: ClaudeVoice; rate?: number }) => {
     for (const id of STEP_IDS) {
       if (!script[id].voice.some((v) => v.voice === role)) continue
-      scriptStore.setStep(id, (st) => ({ ...st, voice: st.voice.map((v) => (v.voice === role ? { ...v, claudeVoice: cv } : v)) }))
+      scriptStore.setStep(id, (st) => ({ ...st, voice: st.voice.map((v) => (v.voice === role ? { ...v, ...p } : v)) }))
     }
+  }
+  const setAll = (role: Voice, cv: ClaudeVoice) => {
+    apply(role, { claudeVoice: cv, rate: rate(role) })
     stopSpeech()
-    void speak(VOICE_SAMPLE[role], role, { claudeVoice: cv })
+    void speak(VOICE_SAMPLE[role], role, { claudeVoice: cv, rate: rate(role) })
   }
   return (
     <PanelSection title="Voices for the whole flow">
-      <Hint>Pick one Claude voice per speaker; it's used for all their lines. A line can still pick its own below.</Hint>
+      <Hint>One voice and pace per speaker, used for every line on every screen. American English.</Hint>
       {ROLES.map(({ role, label }) => {
         const cur = current(role)
         return (
-          <div key={role} className="grid grid-cols-[64px_1fr_auto] items-center gap-1.5">
+          <div key={role} className="grid grid-cols-[56px_1fr_76px_auto] items-center gap-1.5">
             <span className="text-xs text-zinc-600">{label}</span>
             <Select value={cur} onChange={(e) => setAll(role, e.target.value as ClaudeVoice)}>
               {cur === "mixed" && <option value="mixed">Mixed</option>}
               {CLAUDE_VOICES.map((x) => <option key={x} value={x}>{x}</option>)}
             </Select>
-            <Btn variant="ghost" size="icon-sm" title="Hear it" onClick={() => { stopSpeech(); void speak(VOICE_SAMPLE[role], role, { claudeVoice: cur === "mixed" ? undefined : (cur as ClaudeVoice) }) }}><Volume2 /></Btn>
+            <ScrubInput label="Pace" title="Speaking pace for all of this speaker's lines (0.7–1.5)" value={rate(role)} min={0.7} max={1.5} step={0.05} onChange={(x) => apply(role, { rate: x, claudeVoice: cur === "mixed" ? ROLE_VOICE[role] : (cur as ClaudeVoice) })} />
+            <Btn variant="ghost" size="icon-sm" title="Hear it" onClick={() => { stopSpeech(); void speak(VOICE_SAMPLE[role], role, { claudeVoice: cur === "mixed" ? undefined : (cur as ClaudeVoice), rate: rate(role) }) }}><Volume2 /></Btn>
           </div>
         )
       })}
