@@ -3,6 +3,7 @@
  * the ink sheet (boils with the stop-motion cut) and the full-screen glow-up.
  */
 import { useEffect, useRef } from "react"
+import { isPaused, later, now } from "@/lib/clock"
 import { buildFrames, FRAME_COUNT, STAGE } from "../glowup/glowup"
 import { createBackground, drawHeadline, HEADLINE_FONT, makePaperGrain, paintLayers } from "../glowup/paint"
 
@@ -38,6 +39,7 @@ export function InkSheetCanvas({ fps = 8.5, className }: { fps?: number; classNa
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
     if (reduce || fps <= 0) return
     const id = window.setInterval(() => {
+      if (isPaused()) return
       cut = (cut + 1) % 3
       draw()
     }, 1000 / fps)
@@ -94,10 +96,11 @@ export function GlowUpCanvas({
       render(0)
       if (!playing) return
       if (reduce) {
-        window.setTimeout(() => done.current?.(), 2500)
+        later(() => done.current?.(), 2500)
         return
       }
-      const tick = (t: number) => {
+      const tick = () => {
+        const t = now()
         if (!t0) t0 = t
         const f = Math.min(last, Math.floor(((t - t0) / 1000) * fps))
         if (f !== frame) {

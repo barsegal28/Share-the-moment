@@ -14,6 +14,7 @@ import { GlowUpCanvas, InkSheetCanvas } from "./canvases"
 import { ArrowRightIcon, DismissIcon, RibbonIcon, ShareIcon } from "../icons"
 import { DieCutText, KidActionButton, SONG_SECONDS, fmt, useReplyChoice } from "../shared"
 import { playSound } from "../sounds"
+import { cancelLater, later } from "@/lib/clock"
 import type { StepId } from "../script"
 
 export const IPAD = { w: 1194, h: 834 }
@@ -122,8 +123,8 @@ function TopBar() {
   useEffect(() => {
     if (flow.step !== "k-success" || !flow.animate) return setN(18)
     setN(17)
-    const t = window.setTimeout(() => setN(18), flow.script["k-success"].objects.star3.motion.delay + 500)
-    return () => clearTimeout(t)
+    const t = later(() => setN(18), flow.script["k-success"].objects.star3.motion.delay + 500)
+    return () => cancelLater(t)
   }, [flow.step, flow.run, flow.animate, flow.script])
   return (
     <>
@@ -326,11 +327,11 @@ function SendOverlay() {
       )
     const x = fly(a.current, MOM, 160, -40)
     const y = fly(b.current, DAD, 190, 40)
-    const t = window.setTimeout(() => setLanded(true), flyAt + flyMs - 80)
+    const t = later(() => setLanded(true), flyAt + flyMs - 80)
     return () => {
       x?.cancel()
       y?.cancel()
-      clearTimeout(t)
+      cancelLater(t)
     }
   }, [flow.run, flow.animate, flyAt, flyMs])
 

@@ -5,6 +5,7 @@
 import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { playSound } from "./sounds"
+import { cancelLater } from "@/lib/clock"
 import { useFlow } from "./runtime"
 import type { Ease, MotionCfg, StepId } from "./script"
 
@@ -135,7 +136,7 @@ export function Obj({
       anims.push(el.animate(enterKeyframes(m, origin), { duration: Math.max(1, m.duration), delay: m.delay, easing: EASING[m.ease], fill: "backwards" }))
       if (cfg.enterSound !== "none") {
         const t = playSound(cfg.enterSound, { volume: cfg.enterVolume, pitch: cfg.enterPitch, delayMs: m.delay + Math.min(120, m.duration * 0.25) })
-        if (t) anims.push({ cancel: () => clearTimeout(t) } as unknown as Animation)
+        if (t) anims.push({ cancel: () => cancelLater(t) } as unknown as Animation)
       }
     }
     if (m.idle !== "none" && !reduced()) {

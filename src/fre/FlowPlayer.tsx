@@ -1,6 +1,7 @@
 /** #/flow — the whole first-time flow, kid → parent → kid, following the flow chart. */
 import { useEffect, useState } from "react"
-import { ChevronLeft, ChevronRight, Hand, RotateCcw, SlidersHorizontal, Volume2, VolumeX } from "lucide-react"
+import { ChevronLeft, ChevronRight, Hand, Pause, Play, RotateCcw, SlidersHorizontal, Volume2, VolumeX } from "lucide-react"
+import { setPaused, usePaused } from "@/lib/clock"
 import { setMuted, unlockAudio } from "@/lib/audio"
 import { FlowProvider, useFlow } from "./runtime"
 import { FlowStage } from "./FlowStage"
@@ -51,12 +52,13 @@ export function SoundUnlock() {
   useEffect(() => {
     if (audioUnlocked) return
     const startStep = flow.step
-    const on = () => {
+    const on = (e: Event) => {
       if (audioUnlocked) return
       audioUnlocked = true
       unlockAudio()
       force((n) => n + 1)
-      // Let a click on a control run first; replay only if the step didn't change.
+      // A click on the page replays the step with sound; a click on a control (pause, next…) just does its job.
+      if ((e.target as HTMLElement | null)?.closest?.("button, a, [role=switch], select, input")) return
       window.setTimeout(() => flow.step === startStep && flow.replay(), 0)
     }
     window.addEventListener("pointerdown", on, { once: true, capture: true })
@@ -92,19 +94,32 @@ function Header() {
 function Footer() {
   const flow = useFlow()
   const [muted, setM] = useState(false)
+  const paused = usePaused()
   const i = STEP_IDS.indexOf(flow.step)
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).closest("input, textarea, select")) return
+      if (e.key === "p" || e.key === "P") setPaused(!paused)
+    }
+    window.addEventListener("keydown", on)
+    return () => window.removeEventListener("keydown", on)
+  }, [paused])
   const waiting = flow.cfg.advance === "tap"
   return (
     <footer className="flex h-16 items-center gap-2 border-t border-zinc-200 px-6">
       <Btn size="icon" onClick={() => flow.go(STEP_IDS[i - 1])} disabled={i === 0} aria-label="Previous step"><ChevronLeft /></Btn>
       <Btn size="icon" onClick={() => flow.go(STEP_IDS[i + 1])} disabled={i === STEP_IDS.length - 1} aria-label="Next step"><ChevronRight /></Btn>
+      <Btn variant={paused ? "default" : "outline"} className="w-[92px]" onClick={() => setPaused(!paused)} title="Pause / resume (P)">
+        {paused ? <Play className="fill-current" /> : <Pause className="fill-current" />} {paused ? "Resume" : "Pause"}
+      </Btn>
       <Btn onClick={() => flow.restart()}><RotateCcw /> Restart</Btn>
       <div className="ml-3 min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="font-[family-name:var(--font-ui-mono)] text-xs text-zinc-400">{String(i + 1).padStart(2, "0")}/{STEP_IDS.length}</span>
           <p className="truncate text-sm font-medium">{flow.cfg.title}</p>
           <Badge variant="outline">{flow.cfg.device === "ipad" ? "Kid · iPad" : "Parent · phone"}</Badge>
-          {waiting && (
+          {paused && <Badge variant="outline">Paused</Badge>}
+          {waiting && !paused && (
             <Badge variant="default">
               <Hand className="mr-1 size-3" /> Waiting for a tap
             </Badge>

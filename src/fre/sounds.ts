@@ -3,6 +3,7 @@
  * each sound takes a volume (0–1.5) and a pitch multiplier (0.5–2).
  */
 import { ac, isMuted } from "@/lib/audio"
+import { later } from "@/lib/clock"
 
 export const SOUND_NAMES = [
   "tap", "pop", "bubble", "boop", "chime", "sparkle", "star", "success", "fanfare", "glow", "burst", "whoosh", "swoosh",
@@ -95,6 +96,6 @@ export function playSound(name: SoundName | "none" | undefined, { volume = 1, pi
     RECIPES[name]?.(c, g, pitch)
     window.setTimeout(() => g.disconnect(), 3000)
   }
-  if (delayMs > 0) return window.setTimeout(go, delayMs)
+  if (delayMs > 0) return later(go, delayMs)
   go()
 }

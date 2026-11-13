@@ -8,6 +8,7 @@
  * - voice-over: the Web Speech API, with every line also published as a caption (text is a backup, never the only cue)
  */
 import { useSyncExternalStore } from "react"
+import { cancelLater, isPaused, later, now, onPauseChange } from "./clock"
 
 let ctx: AudioContext | null = null
 let muted = false
@@ -20,7 +21,7 @@ export function ac(): AudioContext | null {
     if (!C) return null
     ctx = new C()
   }
-  if (ctx.state === "suspended") void ctx.resume()
+  if (ctx.state === "suspended" && !isPaused()) void ctx.resume()
   return ctx
 }
 
@@ -103,16 +104,17 @@ export function playRecording({ volume = 1, loop = false, onEnd }: { volume?: nu
   schedule()
   const total = RECORDING_SECONDS * 1000
   if (loop) {
-    timers.push(window.setInterval(() => { t = 0.05; schedule() }, total + 600))
+    const loopAgain = () => { t = 0.05; schedule(); timers.push(later(loopAgain, total + 600)) }
+    timers.push(later(loopAgain, total + 600))
   } else {
-    timers.push(window.setTimeout(() => { recording = null; emitRec(); onEnd?.() }, total + 200))
+    timers.push(later(() => { recording = null; emitRec(); onEnd?.() }, total + 200))
   }
   recording = {
-    startedAt: performance.now(),
+    startedAt: now(),
     volume,
     setVolume: (v: number) => master.gain.setTargetAtTime(v, c.currentTime, 0.15),
     stop: () => {
-      timers.forEach((id) => { clearTimeout(id); clearInterval(id) })
+      timers.forEach((id) => cancelLater(id))
       master.gain.setTargetAtTime(0, c.currentTime, 0.05)
       window.setTimeout(() => master.disconnect(), 300)
     },
@@ -122,7 +124,7 @@ export function playRecording({ volume = 1, loop = false, onEnd }: { volume?: nu
 /** 0–1 through the current recording, or null when nothing is playing. */
 export function recordingProgress(): number | null {
   if (!recording) return null
-  return (((performance.now() - recording.startedAt) / 1000) % (RECORDING_SECONDS + 0.6)) / RECORDING_SECONDS
+  return (((now() - recording.startedAt) / 1000) % (RECORDING_SECONDS + 0.6)) / RECORDING_SECONDS
 }
 /** Change the volume of the recording that is playing (e.g. duck it under the voice-over). */
 export function setRecordingVolume(v: number) {
@@ -167,6 +169,8 @@ export const ROLE_VOICE: Record<Voice, ClaudeVoice> = { guide: "rounded", mom: "
 type Tts = {
   speak: (what: string, o?: { voice?: ClaudeVoice; rate?: number; language?: string }) => Promise<unknown>
   stop: () => Promise<void>
+  pause?: () => Promise<void>
+  resume?: () => Promise<void>
 }
 let tts: Tts | null = null
 let ttsBlocked = false
@@ -220,6 +224,22 @@ if (typeof window !== "undefined" && "speechSynthesis" in window) {
   window.speechSynthesis.addEventListener?.("voiceschanged", () => window.speechSynthesis.getVoices())
 }
 
+// Pause everything with the prototype's pause button: synthesized sound, the recording and the voice-over.
+if (typeof window !== "undefined") {
+  onPauseChange({
+    pause: () => {
+      void ctx?.suspend()
+      void tts?.pause?.().catch(() => {})
+      if ("speechSynthesis" in window) window.speechSynthesis.pause()
+    },
+    resume: () => {
+      void ctx?.resume()
+      void tts?.resume?.().catch(() => {})
+      if ("speechSynthesis" in window) window.speechSynthesis.resume()
+    },
+  })
+}
+
 /** Speak a line and show it as a caption. Resolves when done (or after a reading-time fallback). */
 export async function speak(text: string, voice: Voice = "guide", opts: { rate?: number; pitch?: number; claudeVoice?: ClaudeVoice } = {}): Promise<void> {
   setCaption({ text, voice })
@@ -227,11 +247,11 @@ export async function speak(text: string, voice: Voice = "guide", opts: { rate?:
   const cv = opts.claudeVoice ?? ROLE_VOICE[voice]
   setCaption({ text, voice, engine: muted ? "muted" : tts && !ttsBlocked ? `Claude · ${cv}` : "Browser voice" })
   return new Promise((resolve) => {
-    let fallback = window.setTimeout(done, 900 + text.length * 55)
-    function done() { clearTimeout(fallback); setCaption(null); resolve() }
+    let fallback = later(done, 900 + text.length * 55)
+    function done() { cancelLater(fallback); setCaption(null); resolve() }
     if (muted) return
     if (tts && !ttsBlocked) {
-      clearTimeout(fallback)
+      cancelLater(fallback)
       tts
         .speak(text, { voice: cv, rate: Math.min(1.5, Math.max(0.7, opts.rate ?? 1)), language: "en-US" })
         .then(done, (e: { code?: string; reason?: string }) => {
@@ -241,7 +261,7 @@ export async function speak(text: string, voice: Voice = "guide", opts: { rate?:
             engineListeners.forEach((l) => l())
           }
           if (e?.code === "stopped") return done()
-          fallback = window.setTimeout(done, 600 + text.length * 45)
+          fallback = later(done, 600 + text.length * 45)
         })
       return
     }

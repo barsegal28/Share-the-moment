@@ -5,6 +5,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { playRecording, recordingProgress, setRecordingVolume, speak, stopRecording, stopSpeech } from "@/lib/audio"
 import { playSound } from "./sounds"
+import { cancelLater, later as clockLater, setPaused, sleep } from "@/lib/clock"
 import { STEP_IDS, type Script, type StepCfg, type StepId } from "./script"
 
 export interface FlowCtx {
@@ -79,15 +80,18 @@ export function FlowProvider({
 
   const go = useCallback((id: StepId | null) => {
     if (!id) return
+    setPaused(false)
     setAnimate(!seenRef.current.has(id))
     setStep(id)
     setRun((r) => r + 1)
   }, [])
   const replay = useCallback(() => {
+    setPaused(false)
     setAnimate(true)
     setRun((r) => r + 1)
   }, [])
   const restart = useCallback(() => {
+    setPaused(false)
     seenRef.current.clear()
     stopRecording()
     setAnimate(true)
@@ -104,7 +108,7 @@ export function FlowProvider({
     const s = live.current[step]
     let alive = true
     const timers: number[] = []
-    const later = (ms: number, fn: () => void) => timers.push(window.setTimeout(() => alive && fn(), ms))
+    const later = (ms: number, fn: () => void) => timers.push(clockLater(() => alive && fn(), ms))
     const advance = () => {
       if (hold || !s.next) return
       go(s.next)
@@ -138,7 +142,7 @@ export function FlowProvider({
     }
     return () => {
       alive = false
-      timers.forEach((t) => clearTimeout(t))
+      timers.forEach((t) => cancelLater(t))
       motionDone.current = () => {}
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -176,7 +180,7 @@ export function FlowProvider({
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 
-const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
+const wait = sleep
 
 /** 0–1 progress of the playing recording, updated every frame while `active`. */
 export function useRecordingProgress(active = true) {
