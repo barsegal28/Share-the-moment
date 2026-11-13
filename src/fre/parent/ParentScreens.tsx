@@ -141,13 +141,16 @@ function SmsThread() {
         </Obj>
         <Obj step="p-sms" id="link" hint onTap={() => flow.go("p-message")} className="w-[78%] rounded-[18px]">
           <div className="overflow-hidden rounded-[18px] rounded-bl-[4px] bg-[#e9e9eb]">
-            <div className="relative h-[150px] overflow-hidden bg-pink">
-              <svg className="absolute inset-0" width="100%" height="100%" viewBox="0 0 300 150" preserveAspectRatio="none" aria-hidden>
-                <path d="M-10 70 L320 140 V160 H-10 Z" fill="var(--sticker-cream)" />
-              </svg>
-              <span className="absolute top-2 left-4"><Sticker name="cloudComet" size={96} tilt={-8} /></span>
-              <span className="absolute top-3 right-20"><Sticker name="sparkle" size={44} tilt={12} /></span>
-              <span className="absolute top-8 right-4"><Sticker name="burst" size={84} tilt={10} /></span>
+            {/* The listen page's hero (Figma Parent.Mobile 1, top 393 × 250), scaled into the preview. */}
+            <div className="relative h-[184px] overflow-hidden bg-pink">
+              <div className="absolute top-0 left-0 h-[250px] w-[393px] origin-top-left" style={{ transform: "scale(0.733)" }}>
+                <svg className="absolute top-0 left-0" width={393} height={250} viewBox="0 0 393 250" aria-hidden style={{ filter: "drop-shadow(0 5px 5px rgb(0 0 0 / 0.2))" }}>
+                  <path d="M-24 88.5 L464 270 V300 H-24 Z" fill="var(--sticker-cream)" />
+                </svg>
+                <span className="absolute" style={{ left: 47, top: 26 }}><Sticker name="cloudComet" size={182} tilt={-8} /></span>
+                <span className="absolute" style={{ left: 251, top: 28 }}><Sticker name="sparkle" size={86} tilt={12} /></span>
+                <span className="absolute" style={{ left: 219, top: 105 }}><Sticker name="burst" size={151} tilt={10} /></span>
+              </div>
             </div>
             <div className="px-3 py-2">
               <p className="text-[15px] leading-tight font-semibold">Listen to Noa play “{DEMO_SONG.title}”</p>
