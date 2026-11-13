@@ -145,7 +145,7 @@ export function useRecordingPlaying() {
 
 // ─── Voice-over ───────────────────────────────────────────────────────────────
 export type Voice = "guide" | "mom" | "dad" | "grandma" | "kid"
-type Caption = { text: string; voice: Voice } | null
+type Caption = { text: string; voice: Voice; engine?: string } | null
 let caption: Caption = null
 const capListeners = new Set<() => void>()
 function setCaption(c: Caption) { caption = c; capListeners.forEach((l) => l()) }
@@ -191,7 +191,7 @@ if (typeof window !== "undefined") {
           engineListeners.forEach((l) => l())
         })
         .catch(() => {}),
-      new Promise<void>((r) => setTimeout(r, 4000)),
+      new Promise<void>((r) => setTimeout(r, 10000)),
     ])
   }
 }
@@ -224,6 +224,8 @@ if (typeof window !== "undefined" && "speechSynthesis" in window) {
 export async function speak(text: string, voice: Voice = "guide", opts: { rate?: number; pitch?: number; claudeVoice?: ClaudeVoice } = {}): Promise<void> {
   setCaption({ text, voice })
   await ttsReady
+  const cv = opts.claudeVoice ?? ROLE_VOICE[voice]
+  setCaption({ text, voice, engine: muted ? "muted" : tts && !ttsBlocked ? `Claude · ${cv}` : "Browser voice" })
   return new Promise((resolve) => {
     let fallback = window.setTimeout(done, 900 + text.length * 55)
     function done() { clearTimeout(fallback); setCaption(null); resolve() }
@@ -231,7 +233,7 @@ export async function speak(text: string, voice: Voice = "guide", opts: { rate?:
     if (tts && !ttsBlocked) {
       clearTimeout(fallback)
       tts
-        .speak(text, { voice: opts.claudeVoice ?? ROLE_VOICE[voice], rate: Math.min(1.5, Math.max(0.7, opts.rate ?? 1)), language: "en" })
+        .speak(text, { voice: cv, rate: Math.min(1.5, Math.max(0.7, opts.rate ?? 1)), language: "en" })
         .then(done, (e: { code?: string; reason?: string }) => {
           // The viewer turned reading aloud off: respect it (caption only), don't switch to another voice.
           if (e?.code === "not_granted" || e?.code === "unavailable") {

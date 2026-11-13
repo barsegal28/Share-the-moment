@@ -344,7 +344,7 @@ function StepProps() {
             <TextArea rows={2} value={v.text} onChange={(e) => setVoice(i, { text: e.target.value })} />
             <div className="grid grid-cols-2 gap-1.5">
               <Select value={v.voice} onChange={(e) => setVoice(i, { voice: e.target.value as Voice })} title="Who is speaking (caption label)">
-                {(["guide", "mom", "dad", "grandma", "kid"] as Voice[]).map((x) => <option key={x}>{x}</option>)}
+                {(["guide", "mom", "dad", "grandma", "kid"] as Voice[]).map((x) => <option key={x} value={x}>{SPEAKER_LABEL[x]}</option>)}
               </Select>
               <Select value={v.claudeVoice ?? ""} onChange={(e) => setVoice(i, { claudeVoice: (e.target.value || undefined) as ClaudeVoice | undefined })} title="Claude voice">
                 <option value="">{ROLE_VOICE[v.voice]} (default)</option>
@@ -414,6 +414,8 @@ function StepProps() {
     </>
   )
 }
+const SPEAKER_LABEL: Record<Voice, string> = { guide: "Narrator", mom: "Mom", dad: "Dad", grandma: "Grandma", kid: "Kid" }
+
 /** One voice per role for the whole flow: sets the Claude voice on every line of that role, in every step. */
 const ROLES: { role: Voice; label: string }[] = [
   { role: "guide", label: "Narrator" },

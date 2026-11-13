@@ -50,8 +50,9 @@ function Caption({ device }: { device: "ipad" | "phone" }) {
   return (
     <div className={cn("pointer-events-none absolute inset-x-0 bottom-3 flex justify-center px-6", device === "phone" && "bottom-1")}>
       <p className="flex max-w-[720px] items-center gap-2.5 rounded-lg border border-zinc-200 bg-white/95 px-3.5 py-2 text-sm text-zinc-900 shadow-md backdrop-blur [font-family:var(--font-ui)]">
-        <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] font-medium text-white uppercase">{c.voice === "guide" ? "Voice-over" : c.voice}</span>
+        <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] font-medium text-white uppercase">{c.voice === "guide" ? "Narrator" : c.voice}</span>
         {c.text}
+        {c.engine && <span className="ml-1 text-[11px] whitespace-nowrap text-zinc-400">{c.engine}</span>}
       </p>
     </div>
   )
