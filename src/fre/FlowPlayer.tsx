@@ -1,24 +1,23 @@
 /** #/flow — the whole first-time flow, kid → parent → kid, following the flow chart. */
-import { useState } from "react"
-import { ChevronLeft, ChevronRight, Hand, Play, RotateCcw, SlidersHorizontal, Volume2, VolumeX } from "lucide-react"
+import { useEffect, useState } from "react"
+import { ChevronLeft, ChevronRight, Hand, RotateCcw, SlidersHorizontal, Volume2, VolumeX } from "lucide-react"
 import { setMuted, unlockAudio } from "@/lib/audio"
 import { FlowProvider, useFlow } from "./runtime"
 import { FlowStage } from "./FlowStage"
 import { FlowChart } from "./FlowChart"
 import { useScript } from "./store"
 import { STEP_IDS, type StepId } from "./script"
-import { Badge, Btn, btnClass, Kbd } from "./ui"
+import { Badge, Btn, btnClass } from "./ui"
 
 export function FlowPlayer({ initial = "k-glow" }: { initial?: StepId }) {
   const script = useScript()
-  const [started, setStarted] = useState(false)
   return (
-    <FlowProvider script={script} initial={initial} started={started}>
+    <FlowProvider script={script} initial={initial}>
       <div className="ui-root flex h-dvh flex-col bg-white">
+        <SoundUnlock />
         <Header />
         <main className="relative min-h-0 flex-1 bg-zinc-50 px-6 py-5">
           <FlowStage />
-          {!started && <StartDialog onStart={() => { unlockAudio(); setStarted(true) }} />}
         </main>
         <Footer />
       </div>
@@ -40,6 +39,35 @@ export function Brand({ sub }: { sub: string }) {
       </span>
     </a>
   )
+}
+
+/**
+ * Browsers only play sound after the first click or key press. The flow starts right away;
+ * the first interaction turns sound on and, if nothing has moved on yet, replays the step with sound.
+ */
+let audioUnlocked = false
+function SoundUnlock() {
+  const flow = useFlow()
+  const [, force] = useState(0)
+  useEffect(() => {
+    if (audioUnlocked) return
+    const startStep = flow.step
+    const on = () => {
+      if (audioUnlocked) return
+      audioUnlocked = true
+      unlockAudio()
+      force((n) => n + 1)
+      // Let a click on a control run first; replay only if the step didn't change.
+      window.setTimeout(() => flow.step === startStep && flow.replay(), 0)
+    }
+    window.addEventListener("pointerdown", on, { once: true, capture: true })
+    window.addEventListener("keydown", on, { once: true, capture: true })
+    return () => {
+      window.removeEventListener("pointerdown", on, { capture: true })
+      window.removeEventListener("keydown", on, { capture: true })
+    }
+  }, [flow])
+  return null
 }
 
 function Header() {
@@ -95,30 +123,8 @@ function Footer() {
           setM(!muted)
         }}
       >
-        {muted ? <VolumeX /> : <Volume2 />} {muted ? "Muted" : "Sound on"}
+        {muted ? <VolumeX /> : <Volume2 />} {muted ? "Muted" : audioUnlocked ? "Sound on" : "Click anywhere for sound"}
       </Btn>
     </footer>
-  )
-}
-
-function StartDialog({ onStart }: { onStart: () => void }) {
-  return (
-    <div className="absolute inset-0 z-50 grid place-items-center bg-white/70 backdrop-blur-sm">
-      <div className="w-[440px] rounded-xl border border-zinc-200 bg-white p-6 shadow-lg">
-        <Badge>First-time experience</Badge>
-        <h2 className="mt-3 text-lg font-semibold tracking-tight">Noa just got 3 stars</h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-zinc-500">
-          The first time Noa and Mom use Share the Moment: Noa on the iPad, then Mom on her phone, then back to Noa. Steps that need a person wait for your tap.
-        </p>
-        <ul className="mt-4 space-y-1.5 text-sm text-zinc-600">
-          <li className="flex items-center gap-2"><Volume2 className="size-4 text-zinc-400" /> Voice-over, sounds and the recording are part of the design.</li>
-          <li className="flex items-center gap-2"><Hand className="size-4 text-zinc-400" /> Tap where a kid or parent would tap.</li>
-        </ul>
-        <div className="mt-6 flex items-center justify-between">
-          <span className="flex items-center gap-1.5 text-xs text-zinc-400">Sound on <Kbd>🔊</Kbd></span>
-          <Btn variant="default" size="default" onClick={onStart}><Play className="fill-current" /> Start the flow</Btn>
-        </div>
-      </div>
-    </div>
   )
 }
