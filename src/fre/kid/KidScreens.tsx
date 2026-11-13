@@ -90,6 +90,8 @@ export function KidScreens() {
               width: p.size,
               height: p.size,
               transition: `left ${layoutMs}ms ${EASING.spring}, top ${layoutMs}ms ${EASING.spring}`,
+              // Figma frames 3–4: the gold burst sits on top of the card; the other stickers are behind it.
+              zIndex: id === "burst" && layout === LAYOUT_CARD ? 5 : undefined,
             }}
             onTap={() => {}}
           >
@@ -334,7 +336,7 @@ function SendOverlay() {
 
   const checkDelay = flow.script["k-send"].objects.checks.motion.delay
   return (
-    <div className="absolute inset-0">
+    <div className="absolute inset-0 z-10">
       <Obj step="k-send" id="dim" className="absolute inset-0">
         <div className="h-full w-full bg-ink/70" />
       </Obj>
@@ -379,7 +381,7 @@ function ReplyBanner() {
   const flow = useFlow()
   const { sticker } = useReplyChoice()
   return (
-    <Obj step="k-notify" id="banner" hint onTap={() => flow.go("k-reveal")} className="absolute rounded-[36px]" style={{ left: (IPAD.w - 600) / 2, top: 28, width: 600 }}>
+    <Obj step="k-notify" id="banner" hint onTap={() => flow.go("k-reveal")} className="absolute z-10 rounded-[36px]" style={{ left: (IPAD.w - 600) / 2, top: 28, width: 600 }}>
       <div className="sticker flex items-center gap-5 rounded-[36px] bg-paper py-4 pr-6 pl-5 [--kiss:var(--sticker-pink)]">
         <Sticker name="mom" size={96} tilt={-6} />
         <div className="flex-1">
@@ -400,7 +402,7 @@ function Reveal() {
   const { sticker, phrase } = useReplyChoice()
   const confettiAt = flow.script["k-reveal"].objects.confetti.motion.delay
   return (
-    <div className="absolute inset-0">
+    <div className="absolute inset-0 z-10">
       <Obj step="k-reveal" id="dim" className="absolute inset-0">
         <div className="h-full w-full bg-ink/85" />
       </Obj>
