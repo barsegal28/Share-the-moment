@@ -72,13 +72,114 @@ function diff(sc: Script) {
   return out
 }
 
+// ─── Saving ───────────────────────────────────────────────────────────────
+// Every edit is kept in this browser (localStorage) and, when the page runs as a claude.ai artifact,
+// in the artifact's database (doc "fre/script"), so it survives reloads, other browsers and republishes.
+export type SaveStatus = "connecting" | "saving" | "saved" | "local" | "error"
+let status: SaveStatus = "local"
+let lastSaved = ""
+const statusListeners = new Set<() => void>()
+const setStatus = (s: SaveStatus) => {
+  status = s
+  statusListeners.forEach((l) => l())
+}
+export function useSaveStatus() {
+  return useSyncExternalStore(
+    (l) => {
+      statusListeners.add(l)
+      return () => statusListeners.delete(l)
+    },
+    () => status,
+    () => status,
+  )
+}
+
+type DocRef = {
+  set: (d: Record<string, unknown>) => Promise<void>
+  onSnapshot: (next: (s: { exists: boolean; data(): Record<string, unknown> | undefined; metadata: { hasPendingWrites: boolean } }) => void, err?: (e: { code: string }) => void) => () => void
+}
+let remote: DocRef | null = null
+let writing = false
+let queued = false
+let timer = 0
+
+async function writeRemote() {
+  if (!remote) return
+  if (writing) {
+    queued = true
+    return
+  }
+  writing = true
+  const body = JSON.stringify(diff(script))
+  try {
+    if (body !== lastSaved) {
+      setStatus("saving")
+      await remote.set({ diff: body, updatedAt: new Date().toISOString() })
+      lastSaved = body
+    }
+    setStatus("saved")
+  } catch {
+    setStatus("error")
+  } finally {
+    writing = false
+    if (queued) {
+      queued = false
+      void writeRemote()
+    }
+  }
+}
+
 function save() {
   try {
     localStorage.setItem(KEY, JSON.stringify(diff(script)))
   } catch {
-    /* private mode: edits last for this visit only */
+    /* storage blocked: the artifact database (if any) still keeps the edits */
+  }
+  if (remote) {
+    setStatus("saving")
+    clearTimeout(timer)
+    timer = window.setTimeout(() => void writeRemote(), 600)
   }
 }
+
+/** Connect to the artifact database when the page runs inside claude.ai. */
+async function connectRemote() {
+  const c = (window as unknown as { claude?: { use: (n: string) => Promise<unknown> } }).claude
+  if (!c?.use) return
+  setStatus("connecting")
+  type Db = { doc: (p: string) => DocRef }
+  const db = (await c.use("db").catch(() => null)) as Db | null
+  if (!db) return setStatus("local")
+  const ref = db.doc("fre/script")
+  let first = true
+  ref.onSnapshot(
+    (snap) => {
+      if (snap.metadata.hasPendingWrites) return
+      const raw = snap.exists ? String(snap.data()?.diff ?? "") : ""
+      if (first) {
+        first = false
+        remote = ref
+        if (!raw) {
+          // Nothing stored yet: keep what this browser has and store it.
+          void writeRemote()
+          return
+        }
+      }
+      if (raw && raw !== lastSaved && raw !== JSON.stringify(diff(script))) {
+        try {
+          script = mergeScript(JSON.parse(raw))
+          emit()
+        } catch {
+          /* ignore a malformed document */
+        }
+      }
+      lastSaved = raw || lastSaved
+      setStatus("saved")
+    },
+    () => setStatus("error"),
+  )
+}
+if (typeof window !== "undefined") void connectRemote()
 
 if (typeof window !== "undefined") {
   window.addEventListener("storage", (e) => {

@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import {
   ChevronLeft, ChevronRight, Copy, Download, Frame, Hand, Minus, MousePointer2, Play, Plus, RotateCcw, Upload, Volume2, X,
-  Square, Music2, MessageSquareText, Smartphone, Tablet, ArrowLeft,
+  Square, Music2, MessageSquareText, Smartphone, Tablet, ArrowLeft, Check, CircleAlert, Loader2,
 } from "lucide-react"
 import { speak, stopSpeech } from "@/lib/audio"
 import { cn } from "@/lib/utils"
@@ -14,7 +14,7 @@ import { FlowProvider, useFlow } from "./runtime"
 import { FlowStage } from "./FlowStage"
 import { firstStepOf } from "./FlowChart"
 import { Brand, SoundUnlock } from "./FlowPlayer"
-import { scriptStore, useScript } from "./store"
+import { scriptStore, useSaveStatus, useScript } from "./store"
 import { playSound, SOUND_LABELS, SOUND_NAMES, type SoundName } from "./sounds"
 import {
   DEFAULT_SCRIPT, EASES, ENTER_PRESETS, IDLE_PRESETS, NODES, STEP_IDS,
@@ -103,14 +103,23 @@ function Toolbar({ hold, setHold, selecting, setSelecting }: { hold: boolean; se
         <div className="mx-2 h-5 w-px bg-zinc-200" />
         <Switch checked={!hold} onChange={(v) => setHold(!v)} label="Auto-advance" />
       </div>
-      <span className="flex items-center gap-1.5 text-xs text-zinc-500">
-        <span className={cn("size-1.5 rounded-full", edited ? "bg-zinc-900" : "bg-zinc-300")} />
-        {edited ? "Edited · saved in this browser" : "Default script"}
-      </span>
+      <SaveBadge edited={edited} />
       <Btn onClick={() => setIo(true)}><Download /> Export</Btn>
       <a href={`#/flow?step=${flow.step}`} className={btnClass("default", "sm")}><Play className="fill-current" /> Play flow</a>
       {io && <ExportDialog onClose={() => setIo(false)} />}
     </header>
+  )
+}
+
+function SaveBadge({ edited }: { edited: boolean }) {
+  const st = useSaveStatus()
+  const text =
+    st === "saving" ? "Saving…" : st === "connecting" ? "Connecting…" : st === "error" ? "Couldn't save · use Export" : st === "saved" ? (edited ? "All changes saved" : "Default script · saved") : edited ? "Saved in this browser only" : "Default script"
+  return (
+    <span className="flex items-center gap-1.5 text-xs text-zinc-500" title={st === "saved" ? "Saved to the artifact: it stays after a reload, in any browser" : st === "local" ? "Saved in this browser's storage" : undefined}>
+      {st === "saving" || st === "connecting" ? <Loader2 className="size-3 animate-spin" /> : st === "error" ? <CircleAlert className="size-3.5 text-red-600" /> : st === "saved" ? <Check className="size-3.5 text-zinc-900" /> : <span className={cn("size-1.5 rounded-full", edited ? "bg-zinc-900" : "bg-zinc-300")} />}
+      {text}
+    </span>
   )
 }
 
