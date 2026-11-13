@@ -4,7 +4,7 @@
  * Export the edited JSON from the editor to make it the new default here.
  */
 import type { SoundName } from "./sounds"
-import type { Voice } from "@/lib/audio"
+import type { ClaudeVoice, Voice } from "@/lib/audio"
 
 export type Ease = "spring" | "overshoot" | "out" | "inOut" | "linear" | "bounce"
 export const EASES: Ease[] = ["spring", "overshoot", "out", "inOut", "linear", "bounce"]
@@ -49,7 +49,10 @@ export interface VoiceLine {
   /** ms of silence before this line */
   delay: number
   rate: number
+  /** Browser voice only (Claude voices have no pitch). */
   pitch: number
+  /** Claude voice for this line; empty = the role's default. */
+  claudeVoice?: ClaudeVoice
 }
 
 export interface SoundCue {

@@ -157,13 +157,60 @@ export function useCaption() {
   )
 }
 
+// ─── Natural voices ───────────────────────────────────────────────────────────
+// Inside a claude.ai artifact the page can speak with Claude's own voices (the `tts` capability).
+// Everywhere else (Safari, Firefox, local dev, GitHub Pages) it falls back to the browser's speech voice.
+export type ClaudeVoice = "buttery" | "airy" | "glassy" | "rounded"
+export const CLAUDE_VOICES: ClaudeVoice[] = ["airy", "buttery", "glassy", "rounded"]
+/** Default Claude voice for each role; a voice-over line can pick another. */
+export const ROLE_VOICE: Record<Voice, ClaudeVoice> = { guide: "airy", mom: "rounded", dad: "buttery", grandma: "glassy", kid: "airy" }
+type Tts = {
+  speak: (what: string, o?: { voice?: ClaudeVoice; rate?: number; language?: string }) => Promise<unknown>
+  stop: () => Promise<void>
+}
+let tts: Tts | null = null
+let ttsBlocked = false
+const engineListeners = new Set<() => void>()
+export function useVoiceEngine() {
+  return useSyncExternalStore(
+    (l) => { engineListeners.add(l); return () => engineListeners.delete(l) },
+    () => (tts && !ttsBlocked ? "claude" : "browser"),
+    () => "browser",
+  )
+}
+if (typeof window !== "undefined") {
+  const c = (window as unknown as { claude?: { use: (n: string) => Promise<unknown> } }).claude
+  c?.use("tts")
+    .then((t) => {
+      tts = (t as Tts | null) ?? null
+      engineListeners.forEach((l) => l())
+    })
+    .catch(() => {})
+}
+
 /** Speak a line and show it as a caption. Resolves when done (or after a reading-time fallback). */
-export function speak(text: string, voice: Voice = "guide", opts: { rate?: number; pitch?: number } = {}): Promise<void> {
+export function speak(text: string, voice: Voice = "guide", opts: { rate?: number; pitch?: number; claudeVoice?: ClaudeVoice } = {}): Promise<void> {
   setCaption({ text, voice })
   return new Promise((resolve) => {
-    const fallback = window.setTimeout(done, 900 + text.length * 55)
+    let fallback = window.setTimeout(done, 900 + text.length * 55)
     function done() { clearTimeout(fallback); setCaption(null); resolve() }
-    if (muted || !("speechSynthesis" in window)) return
+    if (muted) return
+    if (tts && !ttsBlocked) {
+      clearTimeout(fallback)
+      tts
+        .speak(text, { voice: opts.claudeVoice ?? ROLE_VOICE[voice], rate: Math.min(1.5, Math.max(0.7, opts.rate ?? 1)), language: "en" })
+        .then(done, (e: { code?: string; reason?: string }) => {
+          // The viewer turned reading aloud off: respect it (caption only), don't switch to another voice.
+          if (e?.code === "not_granted" || e?.code === "unavailable") {
+            ttsBlocked = true
+            engineListeners.forEach((l) => l())
+          }
+          if (e?.code === "stopped") return done()
+          fallback = window.setTimeout(done, 600 + text.length * 45)
+        })
+      return
+    }
+    if (ttsBlocked || !("speechSynthesis" in window)) return
     const u = new SpeechSynthesisUtterance(text)
     u.rate = opts.rate ?? (voice === "guide" ? 1.02 : 0.98)
     u.pitch = opts.pitch ?? (voice === "guide" ? 1.35 : voice === "dad" ? 0.8 : voice === "kid" ? 1.6 : 1.15)
@@ -175,6 +222,7 @@ export function speak(text: string, voice: Voice = "guide", opts: { rate?: numbe
   })
 }
 export function stopSpeech() {
+  if (tts) void tts.stop().catch(() => {})
   if ("speechSynthesis" in window) window.speechSynthesis.cancel()
   setCaption(null)
 }

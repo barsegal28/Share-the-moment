@@ -126,7 +126,7 @@ export function FlowProvider({
       for (const line of s.voice) {
         await wait(line.delay)
         if (!alive) return
-        await speak(line.text, line.voice, { rate: line.rate, pitch: line.pitch })
+        await speak(line.text, line.voice, { rate: line.rate, pitch: line.pitch, claudeVoice: line.claudeVoice })
         if (!alive) return
       }
       if (s.advance === "voice") later(s.after, advance)

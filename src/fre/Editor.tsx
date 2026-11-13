@@ -8,7 +8,7 @@ import {
   ChevronLeft, ChevronRight, Copy, Download, Frame, Hand, Minus, MousePointer2, Play, Plus, RotateCcw, Upload, Volume2, X,
   Square, Music2, MessageSquareText, Smartphone, Tablet, ArrowLeft, Check, CircleAlert, Loader2,
 } from "lucide-react"
-import { speak, stopSpeech } from "@/lib/audio"
+import { CLAUDE_VOICES, ROLE_VOICE, speak, stopSpeech, useVoiceEngine, type ClaudeVoice } from "@/lib/audio"
 import { cn } from "@/lib/utils"
 import { FlowProvider, useFlow } from "./runtime"
 import { FlowStage } from "./FlowStage"
@@ -313,6 +313,7 @@ function StepProps() {
     scriptStore.setStep(s.id, fn)
     if (replay) replaySoon()
   }
+  const engine = useVoiceEngine()
   const setVoice = (i: number, p: Partial<VoiceLine>) => set((st) => ({ ...st, voice: st.voice.map((v, j) => (j === i ? { ...v, ...p } : v)) }), false)
   const setCue = (i: number, p: Partial<SoundCue>) => set((st) => ({ ...st, sounds: st.sounds.map((c, j) => (j === i ? { ...c, ...p } : c)) }))
   return (
@@ -327,24 +328,29 @@ function StepProps() {
         <TextArea rows={3} value={s.note} onChange={(e) => set((st) => ({ ...st, note: e.target.value }), false)} />
       </PanelSection>
 
-      <PanelSection title="Voice-over" action={<Btn variant="ghost" size="icon-sm" title="Add a line" onClick={() => set((st) => ({ ...st, voice: [...st.voice, { text: "New line", voice: "guide", delay: 200, rate: 1.02, pitch: 1.35 }] }), false)}><Plus /></Btn>}>
+      <PanelSection title={<span className="flex items-center gap-2">Voice-over <Badge variant={engine === "claude" ? "default" : "outline"}>{engine === "claude" ? "Claude voices" : "Browser voice"}</Badge></span>} action={<Btn variant="ghost" size="icon-sm" title="Add a line" onClick={() => set((st) => ({ ...st, voice: [...st.voice, { text: "New line", voice: "guide", delay: 200, rate: 1.02, pitch: 1.35 }] }), false)}><Plus /></Btn>}>
+        {engine === "browser" && <Hint>Natural Claude voices play when this page is open on claude.ai in Chrome or Edge. Here it uses the browser's own voice.</Hint>}
         {s.voice.length === 0 && <Hint>No voice-over in this step.</Hint>}
         {s.voice.map((v, i) => (
           <div key={i} className="flex flex-col gap-1.5 rounded-lg border border-zinc-200 p-2">
             <div className="flex items-center gap-1">
               <MessageSquareText className="size-3.5 text-zinc-400" />
               <span className="flex-1 text-[11px] text-zinc-500">Line {i + 1}</span>
-              <Btn variant="ghost" size="icon-sm" title="Hear it" onClick={() => { stopSpeech(); void speak(v.text, v.voice, { rate: v.rate, pitch: v.pitch }) }}><Volume2 /></Btn>
+              <Btn variant="ghost" size="icon-sm" title="Hear it" onClick={() => { stopSpeech(); void speak(v.text, v.voice, { rate: v.rate, pitch: v.pitch, claudeVoice: v.claudeVoice }) }}><Volume2 /></Btn>
               <Btn variant="ghost" size="icon-sm" title="Remove" onClick={() => set((st) => ({ ...st, voice: st.voice.filter((_, j) => j !== i) }), false)}><Minus /></Btn>
             </div>
             <TextArea rows={2} value={v.text} onChange={(e) => setVoice(i, { text: e.target.value })} />
             <div className="grid grid-cols-2 gap-1.5">
-              <Select value={v.voice} onChange={(e) => setVoice(i, { voice: e.target.value as Voice })} title="Voice">
+              <Select value={v.voice} onChange={(e) => setVoice(i, { voice: e.target.value as Voice })} title="Who is speaking (caption label)">
                 {(["guide", "mom", "dad", "grandma", "kid"] as Voice[]).map((x) => <option key={x}>{x}</option>)}
               </Select>
+              <Select value={v.claudeVoice ?? ""} onChange={(e) => setVoice(i, { claudeVoice: (e.target.value || undefined) as ClaudeVoice | undefined })} title="Claude voice">
+                <option value="">{ROLE_VOICE[v.voice]} (default)</option>
+                {CLAUDE_VOICES.map((x) => <option key={x} value={x}>{x}</option>)}
+              </Select>
               <ScrubInput label="Wait" suffix="ms" title="Pause before this line" value={v.delay} min={0} max={6000} step={50} onChange={(x) => setVoice(i, { delay: x })} />
-              <ScrubInput label="Rate" title="Speaking speed" value={v.rate} min={0.5} max={1.6} step={0.02} onChange={(x) => setVoice(i, { rate: x })} />
-              <ScrubInput label="Pitch" value={v.pitch} min={0.4} max={2} step={0.05} onChange={(x) => setVoice(i, { pitch: x })} />
+              <ScrubInput label="Rate" title="Speaking speed (Claude voices: 0.7–1.5)" value={v.rate} min={0.5} max={1.6} step={0.02} onChange={(x) => setVoice(i, { rate: x })} />
+              {engine === "browser" && <ScrubInput label="Pitch" title="Pitch (browser voice only)" value={v.pitch} min={0.4} max={2} step={0.05} onChange={(x) => setVoice(i, { pitch: x })} />}
             </div>
           </div>
         ))}
