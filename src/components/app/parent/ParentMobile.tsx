@@ -309,11 +309,8 @@ export function ParentSendBack({
           </div>
         </div>,
       )}
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center gap-7">
         {slot("card", <StickerCard message={message} onMessage={onMessage} sticker={sticker} onSticker={onSticker} tool={tool} slot={slot} />)}
-        <div className={cn("grid transition-[grid-template-rows,opacity] duration-300", tool === "sticker" ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
-          <div className="overflow-hidden">{slot("library", <StickerLibrary value={sticker ?? "goodjob"} onPick={onPickSticker} />)}</div>
-        </div>
         {slot("toolbar", <ComposerToolbar tool={tool} onTool={setTool} />)}
       </div>
       {slot("send", <SendButton state={sendState} onClick={onSend} />)}
