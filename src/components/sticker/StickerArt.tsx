@@ -17,6 +17,12 @@ export interface StickerArtProps {
   tilt?: number
   /** Kiss-cut edge colour — pick one that contrasts with the art. */
   kiss?: StickerColor
+  /**
+   * Scale of the die-cut edge and lift relative to the Figma component (9px border, 12.5px kiss-cut,
+   * 7/10 lift at the component's own size). Figma instances scale these with the sticker, so a
+   * 142px instance of a 200px star has a 6.4px border. Default 1 = the component's own px.
+   */
+  edge?: number
   /** Lift shadow; turn off for stickers drawn on a card. */
   lift?: boolean
   /** Generate the cream border and kiss-cut edge (off for art that is a button, like Play). */
@@ -41,6 +47,7 @@ export function StickerArt({
   tilt = 0,
   kiss = "teal",
   lift = true,
+  edge = 1,
   diecut = true,
   motion = "none",
   delay = 0,
@@ -50,8 +57,8 @@ export function StickerArt({
 }: StickerArtProps) {
   const [w, h] = viewBox
   const unit = w / size // viewBox units per px
-  const border = 9 * unit
-  const kissW = 3.5 * unit
+  const border = 9 * edge * unit
+  const kissW = 3.5 * edge * unit
   return (
     <span
       role={title ? "img" : undefined}
@@ -71,7 +78,7 @@ export function StickerArt({
         ["--tilt" as string]: `${tilt}deg`,
         animationDelay: delay ? `${delay}ms` : undefined,
         // Figma lift: y 7, blur 10, black 30% (fixed px, like the 9px border)
-        filter: lift ? "drop-shadow(0 var(--sticker-lift-y) var(--sticker-lift-blur) rgb(0 0 0 / var(--sticker-lift-alpha)))" : undefined,
+        filter: lift ? `drop-shadow(0 calc(var(--sticker-lift-y) * ${edge}) calc(var(--sticker-lift-blur) * ${edge}) rgb(0 0 0 / var(--sticker-lift-alpha)))` : undefined,
         ...style,
       }}
     >

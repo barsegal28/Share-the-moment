@@ -259,6 +259,7 @@ export const STICKER_LABELS: Record<FigmaStickerName, string> = {
   burst: "Burst", sparkle: "Sparkle", heart: "Heart", ratingStar1: "Star", ratingStar2: "Star", ratingStar3: "Star",
   trebleClef: "Treble clef", eighthNotes: "Notes", sixteenthNotes: "Notes", eighthNote: "Music note", quarterNote: "Music note",
   playS: "Play", play: "Play",
+  avatarWisp: "Wisp", avatarGummy: "Gummy", avatarCone: "Cone", avatarLeaf: "Leaf", momPlanet: "Mom's planet", kidPlanet: "Your planet",
 }
 
 /** Every sticker name, Figma ones first. */
@@ -316,7 +317,7 @@ export function Sticker({ name, ...props }: { name: StickerName } & Omit<Sticker
     const art = FIGMA_STICKERS[key as FigmaStickerName] as FigmaSticker
     const isPlay = key === "play" || key === "playS"
     return (
-      <StickerArt kiss={art.kiss} viewBox={[art.w, art.h]} title={props.title ?? STICKER_LABELS[key as FigmaStickerName]} diecut={!isPlay} {...props}>
+      <StickerArt kiss={art.kiss} viewBox={[art.w, art.h]} title={props.title ?? STICKER_LABELS[key as FigmaStickerName]} diecut={!isPlay} edge={props.edge ?? (props.size ?? 120) / art.w} {...props}>
         {isPlay ? <PlayArt art={art} /> : <FigmaLayers layers={art.layers} />}
       </StickerArt>
     )
