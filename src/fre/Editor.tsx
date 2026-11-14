@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils"
 import { FlowProvider, useFlow } from "./runtime"
 import { FlowStage } from "./FlowStage"
 import { firstStepOf } from "./FlowChart"
-import { Brand, SoundUnlock } from "./FlowPlayer"
+import { SiteHeader, SoundUnlock } from "./FlowPlayer"
 import { scriptStore, useSaveStatus, useScript } from "./store"
 import { playSound, SOUND_LABELS, SOUND_NAMES, type SoundName } from "./sounds"
 import {
@@ -21,7 +21,7 @@ import {
   type Advance, type MotionCfg, type ObjCfg, type RecordingMode, type SoundCue, type StepCfg, type StepId, type VoiceLine,
 } from "./script"
 import type { Voice } from "@/lib/audio"
-import { Badge, Btn, btnClass, Hint, PanelSection, ScrubInput, Segmented, Select, Switch, TextArea, TextInput } from "./ui"
+import { Badge, Btn, Hint, PanelSection, ScrubInput, Segmented, Select, Switch, TextArea, TextInput } from "./ui"
 
 type Sel = { step: StepId; obj: string } | null
 
@@ -57,12 +57,15 @@ export function Editor({ initial = "k-success" }: { initial?: StepId }) {
 
   return (
     <FlowProvider script={script} initial={initial} edit selecting={selecting} hold={hold} selected={sel} onSelect={onSelect} onStep={onStep}>
-      <div className="ui-root grid h-dvh grid-cols-[240px_minmax(0,1fr)_288px] grid-rows-[48px_minmax(0,1fr)] bg-white text-zinc-950">
-        <SoundUnlock />
-        <Toolbar hold={hold} setHold={setHold} selecting={selecting} setSelecting={setSelecting} />
-        <Layers sel={sel} setSel={setSel} />
-        <Center />
-        <Properties sel={sel} setSel={setSel} />
+      <div className="ui-root flex h-dvh flex-col bg-white text-zinc-950">
+        <SiteHeader page="editor" step={step} />
+        <div className="grid min-h-0 flex-1 grid-cols-[240px_minmax(0,1fr)_288px] grid-rows-[48px_minmax(0,1fr)]">
+          <SoundUnlock />
+          <Toolbar hold={hold} setHold={setHold} selecting={selecting} setSelecting={setSelecting} />
+          <Layers sel={sel} setSel={setSel} />
+          <Center />
+          <Properties sel={sel} setSel={setSel} />
+        </div>
       </div>
     </FlowProvider>
   )
@@ -86,8 +89,6 @@ function Toolbar({ hold, setHold, selecting, setSelecting }: { hold: boolean; se
   }, [flow, i])
   return (
     <header className="col-span-3 flex items-center gap-3 border-b border-zinc-200 px-3">
-      <Brand sub="Flow editor" />
-      <div className="mx-1 h-5 w-px bg-zinc-200" />
       <Segmented
         value={selecting ? "select" : "interact"}
         onChange={(v) => setSelecting(v === "select")}
@@ -105,7 +106,6 @@ function Toolbar({ hold, setHold, selecting, setSelecting }: { hold: boolean; se
       </div>
       <SaveBadge edited={edited} />
       <Btn onClick={() => setIo(true)}><Download /> Export</Btn>
-      <a href={`#/flow?step=${flow.step}`} className={btnClass("default", "sm")}><Play className="fill-current" /> Play flow</a>
       {io && <ExportDialog onClose={() => setIo(false)} />}
     </header>
   )

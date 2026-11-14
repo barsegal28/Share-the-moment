@@ -1,4 +1,5 @@
 /** #/flow — the whole first-time flow, kid → parent → kid, following the flow chart. */
+import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
 import { ChevronLeft, ChevronRight, Hand, Pause, Play, RotateCcw, SlidersHorizontal, Volume2, VolumeX } from "lucide-react"
 import { setPaused, usePaused } from "@/lib/clock"
@@ -74,20 +75,28 @@ export function SoundUnlock() {
 
 function Header() {
   const flow = useFlow()
+  return <SiteHeader page="flow" step={flow.step} />
+}
+
+/**
+ * The site header, the same on both pages: brand + Flow on the left; Figma, Storybook, GitHub and the Editor tab on
+ * the right. Opening the editor keeps this header as it is and shows the editor under it.
+ */
+export function SiteHeader({ page, step }: { page: "flow" | "editor"; step: string }) {
+  const tab = (active: boolean) => cn("rounded-md px-3 py-1.5 text-sm", active ? "font-medium text-zinc-900" : "text-zinc-500 hover:text-zinc-900")
   return (
-    <header className="border-b border-zinc-200">
+    <header className="shrink-0 border-b border-zinc-200">
       <div className="flex h-14 items-center gap-4 px-6">
         <Brand sub="First-time flow · prototype" />
-        <nav className="ml-4 flex items-center gap-1 text-sm">
-          <a href="#/flow" className="rounded-md px-3 py-1.5 font-medium text-zinc-900">Flow</a>
-          <a href={`#/editor?step=${flow.step}`} className="rounded-md px-3 py-1.5 text-zinc-500 hover:text-zinc-900">Editor</a>
+        <nav className="ml-4 flex items-center gap-1">
+          <a href={`#/flow?step=${step}`} className={tab(page === "flow")}>Flow</a>
         </nav>
         <div className="flex-1" />
-        <a href={LINKS.figma} target="_blank" rel="noreferrer" className="rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:text-zinc-900">Figma</a>
-        <a href={LINKS.storybook} target="_blank" rel="noreferrer" className="rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:text-zinc-900">Storybook</a>
-        <a href={LINKS.repo} target="_blank" rel="noreferrer" className="rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:text-zinc-900">GitHub</a>
-        <a href={`#/editor?step=${flow.step}`} className={btnClass("outline", "sm")}>
-          <SlidersHorizontal /> Edit this step
+        <a href={LINKS.figma} target="_blank" rel="noreferrer" className={tab(false)}>Figma</a>
+        <a href={LINKS.storybook} target="_blank" rel="noreferrer" className={tab(false)}>Storybook</a>
+        <a href={LINKS.repo} target="_blank" rel="noreferrer" className={tab(false)}>GitHub</a>
+        <a href={`#/editor?step=${step}`} className={cn(btnClass(page === "editor" ? "default" : "outline", "sm"))} aria-current={page === "editor" ? "page" : undefined}>
+          <SlidersHorizontal /> Editor
         </a>
       </div>
     </header>
