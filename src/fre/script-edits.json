@@ -105,6 +105,15 @@
     "recording": {
       "mode": "off",
       "volume": 0.14
+    },
+    "sounds": [],
+    "objects": {
+      "share": {
+        "motion": {
+          "enter": "stamp",
+          "idleAmp": 3
+        }
+      }
     }
   },
   "p-message": {

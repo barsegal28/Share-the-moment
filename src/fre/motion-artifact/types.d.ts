@@ -7,7 +7,8 @@ declare module "*/motion-artifact/src/paint.js" {
   export function makePaperGrain(w: number, h: number, seed?: number): HTMLCanvasElement
 }
 declare module "*/motion-artifact/src/background.js" {
-  export function createBackground(w: number, h: number): (ctx: CanvasRenderingContext2D, cut: number) => void
+  export const BACKGROUND_ASSETS: string[]
+  export function createBackground(w: number, h: number, images?: Record<string, HTMLImageElement>): (ctx: CanvasRenderingContext2D, cut: number, opts?: { topbar?: boolean }) => void
 }
 declare module "*/motion-artifact/src/lettering.js" {
   export const LETTERING_FONT: string

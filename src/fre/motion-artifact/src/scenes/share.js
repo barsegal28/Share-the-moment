@@ -1,7 +1,8 @@
-// Share the moment — the kid sends the song to mom. Figma "share keyframes": 6 → 7 → 2 → 3 → 4 → 5.
+// Share the moment — the kid sends the song to mom. Figma "share keyframes": 6 → 7 → 2 → 3 → 4. Ends on "mom got it".
 // The kid taps Share on the share panel; the card turns transparent, leaving the music-note stickers;
 // the notes crumple into a paper ball that unfolds into the light-blue comet; the sky clears, the comet flies
-// (its own tail waves + speed dashes, like the reference) and zooms off; "mom got it"; then the result panel ("Shared").
+// (its own tail waves + speed dashes, like the reference) and zooms off; "mom got it" with a heart, and it holds there.
+// The "You are a star!" result panel is a separate screen in the flow.
 // Paper-cut / stop-motion rules (same as the glow-up): everything holds for 2 frames, cycles 3 cuts, no tweening.
 import { drawLettering } from '../lettering.js';
 
@@ -13,10 +14,9 @@ export const SHARE_PHASES = [
   { name: 'Comet', from: 42, to: 51 },
   { name: 'Clear sky', from: 52, to: 73 },
   { name: 'Fly off', from: 74, to: 89 },
-  { name: 'Mom got it', from: 90, to: 113 },
-  { name: 'Result', from: 114, to: 149 },
+  { name: 'Mom got it', from: 90, to: 119 },
 ];
-const N = 150;
+const N = 120;
 const O = 8; // the comet part (pop → fly off → mom got it) starts 8 frames later than in v1
 
 // ---- assets (2x captures from Figma "share keyframes"; boxes are 1x render bounds on the 1194 x 834 stage) ----
@@ -34,8 +34,8 @@ const CARD = [278, 102.5, 640, 680];                // share panel (frame 6), ca
 const SHARE_BTN = [478, 604.5, 240, 80];             // the Share button on it
 const NOTES = [['note-quarter', [347, 298.8, 99, 111.5]], ['note-beamed', [432.4, 280.8, 108.2, 111.5]]];
 const NC = [443.8, 336.5];                            // centre of the two notes
-const HUD = [['avatar', [32, 26, 52, 52]], ['progress', [864, 16, 246, 78]]];
-const RESULT = [278, 102.5, 640, 680];               // result panel (frame 5): "You are a star!" + Shared
+const HEART = [449, 87, 295, 295];                    // heart sticker above "mom got it" (frame 4)
+const MOM = [585.7, 403.2];                           // "mom got it" lettering centre (frame 4)
 const DIM = 0.7;                                      // stickers behind a panel are at 70%
 const COMET = { size: 380.5, center: [187.1, 204.6] }; // silhouette centre inside the comet image (1x)
 const P2 = [271 + 187.1, 230 + 204.6], P3 = [543 + 187.1, 155 + 204.6], EXIT = [1390, -230];
@@ -89,26 +89,12 @@ export function createShare({ images, paperGrain }) {
     for (let i = 0; i < STICKERS.length; i++) {
       const [name, box, order] = STICKERS[i]; const [bx, by, br] = boil[i][cut];
       let o = { dx: bx, dy: by, rot: br, scale: 1 }, a = name === 'star' ? 1 : (f < 42 ? DIM : 1);
-      if (f >= 116) { // stick back on, reverse order, dimmed behind the result panel
-        const r = f - (116 + (7 - order) * 2); if (r < 0) continue;
-        if (r < 2) o = { dx: bx, dy: by - 28, rot: br - 6, scale: 1.08 };
-        a = name === 'star' ? 1 : DIM;
-      } else {
-        const r = f - (44 + O + order * 2);
-        if (r >= 4) continue; // peeled off
-        if (r >= 0 && r < 2) o = { dx: bx, dy: by - 6, rot: br + 4, scale: 1.06 };
-        if (r >= 2) o = { dx: bx + 6, dy: by + 34, rot: br + 13, scale: 0.97 };
-      }
+      const r = f - (44 + O + order * 2);
+      if (r >= 4) continue; // peeled off
+      if (r >= 0 && r < 2) o = { dx: bx, dy: by - 6, rot: br + 4, scale: 1.06 };
+      if (r >= 2) o = { dx: bx + 6, dy: by + 34, rot: br + 13, scale: 0.97 };
       ctx.save(); ctx.globalAlpha = a; drawImg(ctx, name, box, o); ctx.restore();
     }
-  }
-
-  // ---- top bar (avatar, level progress): there with the panels, hops off for the flight ----
-  function drawHud(ctx, f) {
-    let dy = 0;
-    if (f >= 38 && f < 118) { const r = f - 38; if (r < 2) dy = 6; else return; }
-    if (f >= 118 && f < 120) dy = -40;
-    for (const [name, box] of HUD) drawImg(ctx, name, box, { dy });
   }
 
   // ---- share panel: tap Share, then the card turns transparent in held steps (notes stay) ----
@@ -200,7 +186,6 @@ export function createShare({ images, paperGrain }) {
 
   function draw(ctx, k, f, cut) {
     drawStickers(ctx, f, cut);
-    drawHud(ctx, f);
     if (f < 20) drawCard(ctx, f);
     drawNotes(ctx, f, cut);
     if (f >= 30 && f < 42) drawCrumple(ctx, k, f, cut);
@@ -210,21 +195,16 @@ export function createShare({ images, paperGrain }) {
       if (f >= 42 + O) drawDashes(ctx, k, f, pose);
     }
     burst(ctx, k, f, 34 + O, P2[0], P2[1], 190, 10, 7);
-    const [dx, dy, dr] = [[0, 0, 0], [1.2, -1, -.7], [-1, 1, .6]][cut];
-    if (f >= 82 + O && f < 118) { // "mom got it" slaps in, holds, then peels off
-      const r = f - (82 + O); let s = [1.45, 1.45, .88, .88, 1.06, 1.06][r] || 1, oy = 0, rot = 0;
-      if (f >= 114) { const p = f - 114; s = p < 2 ? 1.06 : .97; oy = p < 2 ? -6 : 40; rot = p < 2 ? 3 : 9; }
-      burst(ctx, k, f, 84 + O, 584.5, 339.2, 360, 16, 21);
-      drawLettering(ctx, k, { lines: ['mom got it'], x: 584.5, y: 339.2 + oy, tilt: -3 + rot, scale: s }); // no boil: holds still once it lands
-    }
-    if (f >= 124) { // result panel (frame 5) slaps in, with "Shared"
-      const s = [1.12, 1.12, .96, .96, 1.02, 1.02][f - 124] || 1, [x, y, w, h] = RESULT;
-      ctx.save(); ctx.translate(x + w / 2 + dx * .5, y + h / 2 + dy * .5); ctx.rotate(dr * .3 * Math.PI / 180); ctx.scale(s, s);
-      ctx.drawImage(images['result-panel'], -w / 2, -h / 2, w, h); ctx.restore();
+    if (f >= 82 + O) { // "mom got it" slaps in, then the heart; both hold still to the end (no boil)
+      const r = f - (82 + O), s1 = [1.45, 1.45, .88, .88, 1.06, 1.06][r] || 1;
+      burst(ctx, k, f, 84 + O, MOM[0], MOM[1] - 60, 380, 16, 21);
+      const hr = r - 4; if (hr >= 0) { const s2 = [1.3, 1.3, .9, .9, 1.04, 1.04][hr] || 1, [x, y, w, h] = HEART;
+        ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.scale(s2, s2); ctx.drawImage(images['heart-big'], -w / 2, -h / 2, w, h); ctx.restore(); }
+      drawLettering(ctx, k, { lines: ['mom got it'], x: MOM[0], y: MOM[1], tilt: -3, scale: s1 });
     }
   }
 
   return { id: 'share', title: 'Share · send to mom', frameCount: N, fps: FPS, phases: SHARE_PHASES, draw };
 }
 
-export const SHARE_ASSETS = ['share-card', 'note-quarter', 'note-beamed', 'avatar', 'progress', 'result-panel', 'drippy-comet', ...STICKERS.map(s => s[0])];
+export const SHARE_ASSETS = ['share-card', 'note-quarter', 'note-beamed', 'heart-big', 'drippy-comet', ...STICKERS.map(s => s[0])];

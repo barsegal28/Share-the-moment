@@ -11,19 +11,19 @@ import { useEffect, useRef } from "react"
 import { now } from "@/lib/clock"
 import { STAGE } from "../motion-artifact/src/glowup.js"
 import { makePaperGrain } from "../motion-artifact/src/paint.js"
-import { createBackground } from "../motion-artifact/src/background.js"
+import { BACKGROUND_ASSETS, createBackground } from "../motion-artifact/src/background.js"
 import { LETTERING_FONT } from "../motion-artifact/src/lettering.js"
 import { createSuccess } from "../motion-artifact/src/scenes/success.js"
 import { createShare, SHARE_ASSETS } from "../motion-artifact/src/scenes/share.js"
 import fontUrl from "../motion-artifact/fonts/bagel-fat-one-latin-400-normal.woff2?inline"
 
-const IMAGE_URLS = import.meta.glob("../motion-artifact/assets/share/*.webp", { query: "?inline", import: "default", eager: true }) as Record<string, string>
-const imageUrl = (name: string) => IMAGE_URLS[`../motion-artifact/assets/share/${name}.webp`]
+const IMAGE_URLS = import.meta.glob("../motion-artifact/assets/*/*.webp", { query: "?inline", import: "default", eager: true }) as Record<string, string>
+const imageUrl = (name: string, dir = "share") => IMAGE_URLS[`../motion-artifact/assets/${dir}/${name}.webp`]
 
 type Scene = ReturnType<typeof createSuccess>
 type Loaded = { scenes: Record<SceneId, Scene>; drawBackground: (ctx: CanvasRenderingContext2D, cut: number) => void }
 
-export const SCENE_FRAMES = { glowup: 108, share: 150 } as const
+export const SCENE_FRAMES = { glowup: 108, share: 120 } as const
 export type SceneId = keyof typeof SCENE_FRAMES
 
 const timeout = <T,>(p: Promise<T>, ms: number) => Promise.race([p, new Promise<T>((_, no) => setTimeout(() => no(new Error("timeout")), ms))])
@@ -40,20 +40,23 @@ function loadBase() {
       console.warn("Motion font did not load; using a fallback", e)
     }
     const { width: W, height: H } = STAGE
-    return { paperGrain: makePaperGrain(W, H), drawBackground: createBackground(W, H) }
+    // The Figma background (sheet, specks, top bar with Noa and 18/25 · Level 2) — drawn by the scenes.
+    const bg = Object.fromEntries((await Promise.all(BACKGROUND_ASSETS.map((n: string) => loadImage(n, "bg")))).filter(([, i]) => i))
+    return { paperGrain: makePaperGrain(W, H), drawBackground: createBackground(W, H, bg as Record<string, HTMLImageElement>) }
   })()
   return base
 }
 
-const loadImage = (name: string) =>
-  new Promise<[string, HTMLImageElement | null]>((ok) => {
-    const src = imageUrl(name)
+function loadImage(name: string, dir = "share") {
+  return new Promise<[string, HTMLImageElement | null]>((ok) => {
+    const src = imageUrl(name, dir)
     if (!src) return ok([name, null])
     const i = new Image()
     i.onload = () => ok([name, i])
     i.onerror = () => (console.warn("Motion image failed", name), ok([name, null]))
     i.src = src
   })
+}
 
 const scenes: Partial<Record<SceneId, Promise<Scene>>> = {}
 /** Load one scene. The glow-up never waits for the share scene's images. */
@@ -61,7 +64,7 @@ function loadScene(id: SceneId): Promise<Scene> {
   scenes[id] ??= (async () => {
     const { paperGrain } = await loadBase()
     if (id === "glowup") return createSuccess({ paperGrain } as never)
-    const images = Object.fromEntries((await Promise.all(SHARE_ASSETS.map(loadImage))).filter(([, i]) => i))
+    const images = Object.fromEntries((await Promise.all(SHARE_ASSETS.map((n) => loadImage(n)))).filter(([, i]) => i))
     return createShare({ images, paperGrain } as never)
   })()
   return scenes[id]!

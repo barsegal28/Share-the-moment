@@ -182,9 +182,9 @@ const BASE_SCRIPT: Script = {
   }),
   "k-send": step({
     id: "k-send", title: "Sending to Mom → Shared", node: "kid-confirm", device: "ipad",
-    note: "Motion scene “share”, played until “mom got it” has landed and held (endFrame). The result screen after it is its own step (k-shared). Sounds follow the hand-off cue table (frame / 17).",
-    advance: "motion", after: 0, next: "k-shared",
-    voice: [V("Mom got it!", "guide", 5294), V("When she sends something back, it pops up right here!", "guide", 400)],
+    note: "Motion scene “share” (120 frames, 17 fps ≈ 7.1 s): it ends and holds on “mom got it” with a heart. The result screen pops up 1.2 s after it ends (k-shared). Sounds follow the hand-off cue table (frame / 17).",
+    advance: "motion", after: 1200, next: "k-shared",
+    voice: [V("Mom got it!", "guide", 5294)],
     sounds: [
       S("tap", 588, 0.7, 1),
       S("sparkle", 706, 0.4, 1.2),
@@ -207,16 +207,17 @@ const BASE_SCRIPT: Script = {
       S("stamp", 5294, 0.9, 1),
       S("sparkle", 5353, 0.7, 1),
       S("chime", 5412, 0.5, 1),
+      S("pop", 5529, 0.5, 1.25),
     ],
     recording: { mode: "off", volume: 0 },
-    params: { fps: 17, waitMotion: 1, endFrame: 112 },
+    params: { fps: 17, waitMotion: 1 },
     objects: {},
   }),
   "k-shared": step({
     id: "k-shared", title: "You are a star! · Shared", node: "kid-confirm", device: "ipad",
     note: "Figma screen 5: a standalone screen straight after the share animation. The card is main · default with Shared ✓; Play next goes on to Mom's side of the prototype, Play again replays from the glow-up.",
     advance: "tap", after: 0, next: "p-notify",
-    voice: [V("Want to learn the next song? Click play next to continue", "guide", 600, { rate: 1.02 })],
+    voice: [V("When she sends something back, it pops up right here!", "guide", 500), V("Want to learn the next song? Click play next to continue", "guide", 500, { rate: 1.02 })],
     sounds: [S("paper", 0, 0.5, 1.1)],
     recording: { mode: "off", volume: 0 },
     objects: {
