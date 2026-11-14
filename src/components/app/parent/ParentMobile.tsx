@@ -277,7 +277,6 @@ export function ParentSendBack({
   onMessage,
   sticker,
   onSticker,
-  onPickSticker,
   onSend,
   onBack,
   sendState = "idle",
@@ -291,8 +290,6 @@ export function ParentSendBack({
   onMessage?: (v: string) => void
   sticker?: PraiseId
   onSticker?: () => void
-  /** Pick a sticker from the library row. */
-  onPickSticker?: (id: PraiseId) => void
   onSend?: () => void
   slot?: Slot
 }) {
