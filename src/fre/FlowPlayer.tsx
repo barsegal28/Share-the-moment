@@ -109,7 +109,7 @@ export function SiteHeader({ page, step }: { page: FlowMode | "editor"; step: st
         <a href={LINKS.figma} target="_blank" rel="noreferrer" className={tab(false)}>Figma</a>
         <a href={LINKS.storybook} target="_blank" rel="noreferrer" className={tab(false)}>Storybook</a>
         <a href={LINKS.repo} target="_blank" rel="noreferrer" className={tab(false)}>GitHub</a>
-        <a href={`#/editor?step=${step}`} className={cn(btnClass(page === "editor" ? "default" : "outline", "sm"))} aria-current={page === "editor" ? "page" : undefined}>
+        <a href={page === "overview" ? "#/editor?page=overview" : `#/editor?step=${step}`} className={cn(btnClass(page === "editor" ? "default" : "outline", "sm"))} aria-current={page === "editor" ? "page" : undefined}>
           <SlidersHorizontal /> Editor
         </a>
       </div>

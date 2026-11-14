@@ -14,6 +14,8 @@ import { FlowProvider, useFlow } from "./runtime"
 import { FlowStage } from "./FlowStage"
 import { firstStepOf } from "./FlowChart"
 import { SiteHeader, SoundUnlock } from "./FlowPlayer"
+import { OverviewDoc } from "./overview/OverviewDoc"
+import { overviewStore } from "./overview/store"
 import { scriptStore, useSaveStatus, useScript } from "./store"
 import { playSound, SOUND_LABELS, SOUND_NAMES, type SoundName } from "./sounds"
 import {
@@ -21,11 +23,44 @@ import {
   type Advance, type MotionCfg, type ObjCfg, type RecordingMode, type SoundCue, type StepCfg, type StepId, type VoiceLine,
 } from "./script"
 import type { Voice } from "@/lib/audio"
-import { Badge, Btn, Hint, PanelSection, ScrubInput, Segmented, Select, Switch, TextArea, TextInput } from "./ui"
+import { Badge, Btn, btnClass, Hint, PanelSection, ScrubInput, Segmented, Select, Switch, TextArea, TextInput } from "./ui"
 
 type Sel = { step: StepId; obj: string } | null
 
-export function Editor({ initial = "k-success" }: { initial?: StepId }) {
+/** What the editor edits: the screens (flow script) or the Overview page's text. */
+function EditorTabs({ page, step }: { page: "screens" | "overview"; step: string }) {
+  const tab = (on: boolean) => cn("rounded-md px-2.5 py-1 text-sm", on ? "bg-white font-medium text-zinc-900 shadow-xs" : "text-zinc-500 hover:text-zinc-900")
+  return (
+    <div className="flex items-center gap-0.5 rounded-lg bg-zinc-100 p-0.5">
+      <a href={`#/editor?step=${step}`} className={tab(page === "screens")}>Screens</a>
+      <a href="#/editor?page=overview" className={tab(page === "overview")}>Overview</a>
+    </div>
+  )
+}
+
+function OverviewEditor() {
+  return (
+    <div className="ui-root flex h-dvh flex-col bg-white text-zinc-950">
+      <SiteHeader page="editor" step="k-success" />
+      <div className="flex h-12 shrink-0 items-center gap-3 border-b border-zinc-200 px-3">
+        <EditorTabs page="overview" step="k-success" />
+        <p className="flex-1 text-center text-xs text-zinc-500">Click any text to edit it. Enter adds a paragraph; hover a block to change its type, move, delete or add below.</p>
+        <Btn variant="ghost" onClick={() => confirm("Reset the Overview to its default text?") && overviewStore.reset()}><RotateCcw /> Reset text</Btn>
+        <a href="#/overview" className={btnClass("outline", "sm")}>View page</a>
+      </div>
+      <main className="min-h-0 flex-1 overflow-y-auto bg-white">
+        <OverviewDoc editable />
+      </main>
+    </div>
+  )
+}
+
+export function Editor({ initial = "k-success", page = "screens" }: { initial?: StepId; page?: "screens" | "overview" }) {
+  if (page === "overview") return <OverviewEditor />
+  return <ScreensEditor initial={initial} />
+}
+
+function ScreensEditor({ initial = "k-success" }: { initial?: StepId }) {
   const script = useScript()
   const [step, setStep] = useState<StepId>(initial)
   const [sel, setSel] = useState<Sel>(null)
@@ -89,6 +124,7 @@ function Toolbar({ hold, setHold, selecting, setSelecting }: { hold: boolean; se
   }, [flow, i])
   return (
     <header className="col-span-3 flex items-center gap-3 border-b border-zinc-200 px-3">
+      <EditorTabs page="screens" step={flow.step} />
       <Segmented
         value={selecting ? "select" : "interact"}
         onChange={(v) => setSelecting(v === "select")}
