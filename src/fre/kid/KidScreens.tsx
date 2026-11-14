@@ -285,44 +285,47 @@ function MessageFromMom({ onDone }: { onDone: () => void }) {
   )
 }
 
-// ─── k-success → k-share: the card stays; its content swaps with a pop ───────────
+// ─── k-success → k-share: the card itself moves; its content dissolves ───────────
 /**
- * A DOM copy of the "You are a star!" card sits over the share scene for ~0.6 s: the card grows to the share
- * card's size while its title and stars pop out, then a hole opens from the centre and reveals the share
- * content underneath (which pops in). The gold burst is redrawn on top so it never blinks.
+ * For ~0.8 s a copy of the "You are a star!" screen lies over the share scene (same background, so only the card
+ * changes): the card grows to the share card's box with a little overshoot while its title and stars dissolve,
+ * then the whole copy dissolves into the share scene underneath.
  */
 const RESULT_BOX = [288, 107, 620, 660] as const
 const SHARE_BOX = [278, 102.5, 640, 680] as const
 function CardSwap() {
   const [gone, setGone] = useState(false)
   useEffect(() => {
-    const t = later(() => setGone(true), 700)
+    const t = later(() => setGone(true), 850)
     return () => cancelLater(t)
   }, [])
   if (gone) return null
-  const px = (v: readonly number[]) => ({ left: v[0], top: v[1], width: v[2], height: v[3] })
+  const box = (v: readonly number[]) => `left:${v[0]}px;top:${v[1]}px;width:${v[2]}px;height:${v[3]}px`
   return (
-    <div className="pointer-events-none absolute inset-0">
+    <div className="pointer-events-none absolute inset-0" style={{ animation: "fre-swap-fade 320ms ease-out 480ms both" }}>
       <style>{`
-        @keyframes fre-swap-card { from { left:${RESULT_BOX[0]}px; top:${RESULT_BOX[1]}px; width:${RESULT_BOX[2]}px; height:${RESULT_BOX[3]}px } to { left:${SHARE_BOX[0]}px; top:${SHARE_BOX[1]}px; width:${SHARE_BOX[2]}px; height:${SHARE_BOX[3]}px } }
-        @keyframes fre-swap-out { 0% { transform: scale(1); opacity: 1 } 35% { transform: scale(1.06); opacity: 1 } 100% { transform: scale(.4); opacity: 0 } }
-        @property --fre-hole { syntax: "<length>"; inherits: false; initial-value: 0px; }
-        @keyframes fre-swap-hole { from { --fre-hole: 0px } to { --fre-hole: 520px } }
+        @keyframes fre-swap-card { 0% { ${box(RESULT_BOX)} } 60% { left:${SHARE_BOX[0] - 8}px; top:${SHARE_BOX[1] - 8}px; width:${SHARE_BOX[2] + 16}px; height:${SHARE_BOX[3] + 16}px } 100% { ${box(SHARE_BOX)} } }
+        @keyframes fre-swap-out { from { opacity: 1 } to { opacity: 0 } }
+        @keyframes fre-swap-fade { from { opacity: 1 } to { opacity: 0 } }
       `}</style>
-      <div
-        className="absolute overflow-hidden rounded-[40px] bg-paper"
-        style={{
-          ...px(SHARE_BOX),
-          animation: `fre-swap-card 260ms ${EASING.spring} both, fre-swap-hole 360ms cubic-bezier(.5,0,.75,0) 300ms both`,
-          WebkitMaskImage: "radial-gradient(circle at 50% 50%, transparent var(--fre-hole), #000 calc(var(--fre-hole) + 1px))",
-          maskImage: "radial-gradient(circle at 50% 50%, transparent var(--fre-hole), #000 calc(var(--fre-hole) + 1px))",
-        }}
-      >
-        <div className="absolute inset-0 grid place-items-center" style={{ animation: "fre-swap-out 280ms ease-in both" }}>
-          <ResultCard timeline="FRE" className="bg-transparent" />
+      <KidBackground learner={false} progress={false}>
+        {ORDER.filter((id) => id !== "burst").map((id) => {
+          const p = LAYOUT_CARD[id]
+          return (
+            <span key={id} className="absolute opacity-70" style={{ left: p.cx - p.size / 2, top: p.cy - p.size / 2 }}>
+              <Sticker name={ART[id]} size={p.size} tilt={p.rot} />
+            </span>
+          )
+        })}
+        <Learner />
+        <RewardProgress count={18} progress={144 / 214} className="absolute top-4 right-4" />
+        <div className="absolute overflow-hidden rounded-[40px] bg-paper" style={{ animation: `fre-swap-card 420ms ease-out both` }}>
+          <div className="absolute inset-0 grid place-items-center" style={{ animation: "fre-swap-out 300ms ease-out both" }}>
+            <ResultCard timeline="FRE" className="bg-transparent" />
+          </div>
         </div>
-      </div>
-      <GoldStar />
+        <GoldStar />
+      </KidBackground>
     </div>
   )
 }
