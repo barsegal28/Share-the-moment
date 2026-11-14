@@ -1,5 +1,5 @@
 // Types for the motion artifact's plain-JS modules (the JS itself is copied unchanged).
-type MotionScene = { id: string; frameCount: number; fps: number; draw(ctx: CanvasRenderingContext2D, k: number, frame: number, cut: number): void }
+type MotionScene = { id: string; frameCount: number; fps: number; stillBackground?: boolean; recording?: boolean; sfx?: { frame(f: number): void; stop(): void }; draw(ctx: CanvasRenderingContext2D, k: number, frame: number, cut: number): void }
 declare module "*/motion-artifact/src/glowup.js" {
   export const STAGE: { width: number; height: number }
 }
@@ -19,4 +19,8 @@ declare module "*/motion-artifact/src/scenes/success.js" {
 declare module "*/motion-artifact/src/scenes/share.js" {
   export const SHARE_ASSETS: string[]
   export function createShare(o: { images: Record<string, HTMLImageElement>; paperGrain: HTMLCanvasElement }): MotionScene
+}
+declare module "*/motion-artifact/src/scenes/share-screen.js" {
+  export const SHARE_SCREEN_ASSETS: string[]
+  export function createShareScreen(o: { images: Record<string, HTMLImageElement>; paperGrain: HTMLCanvasElement; variant: "a" | "b" }): MotionScene
 }

@@ -5,6 +5,7 @@
 // The "You are a star!" result panel is a separate screen in the flow.
 // Paper-cut / stop-motion rules (same as the glow-up): everything holds for 2 frames, cycles 3 cuts, no tweening.
 import { drawLettering } from '../lettering.js';
+import { createShareSfx } from '../sfx.js';
 
 const FPS = 17;
 export const SHARE_PHASES = [
@@ -20,7 +21,7 @@ const N = 120;
 const O = 8; // the comet part (pop → fly off → mom got it) starts 8 frames later than in v1
 
 // ---- assets (2x captures from Figma "share keyframes"; boxes are 1x render bounds on the 1194 x 834 stage) ----
-const STICKERS = [ // name, box [x, y, w, h], peel order
+export const STICKERS = [ // name, box [x, y, w, h], peel order
   ['heart', [563.2, 503.5, 182, 182], 0],
   ['sparkle-top', [508.3, 3.1, 178, 178], 1],
   ['striped-planet', [66, 78, 297, 297], 2],
@@ -204,7 +205,7 @@ export function createShare({ images, paperGrain }) {
     }
   }
 
-  return { id: 'share', title: 'Share · send to mom', frameCount: N, fps: FPS, phases: SHARE_PHASES, draw };
+  return { id: 'share', title: 'Share · send to mom', frameCount: N, fps: FPS, phases: SHARE_PHASES, draw, sfx: createShareSfx() }; // sound: comet engine + "mom got it" only
 }
 
 export const SHARE_ASSETS = ['share-card', 'note-quarter', 'note-beamed', 'heart-big', 'drippy-comet', ...STICKERS.map(s => s[0])];

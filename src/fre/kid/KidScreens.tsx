@@ -185,10 +185,12 @@ function ShareMoment() {
   return (
     <div className="relative h-full w-full bg-ink">
       <MotionScene
-        scene="share"
+        // Share screen: the "share-screen-a" invitation loops (the song travels kid → Mom); on the Share tap the
+        // "share" scene plays once, with its own built-in sound (comet engine, "mom got it" slap, heart pop).
+        scene={sending ? "share" : "share-screen-a"}
+        loop={!sending}
         run={flow.run}
         fps={p.fps ?? 17}
-        still={sending ? undefined : 0}
         onStart={() => sending && flow.signal("motionStart")}
         endFrame={sending ? p.endFrame : undefined}
         onDone={() => sending && flow.signal("motionDone")}

@@ -101,10 +101,6 @@
         "claudeVoice": "airy"
       }
     ],
-    "recording": {
-      "mode": "off",
-      "volume": 0.14
-    },
     "sounds": [],
     "objects": {
       "share": {

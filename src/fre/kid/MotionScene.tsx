@@ -15,6 +15,7 @@ import { BACKGROUND_ASSETS, createBackground } from "../motion-artifact/src/back
 import { LETTERING_FONT } from "../motion-artifact/src/lettering.js"
 import { createSuccess } from "../motion-artifact/src/scenes/success.js"
 import { createShare, SHARE_ASSETS } from "../motion-artifact/src/scenes/share.js"
+import { createShareScreen, SHARE_SCREEN_ASSETS } from "../motion-artifact/src/scenes/share-screen.js"
 
 const IMAGE_URLS = import.meta.glob("../motion-artifact/assets/*/*.webp", { query: "?inline", import: "default", eager: true }) as Record<string, string>
 const imageUrl = (name: string, dir = "share") => IMAGE_URLS[`../motion-artifact/assets/${dir}/${name}.webp`]
@@ -22,7 +23,7 @@ const imageUrl = (name: string, dir = "share") => IMAGE_URLS[`../motion-artifact
 type Scene = ReturnType<typeof createSuccess>
 type Loaded = { scenes: Record<SceneId, Scene>; drawBackground: (ctx: CanvasRenderingContext2D, cut: number) => void }
 
-export const SCENE_FRAMES = { glowup: 108, share: 120 } as const
+export const SCENE_FRAMES = { glowup: 108, share: 120, "share-screen-a": 68, "share-screen-b": 68 } as const
 export type SceneId = keyof typeof SCENE_FRAMES
 
 const timeout = <T,>(p: Promise<T>, ms: number) => Promise.race([p, new Promise<T>((_, no) => setTimeout(() => no(new Error("timeout")), ms))])
@@ -63,15 +64,17 @@ function loadScene(id: SceneId): Promise<Scene> {
   scenes[id] ??= (async () => {
     const { paperGrain } = await loadBase()
     if (id === "glowup") return createSuccess({ paperGrain } as never)
-    const images = Object.fromEntries((await Promise.all(SHARE_ASSETS.map((n) => loadImage(n)))).filter(([, i]) => i))
-    return createShare({ images, paperGrain } as never)
+    const names = [...new Set([...SHARE_ASSETS, ...SHARE_SCREEN_ASSETS])]
+    const images = Object.fromEntries((await Promise.all(names.map((n) => loadImage(n)))).filter(([, i]) => i))
+    if (id === "share") return createShare({ images, paperGrain } as never)
+    return createShareScreen({ images, paperGrain, variant: id === "share-screen-b" ? "b" : "a" } as never)
   })()
   return scenes[id]!
 }
 
 /** Warm up both scenes (the glow-up first). */
 export function loadMotion() {
-  return loadScene("glowup").then(() => loadScene("share"))
+  return loadScene("glowup").then(() => Promise.all([loadScene("share-screen-a"), loadScene("share")]))
 }
 
 export function MotionScene({
@@ -82,7 +85,13 @@ export function MotionScene({
   onStart,
   onDone,
   still,
+  loop = false,
+  sound = true,
 }: {
+  /** Loop the scene (the share screen invitation). */
+  loop?: boolean
+  /** Play the scene's built-in sound (share: comet engine + "mom got it" slap + heart pop). */
+  sound?: boolean
   /** Show this frame and don't play (e.g. the share panel before the kid taps Share). */
   still?: number
   scene: SceneId
@@ -109,6 +118,7 @@ export function MotionScene({
     canvas.height = H * k
     let alive = true
     let raf = 0
+    let stopSfx = () => {}
     const last = Math.min(SCENE_FRAMES[scene] - 1, endFrame ?? SCENE_FRAMES[scene] - 1)
     Promise.all([loadBase(), loadScene(scene)])
       .then(([{ drawBackground }, sc]) => {
@@ -118,7 +128,7 @@ export function MotionScene({
           const cut = Math.floor(f / 2) % 3
           ctx.setTransform(k, 0, 0, k, 0, 0)
           ctx.clearRect(0, 0, W, H)
-          drawBackground(ctx, cut)
+          drawBackground(ctx, sc.stillBackground ? 0 : cut)
           sc.draw(ctx, k, f, cut)
         }
         if (still !== undefined) return draw(Math.min(SCENE_FRAMES[scene] - 1, still))
@@ -128,16 +138,25 @@ export function MotionScene({
           window.setTimeout(() => alive && cb.current.onDone?.(), 1500)
           return
         }
+        const sfx = sound ? sc.sfx : undefined
+        stopSfx = () => sfx?.stop()
         const t0 = now()
         let shown = 0
         const tick = () => {
           if (!alive) return
-          const f = Math.min(last, Math.floor(((now() - t0) / 1000) * fps))
+          const elapsed = Math.floor(((now() - t0) / 1000) * fps)
+          const f = loop ? elapsed % SCENE_FRAMES[scene] : Math.min(last, elapsed)
           if (f !== shown) {
+            // The scene's own sound, frame by frame (as the artifact's embed.js does).
+            if (sfx) for (let g = shown + 1; g <= f; g++) sfx.frame(g)
+            if (loop && f < shown) sfx?.stop()
             shown = f
             draw(f)
           }
-          if (f >= last) return cb.current.onDone?.()
+          if (!loop && f >= last) {
+            sfx?.stop()
+            return cb.current.onDone?.()
+          }
           raf = requestAnimationFrame(tick)
         }
         raf = requestAnimationFrame(tick)
@@ -149,15 +168,16 @@ export function MotionScene({
     return () => {
       alive = false
       cancelAnimationFrame(raf)
+      stopSfx()
     }
-  }, [scene, run, fps, endFrame, still])
+  }, [scene, run, fps, endFrame, still, loop, sound])
 
   return (
     <canvas
       ref={ref}
       style={{ width: STAGE.width, height: STAGE.height }}
       role="img"
-      aria-label={scene === "glowup" ? "A planet sticker glows and bursts into paper light under the headline You did it!" : "The song crumples into a comet that flies off to Mom: Mom got it!"}
+      aria-label={scene === "glowup" ? "A planet sticker glows and bursts into paper light under the headline You did it!" : scene === "share" ? "The song crumples into a comet that flies off to Mom: Mom got it!" : "Your song travels from your planet to Mom's planet and becomes a heart"}
     />
   )
 }
