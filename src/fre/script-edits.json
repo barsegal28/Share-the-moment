@@ -1,234 +1,65 @@
 {
-  "k-glow": {
-    "voice": [
-      {
-        "text": "You did it!",
-        "voice": "guide",
-        "delay": 0,
-        "rate": 1,
-        "pitch": 1.35,
-        "claudeVoice": "airy"
-      },
-      {
-        "text": "You played Let It Go with almost no mistakes!",
-        "voice": "guide",
-        "delay": 150,
-        "rate": 1,
-        "pitch": 1.35,
-        "claudeVoice": "airy"
-      }
-    ]
-  },
   "k-success": {
-    "sounds": [],
-    "voice": [
-      {
-        "text": "You are a star!",
-        "voice": "guide",
-        "delay": 0,
-        "rate": 1,
-        "pitch": 1.35,
-        "claudeVoice": "airy"
-      },
-      {
-        "text": "Every note right!",
-        "voice": "guide",
-        "delay": 0,
-        "rate": 1,
-        "pitch": 1.35,
-        "claudeVoice": "airy"
-      },
-      {
-        "text": "Right on the beat!",
-        "voice": "guide",
-        "delay": 150,
-        "rate": 1,
-        "pitch": 1.35,
-        "claudeVoice": "airy"
-      },
-      {
-        "text": "Both hands together!",
-        "voice": "guide",
-        "delay": 150,
-        "rate": 1,
-        "pitch": 1.35,
-        "claudeVoice": "airy"
-      }
-    ],
-    "objects": {
-      "card": {
-        "motion": {
-          "enter": "none"
-        },
-        "enterSound": "none"
-      },
-      "title": {
-        "motion": {
-          "enter": "stamp",
-          "ease": "bounce",
-          "idle": "none"
-        },
-        "enterSound": "none"
-      },
-      "star1": {
-        "motion": {
-          "idle": "none"
-        },
-        "enterSound": "pop"
-      },
-      "star2": {
-        "motion": {
-          "idle": "none"
-        },
-        "enterSound": "pop"
-      },
-      "star3": {
-        "motion": {
-          "idle": "none"
-        },
-        "enterSound": "pop"
-      }
-    }
-  },
-  "k-share": {
-    "voice": [
-      {
-        "text": "Want Mom to hear you play?\nTap Share, and it goes straight to her!",
-        "voice": "guide",
-        "delay": 500,
-        "rate": 1,
-        "pitch": 1.35,
-        "claudeVoice": "airy"
-      }
-    ],
-    "sounds": [],
-    "objects": {
-      "share": {
-        "motion": {
-          "enter": "stamp",
-          "idleAmp": 3
-        }
-      }
-    }
-  },
-  "p-message": {
-    "sounds": [
-      {
-        "sound": "tap",
-        "at": 100,
-        "volume": 0.5,
-        "pitch": 1
-      }
-    ],
-    "objects": {
-      "paper": {
-        "motion": {
-          "enter": "none"
-        }
-      },
-      "comet": {
-        "motion": {
-          "idle": "wiggle"
-        },
-        "enterSound": "none"
-      },
-      "sparkle": {
-        "enterSound": "none"
-      },
-      "burst": {
-        "motion": {
-          "idle": "wiggle",
-          "idleAmp": 4
-        },
-        "enterSound": "none"
-      },
-      "headline": {
-        "motion": {
-          "enter": "none"
-        }
-      },
-      "song": {
-        "motion": {
-          "enter": "pop"
-        },
-        "tapSound": "none"
-      },
-      "sendBack": {
-        "motion": {
-          "enter": "none"
-        }
-      }
-    },
     "recording": {
       "mode": "off",
       "volume": 0.15
     }
   },
-  "p-reply": {
-    "sounds": [],
+  "p-message": {
     "objects": {
-      "header": {
+      "player": {
         "motion": {
-          "enter": "none"
-        }
+          "enter": "pop"
+        },
+        "tapSound": "none"
       },
-      "card": {
-        "motion": {
-          "enter": "none"
-        }
-      },
-      "tag": {
-        "motion": {
-          "enter": "none"
-        }
-      },
-      "sticker": {
-        "motion": {
-          "enter": "none"
-        }
-      },
-      "toolbar": {
-        "motion": {
-          "enter": "none"
-        }
-      },
-      "send": {
+      "surprise": {
         "motion": {
           "enter": "none"
         }
       }
     }
   },
-  "p-sent": {
-    "sounds": []
-  },
-  "k-shared": {
-    "objects": {
-      "card": {
-        "motion": {
-          "enter": "none"
-        }
+  "k-surprise": {
+    "sounds": [
+      {
+        "sound": "star",
+        "at": 0,
+        "volume": 0.5,
+        "pitch": 1
       },
-      "title": {
+      {
+        "sound": "sparkle",
+        "at": 900,
+        "volume": 0.45,
+        "pitch": 1
+      }
+    ],
+    "voice": [
+      {
+        "text": "Look what Mom sent you!",
+        "voice": "guide",
+        "delay": 900,
+        "rate": 1,
+        "pitch": 1.35
+      },
+      {
+        "text": "want to add it to your sticker notebook?\nyou can also add it later.",
+        "voice": "guide",
+        "delay": 200,
+        "rate": 1.02,
+        "pitch": 1.35
+      }
+    ],
+    "objects": {
+      "headline": {
         "motion": {
           "idle": "none"
         }
       },
-      "next": {
+      "sticker": {
         "motion": {
-          "enter": "none",
-          "idle": "wiggle",
-          "idleAmp": 3
-        }
-      },
-      "shared": {
-        "motion": {
-          "enter": "none"
-        }
-      },
-      "again": {
-        "motion": {
-          "enter": "none"
+          "idle": "wiggle"
         }
       }
     }
