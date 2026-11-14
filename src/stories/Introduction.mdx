@@ -7,17 +7,18 @@ import { Meta } from "@storybook/addon-docs/blocks"
 When a kid earns 3 stars on a song, they can send the recording to family, and a parent can send a surprise back.
 This Storybook holds every component of the prototype and each of its states.
 
-**Base:** [shadcn/ui](https://ui.shadcn.com) components, re-themed with the **Sticker** language and extended with kid sizes.
-**Language:** Sticker — die-cut vinyl stickers on an ink sheet. Every object gets a 9px cream border, a 3.5px kiss-cut edge in a contrasting colour, and a soft lift (7px down, 5px blur, 38% black; 20% on light sheets). Riso grain sits on the sheet only.
+**Source of truth:** the Figma file *Share the moment*, page **app asets**. Every component here is built from its
+Figma node with the file's own values: sizes, padding, gaps, radii, text styles, tokens and effects.
+**Language:** Sticker — die-cut vinyl stickers on an ink sheet. Every object gets a 9px cream border and a 12.5px
+kiss-cut edge in a contrasting colour (3.5px visible), and a lift (7px down, 10px blur, 30% black). Instances scale
+the edge and lift with the sticker, as Figma does. Riso grain sits on the sheet only.
 
 ## Sections
 
-- **Foundations** — palette, type and the die-cut.
-- **UI (shadcn)** — the base components with Sticker tokens. `Button` adds a `sticker` variant and `kid`, `kid-lg`, `kid-icon` sizes (80px+ targets; the rule is at least 64pt).
+- **Foundations** — palette, type and effects (the Figma variables, text styles and effect styles).
 - **Sticker** — `StickerArt`, the art library and the sheet.
-- **Kid** — the iPad components: stars, share prompt, send overlay, parent gate, reply notification and reveal.
-- **Parent** — the phone web components: message, listen widget, reply composer.
-- **Screens** — full screens and the interactive flows (sound on).
+- **Components** — the app components: Button, Play, Progress.bar, Reward progress, Player, Avatars, Stars,
+  background, main (result card), share illustration and Parent.Mobile.
 
 ## Design rules for ages 6–9
 
