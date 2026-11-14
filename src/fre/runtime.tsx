@@ -54,9 +54,12 @@ export function FlowProvider({
   selected = null,
   onSelect,
   onStep,
+  steps,
   children,
 }: {
   script: Script
+  /** Play only these steps (the kid flow / the parent flow); a step outside them is skipped to the next one inside. */
+  steps?: readonly StepId[]
   initial?: StepId
   /** Nothing plays until the viewer taps Start (browsers need a tap before sound). */
   started?: boolean
@@ -105,13 +108,15 @@ export function FlowProvider({
   useEffect(() => setStep(initial), [initial])
   useEffect(() => onStep?.(step), [step, onStep])
 
-  const go = useCallback((id: StepId | null) => {
+  const go = useCallback((target: StepId | null) => {
+    let id = target
+    if (id && steps && !steps.includes(id)) id = STEP_IDS.slice(STEP_IDS.indexOf(id)).find((x) => steps.includes(x)) ?? null
     if (!id) return
     setPaused(false)
     setAnimate(!seenRef.current.has(id))
     setStep(id)
     setRun((r) => r + 1)
-  }, [])
+  }, [steps])
   const replay = useCallback(() => {
     setPaused(false)
     setAnimate(true)
@@ -122,9 +127,9 @@ export function FlowProvider({
     seenRef.current.clear()
     stopRecording()
     setAnimate(true)
-    setStep("k-glow")
+    setStep(steps?.[0] ?? "k-glow")
     setRun((r) => r + 1)
-  }, [])
+  }, [steps])
 
   // ─── play the step ──────────────────────────────────────────────────────
   // Keep the latest script in a ref so editing a field doesn't restart playback; the editor replays explicitly.

@@ -1,4 +1,7 @@
-/** #/flow — the whole first-time flow, kid → parent → kid, following the flow chart. */
+/**
+ * The flow pages: #/overview — the whole first-time flow, kid → parent → kid, following the flow chart;
+ * #/kid — only the kid's screens (iPad); #/parent — only the parent's screens (phone).
+ */
 import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
 import { ChevronLeft, ChevronRight, Hand, Pause, Play, RotateCcw, SlidersHorizontal, Volume2, VolumeX } from "lucide-react"
@@ -11,17 +14,26 @@ import { LINKS } from "@/config"
 import { STEP_IDS, type StepId } from "./script"
 import { Badge, Btn, btnClass } from "./ui"
 
-export function FlowPlayer({ initial = "k-glow" }: { initial?: StepId }) {
+export type FlowMode = "overview" | "kid" | "parent"
+export const MODE_STEPS: Record<FlowMode, readonly StepId[]> = {
+  overview: STEP_IDS,
+  kid: STEP_IDS.filter((s) => s.startsWith("k-")),
+  parent: STEP_IDS.filter((s) => s.startsWith("p-")),
+}
+
+export function FlowPlayer({ initial, mode = "overview" }: { initial?: StepId; mode?: FlowMode }) {
   const script = useScript()
+  const steps = MODE_STEPS[mode]
+  const first = initial && steps.includes(initial) ? initial : steps[0]
   return (
-    <FlowProvider script={script} initial={initial}>
+    <FlowProvider script={script} initial={first} steps={mode === "overview" ? undefined : steps}>
       <div className="ui-root flex h-dvh flex-col bg-white">
         <SoundUnlock />
-        <Header />
+        <Header mode={mode} />
         <main className="relative min-h-0 flex-1 bg-zinc-50 px-6 py-5">
           <FlowStage />
         </main>
-        <Footer />
+        <Footer steps={steps} />
       </div>
     </FlowProvider>
   )
@@ -29,7 +41,7 @@ export function FlowPlayer({ initial = "k-glow" }: { initial?: StepId }) {
 
 export function Brand({ sub }: { sub: string }) {
   return (
-    <a href="#/flow" className="flex shrink-0 items-center gap-2.5">
+    <a href="#/overview" className="flex shrink-0 items-center gap-2.5">
       <span className="grid size-7 place-items-center rounded-md bg-zinc-900 text-white">
         <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden>
           <path d="M12 2.5l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6L3.4 8.8l6-.7z" />
@@ -73,23 +85,25 @@ export function SoundUnlock() {
   return null
 }
 
-function Header() {
+function Header({ mode }: { mode: FlowMode }) {
   const flow = useFlow()
-  return <SiteHeader page="flow" step={flow.step} />
+  return <SiteHeader page={mode} step={flow.step} />
 }
 
 /**
  * The site header, the same on both pages: brand + Flow on the left; Figma, Storybook, GitHub and the Editor tab on
  * the right. Opening the editor keeps this header as it is and shows the editor under it.
  */
-export function SiteHeader({ page, step }: { page: "flow" | "editor"; step: string }) {
+export function SiteHeader({ page, step }: { page: FlowMode | "editor"; step: string }) {
   const tab = (active: boolean) => cn("rounded-md px-3 py-1.5 text-sm", active ? "font-medium text-zinc-900" : "text-zinc-500 hover:text-zinc-900")
   return (
     <header className="shrink-0 border-b border-zinc-200">
       <div className="flex h-14 items-center gap-4 px-6">
         <Brand sub="First-time flow · prototype" />
         <nav className="ml-4 flex items-center gap-1">
-          <a href={`#/flow?step=${step}`} className={tab(page === "flow")}>Flow</a>
+          <a href="#/overview" className={tab(page === "overview")}>Overview</a>
+          <a href="#/kid" className={tab(page === "kid")}>Kid flow</a>
+          <a href="#/parent" className={tab(page === "parent")}>Parent flow</a>
         </nav>
         <div className="flex-1" />
         <a href={LINKS.figma} target="_blank" rel="noreferrer" className={tab(false)}>Figma</a>
@@ -103,11 +117,11 @@ export function SiteHeader({ page, step }: { page: "flow" | "editor"; step: stri
   )
 }
 
-function Footer() {
+function Footer({ steps }: { steps: readonly StepId[] }) {
   const flow = useFlow()
   const [muted, setM] = useState(false)
   const paused = usePaused()
-  const i = STEP_IDS.indexOf(flow.step)
+  const i = steps.indexOf(flow.step)
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement).closest("input, textarea, select")) return
@@ -119,15 +133,15 @@ function Footer() {
   const waiting = flow.cfg.advance === "tap"
   return (
     <footer className="flex h-16 items-center gap-2 border-t border-zinc-200 px-6">
-      <Btn size="icon" onClick={() => flow.go(STEP_IDS[i - 1])} disabled={i === 0} aria-label="Previous step"><ChevronLeft /></Btn>
-      <Btn size="icon" onClick={() => flow.go(STEP_IDS[i + 1])} disabled={i === STEP_IDS.length - 1} aria-label="Next step"><ChevronRight /></Btn>
+      <Btn size="icon" onClick={() => flow.go(steps[i - 1])} disabled={i <= 0} aria-label="Previous step"><ChevronLeft /></Btn>
+      <Btn size="icon" onClick={() => flow.go(steps[i + 1])} disabled={i === steps.length - 1} aria-label="Next step"><ChevronRight /></Btn>
       <Btn variant={paused ? "default" : "outline"} className="w-[92px]" onClick={() => setPaused(!paused)} title="Pause / resume (P)">
         {paused ? <Play className="fill-current" /> : <Pause className="fill-current" />} {paused ? "Resume" : "Pause"}
       </Btn>
       <Btn onClick={() => flow.restart()}><RotateCcw /> Restart</Btn>
       <div className="ml-3 min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="font-[family-name:var(--font-ui-mono)] text-xs text-zinc-400">{String(i + 1).padStart(2, "0")}/{STEP_IDS.length}</span>
+          <span className="font-[family-name:var(--font-ui-mono)] text-xs text-zinc-400">{String(i + 1).padStart(2, "0")}/{steps.length}</span>
           <p className="truncate text-sm font-medium">{flow.cfg.title}</p>
           <Badge variant="outline">{flow.cfg.device === "ipad" ? "Kid · iPad" : "Parent · phone"}</Badge>
           {paused && <Badge variant="outline">Paused</Badge>}
