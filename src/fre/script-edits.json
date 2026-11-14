@@ -86,7 +86,8 @@
         "motion": {
           "idle": "none"
         },
-        "enterSound": "pop"
+        "enterSound": "pop",
+        "tapSound": "none"
       }
     },
     "recording": {
@@ -270,6 +271,14 @@
         "delay": 900,
         "rate": 1,
         "pitch": 1.35
+      },
+      {
+        "text": "proud of you",
+        "voice": "mom",
+        "delay": 200,
+        "rate": 1,
+        "pitch": 1.35,
+        "claudeVoice": "rounded"
       },
       {
         "text": "want to add it to your sticker notebook?\nyou can also add it later.",

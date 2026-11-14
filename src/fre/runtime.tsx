@@ -145,7 +145,8 @@ export function FlowProvider({
     if (!s.params.keepVoice) stopSpeech()
 
     // Recording
-    const rec = s.recording
+    // The kid's piano plays underneath only on the share screen; every other screen is quiet.
+    const rec = s.id === "k-share" ? s.recording : { mode: "off" as const, volume: 0 }
     if (rec.mode === "off") stopRecording()
     else if (rec.mode === "background" || rec.mode === "play") playRecording({ volume: rec.volume, loop: true })
     else if (rec.mode === "keep") setRecordingVolume(rec.volume)
