@@ -237,7 +237,7 @@ function ReplyComposer() {
         onMessage={(text) => replyChoice.set({ text })}
         sticker={choice.sticker}
         onSticker={() => replyChoice.set({ sticker: choice.index.sticker + 1 })}
-        slot={objSlot("p-reply", { send: { onTap: () => flow.go("p-sent"), hint: true, className: "rounded-[24px]" }, back: { onTap: () => flow.go("p-message"), className: "rounded-[12px]" } })}
+        slot={objSlot("p-reply", { send: { onTap: () => flow.go("p-sent"), hint: true, className: "rounded-[24px]" }, back: { onTap: () => flow.go("p-message"), className: "rounded-[12px]" }, header: { className: "w-full" } })}
       />
     </div>
   )
