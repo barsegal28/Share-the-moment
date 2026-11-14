@@ -87,7 +87,7 @@ export interface StepCfg {
   params: Record<string, number>
 }
 
-export const STEP_IDS = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "k-shared", "p-notify", "p-sms", "p-message", "p-listen", "p-reply", "p-sent"] as const
+export const STEP_IDS = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "k-shared", "p-notify", "p-sms", "p-message", "p-listen", "p-reply", "p-sent", "k-notify", "k-surprise"] as const
 export type StepId = (typeof STEP_IDS)[number]
 
 /** The flow chart from the plan doc. */
@@ -98,6 +98,7 @@ export const NODES = [
   { id: "parent-listen", lane: "parent", title: "Listen widget", sub: "kid's recording" },
   { id: "parent-reply", lane: "parent", title: "Send a reply", sub: "pick a reply type" },
   { id: "parent-confirm", lane: "parent", title: "Confirmation", sub: "reply sent" },
+  { id: "kid-reply", lane: "kid", title: "Mom's surprise", sub: "notification + message" },
 ] as const
 export type NodeId = (typeof NODES)[number]["id"]
 
@@ -272,17 +273,46 @@ const BASE_SCRIPT: Script = {
       tag: O("Proud of you! tag", { enter: "pop", delay: 420, duration: 480, rotateFrom: -8 }, { enterSound: "bubble", enterVolume: 0.4 }),
       sticker: O("Sticker", { enter: "stamp", delay: 600, duration: 440, scaleFrom: 1.8, rotateFrom: 20, idle: "breathe", idleAmp: 3, idleSpeed: 2.6 }, { enterSound: "stamp", enterVolume: 0.6, tapSound: "pop" }),
       sparkle: O("Sparkle", { enter: "pop", delay: 760, duration: 420, rotateFrom: 90, idle: "wiggle", idleAmp: 10, idleSpeed: 2 }),
+      library: O("Sticker library", { enter: "slideUp", delay: 700, duration: 420, distance: 16, ease: "spring" }, { tapSound: "pop" }),
       toolbar: O("Toolbar", { enter: "slideUp", delay: 800, duration: 420, distance: 20 }, { tapSound: "click" }),
       send: O("Send to Noa button", { enter: "slideUp", delay: 900, duration: 420, distance: 30, ease: "spring" }, { tapSound: "tap" }),
     },
   }),
   "p-sent": step({
     id: "p-sent", title: "Reply sent", node: "parent-confirm", device: "phone",
-    note: "Figma 187:9339: the send confirmation. Send to Noa spins, then the check pops in and it reads Sent. The end of the flow (the kid's side of the reply is still being designed).",
-    advance: "tap", next: null,
+    note: "Figma 187:9339: the send confirmation. Send to Noa spins, then the check pops in and it reads Sent. Then the flow crosses back to Noa's iPad, where Mom's reply arrives.",
+    advance: "auto", after: 2600, next: "k-notify",
     sounds: [S("send", 0, 0.5), S("chime", 1100, 0.6), S("sparkle", 1150, 0.5)],
     recording: { mode: "off", volume: 0 },
     params: { spinMs: 1100 },
+  }),
+  "k-notify": step({
+    id: "k-notify", title: "A surprise from Mom", node: "kid-reply", device: "ipad",
+    note: "Figma “notification” (212:14829): back in Noa's app, the result screen dims and blurs, and Mom's reply drops in from the top. Tapping it opens the message.",
+    advance: "tap", next: "k-surprise",
+    voice: [V("Ooh! A surprise from Mom! Tap to open it.", "guide", 1300)],
+    sounds: [S("notify", 520, 0.7)],
+    recording: { mode: "off", volume: 0 },
+    objects: {
+      overlay: O("Dim + blur", { enter: "fade", delay: 250, duration: 420, ease: "out" }),
+      notif: O("Reply notification", { enter: "slideDown", delay: 500, duration: 560, distance: 170, ease: "spring", idle: "wiggle", idleAmp: 2, idleSpeed: 2.4 }, { tapSound: "tap" }),
+    },
+  }),
+  "k-surprise": step({
+    id: "k-surprise", title: "Message from Mom", node: "kid-reply", device: "ipad",
+    note: "Figma “message from mom” (212:13507): Mom's words and the sticker she picked, on a paper card. Continue (or Close) goes back to Noa's lesson. The end of the flow.",
+    advance: "tap", next: null,
+    voice: [V("Look what Mom sent you!", "guide", 900)],
+    sounds: [S("paper", 0, 0.5), S("stamp", 820, 0.55), S("sparkle", 900, 0.45)],
+    recording: { mode: "off", volume: 0 },
+    objects: {
+      label: O("A surprise from mom!", { enter: "slideDown", delay: 150, duration: 460, distance: 30, ease: "spring" }),
+      card: O("Message card", { enter: "zoom", delay: 0, duration: 520, scaleFrom: 0.85, ease: "spring" }),
+      headline: O("Mom's words", { enter: "pop", delay: 420, duration: 480, rotateFrom: -6, idle: "boil", idleAmp: 1, idleSpeed: 0.35 }),
+      sticker: O("Mom's sticker", { enter: "stamp", delay: 750, duration: 440, scaleFrom: 1.8, rotateFrom: 20, idle: "breathe", idleAmp: 3, idleSpeed: 2.6 }, { tapSound: "pop" }),
+      continue: O("Continue", { enter: "slideUp", delay: 1000, duration: 420, distance: 30, ease: "spring" }, { tapSound: "tap" }),
+      close: O("Close", { enter: "fade", delay: 1000, duration: 300, ease: "out" }, { tapSound: "click" }),
+    },
   }),
 }
 

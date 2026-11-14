@@ -13,7 +13,7 @@ import { useFlow } from "../runtime"
 import { ListenSheet, ParentSendBack, ParentShareMoment, type SendState } from "@/components/app"
 import { LittlePianist, type LittlePianistHandle } from "@/components/app/parent/LittlePianist"
 import { cancelLater, later } from "@/lib/clock"
-import { fmt, replyChoice, useReplyChoice } from "../shared"
+import { REPLY_STICKERS, fmt, replyChoice, useReplyChoice } from "../shared"
 import type { StepId } from "../script"
 
 export const PHONE = { w: 393, h: 852 }
@@ -251,6 +251,7 @@ function ReplyComposer() {
         onMessage={(text) => replyChoice.set({ text })}
         sticker={choice.sticker}
         onSticker={() => replyChoice.set({ sticker: choice.index.sticker + 1 })}
+        onPickSticker={(id) => replyChoice.set({ sticker: REPLY_STICKERS.indexOf(id) })}
         slot={objSlot("p-reply", { send: { onTap: () => flow.go("p-sent"), hint: true, className: "rounded-[24px]" }, back: { onTap: () => flow.go("p-message"), className: "rounded-[12px]" }, header: { className: "w-full" } })}
       />
     </div>

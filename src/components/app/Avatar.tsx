@@ -8,8 +8,8 @@
 import { Sticker } from "@/art/stickers"
 import { cn } from "@/lib/utils"
 
-export type AvatarCharacter = "wisp" | "gummy" | "cone" | "leaf"
-const ART = { wisp: "avatarWisp", gummy: "avatarGummy", cone: "avatarCone", leaf: "avatarLeaf" } as const
+export type AvatarCharacter = "wisp" | "gummy" | "cone" | "leaf" | "mom"
+const ART = { mom: "avatarMom", wisp: "avatarWisp", gummy: "avatarGummy", cone: "avatarCone", leaf: "avatarLeaf" } as const
 
 export function Avatar({
   character = "cone",

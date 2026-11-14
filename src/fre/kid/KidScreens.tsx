@@ -6,7 +6,8 @@ import { useEffect, useState, type CSSProperties } from "react"
 import { Sticker, type StickerName } from "@/art/stickers"
 import { Obj, EASING } from "../Obj"
 import { useFlow } from "../runtime"
-import { BUTTON_ICON_SIZE, Button, KidBackground, Learner, ResultCard, RewardProgress, ShareIcon } from "@/components/app"
+import { ArrowExitIcon, BUTTON_ICON_SIZE, Button, KidBackground, Learner, MomMessageCard, ReplyNotification, ResultCard, RewardProgress, ShareIcon, SurpriseLabel } from "@/components/app"
+import { useReplyChoice } from "../shared"
 import { MotionScene, loadMotion } from "./MotionScene"
 
 // Warm the motion scenes (font + stickers) so the glow-up starts at once.
@@ -47,13 +48,16 @@ const LAYOUT_CARD: Record<StickerId, Place> = {
 }
 const ORDER: StickerId[] = ["striped", "ringed", "drippy", "cloud", "burst", "heart", "spark1", "spark2", "spark3"]
 
-const KID_STEPS: StepId[] = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "k-shared"]
+const KID_STEPS: StepId[] = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "k-shared", "k-notify", "k-surprise"]
 export const isKidStep = (s: StepId) => KID_STEPS.includes(s)
 
 export function KidScreens() {
   const flow = useFlow()
   const s = flow.step
   const layoutMs = flow.script["k-success"].params.layoutMs ?? 900
+  // Continue / Close on Mom's message hands Noa back to her lesson: the result screen she came from.
+  const [backToLesson, setBackToLesson] = useState(false)
+  useEffect(() => setBackToLesson(false), [s, flow.run])
 
   if (s === "k-glow") {
     // Motion scene "glowup" from the "Share the Moment · motion" artifact, played as-is.
@@ -65,13 +69,18 @@ export function KidScreens() {
     )
   }
   if (s === "k-share" || s === "k-send") return <ShareMoment />
+  if (s === "k-surprise" && !backToLesson) return <MessageFromMom onDone={() => setBackToLesson(true)} />
 
   const layout = s === "k-scatter" ? LAYOUT_SCATTER : LAYOUT_CARD
-  const cardState: CardState | null = s === "k-success" ? "success" : s === "k-shared" ? "shared" : null
+  // k-notify: Mom's reply lands on top of the "You are a star! · Shared" screen.
+  const cardState: CardState | null = s === "k-success" ? "success" : s === "k-shared" || s === "k-notify" || s === "k-surprise" ? "shared" : null
 
   return (
     <KidBackground learner={false} progress={false} className="font-mono">
 
+      {/* k-notify: the screen behind Mom's reply blurs (Figma overlay: 2.15px blur, black 20%). A plain filter on
+          the scene, not backdrop-filter, which smears the scaled stage edges. */}
+      <div className="absolute inset-0" style={{ filter: s === "k-notify" ? "blur(2.15px)" : undefined }}>
       {/* Stickers that scatter out of the planet */}
       {ORDER.map((id) => {
         const p = layout[id]
@@ -105,6 +114,8 @@ export function KidScreens() {
 
       {(cardState || s === "k-scatter") && <TopBar />}
       {cardState && <Card state={cardState} />}
+      </div>
+      {s === "k-notify" && <ReplyArrives />}
     </KidBackground>
   )
 }
@@ -211,5 +222,51 @@ function ShareMoment() {
         </>
       )}
     </div>
+  )
+}
+
+// ─── Mom's reply arrives · Figma "notification" (212:14829) ─────────────────
+/** The result screen dims (black 20%) and blurs (2.15px); the banner drops in, centred 6px from the top. */
+function ReplyArrives() {
+  const flow = useFlow()
+  return (
+    <>
+      <Obj step="k-notify" id="overlay" className="pointer-events-none absolute inset-0 z-10">
+        <div className="h-full w-full bg-black/20" />
+      </Obj>
+      <Obj step="k-notify" id="notif" hint onTap={() => flow.next()} className="absolute top-1.5 left-1/2 z-20 -ml-[231px] rounded-[20px]" style={{ width: 462 }}>
+        <ReplyNotification />
+      </Obj>
+    </>
+  )
+}
+
+// ─── Message from Mom · Figma "message from mom" (212:13507) ────────────────
+/** Top bar (Noa + Exit, Reward progress), the "A surprise from mom!" line and Mom's card (620 × 538, top 172). */
+function MessageFromMom({ onDone }: { onDone: () => void }) {
+  const choice = useReplyChoice()
+  return (
+    <KidBackground learner={false} progress={false} className="font-mono">
+      <Learner />
+      <span className="text-functional-subtitle absolute top-[21px] left-[148px] flex h-16 items-center gap-2 rounded-[24px] px-6 text-white">
+        <ArrowExitIcon size={28} />
+        Exit
+      </span>
+      <RewardProgress count={18} progress={144 / 214} className="absolute top-4 right-4" />
+      <Obj step="k-surprise" id="label" className="absolute top-[91px] left-1/2 -translate-x-1/2">
+        <SurpriseLabel />
+      </Obj>
+      <Obj step="k-surprise" id="card" className="absolute top-[172px] left-[287px]" style={{ width: 620 }}>
+        <MomMessageCard
+          message={choice.phrase}
+          sticker={choice.sticker}
+          slot={(part, node) => {
+            if (part === "continue") return <Obj step="k-surprise" id="continue" hint onTap={onDone} className="rounded-[28px]">{node}</Obj>
+            if (part === "close") return <Obj step="k-surprise" id="close" onTap={onDone} className="rounded-full">{node}</Obj>
+            return <Obj step="k-surprise" id={part} onTap={part === "sticker" ? () => {} : undefined}>{node}</Obj>
+          }}
+        />
+      </Obj>
+    </KidBackground>
   )
 }

@@ -259,7 +259,7 @@ export const STICKER_LABELS: Record<FigmaStickerName, string> = {
   burst: "Burst", sparkle: "Sparkle", heart: "Heart", ratingStar1: "Star", ratingStar2: "Star", ratingStar3: "Star",
   trebleClef: "Treble clef", eighthNotes: "Notes", sixteenthNotes: "Notes", eighthNote: "Music note", quarterNote: "Music note",
   playS: "Play", play: "Play",
-  avatarWisp: "Wisp", avatarGummy: "Gummy", avatarCone: "Cone", avatarLeaf: "Leaf", momPlanet: "Mom's planet", kidPlanet: "Your planet",
+  avatarWisp: "Wisp", avatarMom: "Mom", avatarGummy: "Gummy", avatarCone: "Cone", avatarLeaf: "Leaf", momPlanet: "Mom's planet", kidPlanet: "Your planet",
 }
 
 /** Every sticker name, Figma ones first. */

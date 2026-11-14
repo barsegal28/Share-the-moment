@@ -1,9 +1,10 @@
 /** Small pieces shared by the kid and parent screens. */
 import { useSyncExternalStore } from "react"
-import type { StickerName } from "@/art/stickers"
+import { PRAISE_IDS } from "@/art/praise"
 
 // ─── What the parent picked, so the kid's reveal shows the same sticker and words ───
-export const REPLY_STICKERS: StickerName[] = ["stripedPlanet", "heart", "ringedPlanet", "ratingStar2", "burst", "drippyComet"]
+/** Mom picks from the praise-sticker library (src/art/praise.tsx). */
+export const REPLY_STICKERS = PRAISE_IDS
 export const REPLY_PHRASES = ["Proud of you!", "Bravo, Noa!", "Wow! Again!", "You rock!"]
 let choice: { sticker: number; phrase: number; text?: string } = { sticker: 0, phrase: 0 }
 const subs = new Set<() => void>()

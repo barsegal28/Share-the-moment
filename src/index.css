@@ -244,6 +244,10 @@
   0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }
   50% { transform: translateY(-8px) rotate(var(--tilt, 0deg)); }
 }
+@keyframes praise-in {
+  0% { transform: scale(0.6) rotate(-10deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
 @keyframes slide-down {
   0% { transform: translateY(-140%); }
   100% { transform: translateY(0); }

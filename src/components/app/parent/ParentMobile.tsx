@@ -7,7 +7,8 @@
  *                                 the toolbar and "Send to Noa".
  */
 import { useState, type ReactNode } from "react"
-import { Sticker, type StickerName } from "@/art/stickers"
+import { Sticker } from "@/art/stickers"
+import { PRAISE_STICKERS, PraiseSticker, type PraiseId } from "@/art/praise"
 import { cn } from "@/lib/utils"
 import { BackButton, Button, IconButton } from "../Button"
 import { CameraIcon, CheckmarkCircleIcon, CollectionsIcon, DismissSmallIcon, MicIcon, StickerIcon } from "../icons"
@@ -188,14 +189,14 @@ export function SendButton({ state = "idle", onClick, label = "Send to Noa" }: {
 export function StickerCard({
   message,
   onMessage,
-  sticker = "stripedPlanet",
+  sticker = "goodjob",
   onSticker,
   tool = "sticker",
   slot = same,
 }: {
   message: string
   onMessage?: (v: string) => void
-  sticker?: StickerName
+  sticker?: PraiseId
   onSticker?: () => void
   tool?: ComposerTool
   slot?: Slot
@@ -207,7 +208,7 @@ export function StickerCard({
         slot(
           "sticker",
           <button type="button" onClick={onSticker} aria-label="Change sticker" className="grid size-[229.45px] shrink-0 place-items-center">
-            <Sticker name={sticker} size={203.154} tilt={-8} />
+            <PraiseSticker key={sticker} id={sticker} size={196} className="animate-[praise-in_380ms_cubic-bezier(.34,1.56,.64,1)]" />
           </button>,
         )
       ) : (
@@ -221,6 +222,27 @@ export function StickerCard({
       {/* Figma annotation: keep the sparkle, don't turn it into an avatar. */}
       <div className="absolute size-[71px]" style={{ left: 26, top: 230 }}>{slot("sparkle", <Sticker name="sparkle" size={71} />)}</div>
       <span className="absolute right-3.5 bottom-[13.5px] text-[var(--fluent-icon-default)]"><CollectionsIcon size={24} /></span>
+    </div>
+  )
+}
+
+/** Mom's sticker library: the praise stickers in a row; the picked one sits on a gold-light tile. */
+export function StickerLibrary({ value, onPick }: { value: PraiseId; onPick?: (id: PraiseId) => void }) {
+  return (
+    <div role="listbox" aria-label="Stickers" className="flex items-center gap-1.5">
+      {PRAISE_STICKERS.map((s) => (
+        <button
+          key={s.id}
+          type="button"
+          role="option"
+          aria-selected={value === s.id}
+          aria-label={s.label}
+          onClick={() => onPick?.(s.id)}
+          className={cn("grid size-10 place-items-center rounded-[10px] transition-[background-color,transform] active:scale-90", value === s.id ? "bg-gold-light" : "hover:bg-gold-light/40")}
+        >
+          <PraiseSticker id={s.id} size={34} tilt={0} lift={false} />
+        </button>
+      ))}
     </div>
   )
 }
@@ -255,6 +277,7 @@ export function ParentSendBack({
   onMessage,
   sticker,
   onSticker,
+  onPickSticker,
   onSend,
   onBack,
   sendState = "idle",
@@ -266,8 +289,10 @@ export function ParentSendBack({
   onBack?: () => void
   message?: string
   onMessage?: (v: string) => void
-  sticker?: StickerName
+  sticker?: PraiseId
   onSticker?: () => void
+  /** Pick a sticker from the library row. */
+  onPickSticker?: (id: PraiseId) => void
   onSend?: () => void
   slot?: Slot
 }) {
@@ -284,8 +309,11 @@ export function ParentSendBack({
           </div>
         </div>,
       )}
-      <div className="flex flex-col items-center gap-7">
+      <div className="flex flex-col items-center gap-2">
         {slot("card", <StickerCard message={message} onMessage={onMessage} sticker={sticker} onSticker={onSticker} tool={tool} slot={slot} />)}
+        <div className={cn("grid transition-[grid-template-rows,opacity] duration-300", tool === "sticker" ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
+          <div className="overflow-hidden">{slot("library", <StickerLibrary value={sticker ?? "goodjob"} onPick={onPickSticker} />)}</div>
+        </div>
         {slot("toolbar", <ComposerToolbar tool={tool} onTool={setTool} />)}
       </div>
       {slot("send", <SendButton state={sendState} onClick={onSend} />)}
