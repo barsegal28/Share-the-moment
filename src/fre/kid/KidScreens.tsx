@@ -47,7 +47,7 @@ const LAYOUT_CARD: Record<StickerId, Place> = {
 }
 const ORDER: StickerId[] = ["striped", "ringed", "drippy", "cloud", "burst", "heart", "spark1", "spark2", "spark3"]
 
-const KID_STEPS: StepId[] = ["k-glow", "k-scatter", "k-success", "k-share", "k-send"]
+const KID_STEPS: StepId[] = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "k-shared"]
 export const isKidStep = (s: StepId) => KID_STEPS.includes(s)
 
 export function KidScreens() {
@@ -67,7 +67,7 @@ export function KidScreens() {
   if (s === "k-share" || s === "k-send") return <ShareMoment />
 
   const layout = s === "k-scatter" ? LAYOUT_SCATTER : LAYOUT_CARD
-  const cardState: CardState | null = s === "k-success" ? "success" : null
+  const cardState: CardState | null = s === "k-success" ? "success" : s === "k-shared" ? "shared" : null
 
   return (
     <KidBackground learner={false} progress={false} className="font-mono">
@@ -140,32 +140,30 @@ function TopBar() {
 }
 
 // ─── The card: Figma "main" ───────────────────────────────────────────────
-type CardState = "success"
+type CardState = "success" | "shared"
 const CARD_POS = { left: 288, top: 107 }
 
 function Card({ state }: { state: CardState }) {
   const flow = useFlow()
-  // k-success: main · timeline=FRE (title + stars). The Shared state (Figma screen 5) is the end of the share scene.
-  const step: StepId = "k-success"
+  // k-success: main · timeline=FRE (title + stars). k-shared: main · default with Shared ✓ (Figma screen 5).
+  const step: StepId = state === "success" ? "k-success" : "k-shared"
   return (
-    <Obj step="k-success" id="card" className="absolute" style={{ left: CARD_POS.left, top: CARD_POS.top, width: 620, height: 660 }}>
+    <Obj step={step} id="card" className="absolute" style={{ left: CARD_POS.left, top: CARD_POS.top, width: 620, height: 660 }}>
       <ResultCard
         timeline={state === "success" ? "FRE" : "default"}
         shared
-        slot={(part, node) =>
-          part === "title" ? (
-            <Obj step={step} id="title">{node}</Obj>
-          ) : (
-            node
-          )
-        }
+        slot={(part, node) => {
+          if (part === "title") return <Obj step={step} id="title">{node}</Obj>
+          if (part === "next") return <Obj step={step} id="next" className="w-full rounded-[28px]" hint onTap={() => flow.next()}>{node}</Obj>
+          if (part === "secondary") return <Obj step={step} id="shared" className="w-full">{node}</Obj>
+          if (part === "again") return <Obj step={step} id="again" className="w-full" onTap={() => flow.go("k-glow")}>{node}</Obj>
+          return node
+        }}
         renderStar={(star, i) => (
           <Obj key={i} step={step} id={`star${i + 1}`} onTap={() => {}}>
             {star}
           </Obj>
         )}
-        onPlayNext={() => flow.restart()}
-        onPlayAgain={() => flow.go("k-glow")}
       />
     </Obj>
   )
@@ -177,14 +175,12 @@ function Card({ state }: { state: CardState }) {
  * kid taps Share; k-send plays it, and its onDone turns the result panel's "Play next" and "Play again" on.
  * Tap areas are the scene's boxes on the 1194 × 834 stage.
  */
-const SHARE_HIT = { share: [478, 604.5, 240, 80], close: [824, 140, 64, 64], next: [478, 453.5, 240, 80], again: [478, 668, 240, 56] } as const
+const SHARE_HIT = { share: [478, 604.5, 240, 80], close: [824, 140, 64, 64] } as const
 const box = ([left, top, width, height]: readonly number[]): CSSProperties => ({ position: "absolute", left, top, width, height })
 
 function ShareMoment() {
   const flow = useFlow()
   const sending = flow.step === "k-send"
-  const [done, setDone] = useState(false)
-  useEffect(() => setDone(false), [flow.run, flow.step])
   const p = flow.script["k-send"].params
   return (
     <div className="relative h-full w-full bg-ink">
@@ -194,11 +190,8 @@ function ShareMoment() {
         fps={p.fps ?? 17}
         still={sending ? undefined : 0}
         onStart={() => sending && flow.signal("motionStart")}
-        onDone={() => {
-          if (!sending) return
-          setDone(true)
-          flow.signal("motionDone")
-        }}
+        endFrame={sending ? p.endFrame : undefined}
+        onDone={() => sending && flow.signal("motionDone")}
       />
       {!sending && (
         <>
@@ -212,16 +205,6 @@ function ShareMoment() {
           </Obj>
           <Obj step="k-share" id="close" className="rounded-full" style={box(SHARE_HIT.close)} onTap={() => {}}>
             <span className="block h-full w-full" aria-label="Close" />
-          </Obj>
-        </>
-      )}
-      {sending && done && (
-        <>
-          <Obj step="k-send" id="next" className="rounded-[28px]" style={box(SHARE_HIT.next)} hint onTap={() => flow.next()}>
-            <span className="block h-full w-full" aria-label="Play next" />
-          </Obj>
-          <Obj step="k-send" id="again" className="rounded-[20px]" style={box(SHARE_HIT.again)} onTap={() => flow.go("k-glow")}>
-            <span className="block h-full w-full" aria-label="Play again" />
           </Obj>
         </>
       )}

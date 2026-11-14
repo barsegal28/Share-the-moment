@@ -87,7 +87,7 @@ export interface StepCfg {
   params: Record<string, number>
 }
 
-export const STEP_IDS = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "p-notify", "p-sms", "p-message", "p-listen", "p-reply", "p-sent"] as const
+export const STEP_IDS = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "k-shared", "p-notify", "p-sms", "p-message", "p-listen", "p-reply", "p-sent"] as const
 export type StepId = (typeof STEP_IDS)[number]
 
 /** The flow chart from the plan doc. */
@@ -182,9 +182,9 @@ const BASE_SCRIPT: Script = {
   }),
   "k-send": step({
     id: "k-send", title: "Sending to Mom → Shared", node: "kid-confirm", device: "ipad",
-    note: "Motion scene “share” (150 frames, 17 fps ≈ 8.8 s): the card fades, the notes become a paper blob (two holds), the comet pops and flies off, “mom got it” slaps in and holds, then the result panel with “Shared”. When it ends, Play next (→ the parent side of the prototype) and Play again come on; the step waits for the tap. Sounds follow the hand-off cue table (frame / 17).",
-    advance: "tap", after: 0, next: "p-notify",
-    voice: [V("Mom got it!", "guide", 5294), V("When she sends something back, it pops up right here!", "guide", 400), V("Want to learn the next song? Click play next to continue", "guide", 1500, { rate: 1.02 })],
+    note: "Motion scene “share”, played until “mom got it” has landed and held (endFrame). The result screen after it is its own step (k-shared). Sounds follow the hand-off cue table (frame / 17).",
+    advance: "motion", after: 0, next: "k-shared",
+    voice: [V("Mom got it!", "guide", 5294), V("When she sends something back, it pops up right here!", "guide", 400)],
     sounds: [
       S("tap", 588, 0.7, 1),
       S("sparkle", 706, 0.4, 1.2),
@@ -207,19 +207,27 @@ const BASE_SCRIPT: Script = {
       S("stamp", 5294, 0.9, 1),
       S("sparkle", 5353, 0.7, 1),
       S("chime", 5412, 0.5, 1),
-      S("tap", 6824, 0.35, 1.0),
-      S("tap", 7000, 0.35, 1.05),
-      S("tap", 7176, 0.35, 1.1),
-      S("tap", 7353, 0.35, 1.15),
-      S("tap", 7529, 0.35, 1.2),
-      S("tap", 7706, 0.35, 1.25),
-      S("paper", 7294, 0.5, 1.1),
     ],
     recording: { mode: "off", volume: 0 },
-    params: { fps: 17, waitMotion: 1 },
+    params: { fps: 17, waitMotion: 1, endFrame: 112 },
+    objects: {},
+  }),
+  "k-shared": step({
+    id: "k-shared", title: "You are a star! · Shared", node: "kid-confirm", device: "ipad",
+    note: "Figma screen 5: a standalone screen straight after the share animation. The card is main · default with Shared ✓; Play next goes on to Mom's side of the prototype, Play again replays from the glow-up.",
+    advance: "tap", after: 0, next: "p-notify",
+    voice: [V("Want to learn the next song? Click play next to continue", "guide", 600, { rate: 1.02 })],
+    sounds: [S("paper", 0, 0.5, 1.1)],
+    recording: { mode: "off", volume: 0 },
     objects: {
-      next: O("Play next (live when the scene ends)", { enter: "none" }, { tapSound: "tap" }),
-      again: O("Play again (live when the scene ends)", { enter: "none" }, { tapSound: "tap" }),
+      card: O("Card", { enter: "pop", duration: 520, scaleFrom: 0.85, ease: "overshoot" }),
+      title: O("Title · You are a star!", { enter: "none", idle: "boil", idleAmp: 1, idleSpeed: 0.35 }),
+      star1: O("Star 1", { enter: "none" }, { tapSound: "sparkle" }),
+      star2: O("Star 2", { enter: "none" }, { tapSound: "sparkle" }),
+      star3: O("Star 3", { enter: "none" }, { tapSound: "sparkle" }),
+      next: O("Play next", { enter: "slideUp", delay: 250, duration: 420, distance: 30, ease: "spring" }, { tapSound: "tap" }),
+      shared: O("Shared ✓", { enter: "stamp", delay: 380, duration: 420, scaleFrom: 1.6, ease: "overshoot" }, { enterSound: "stamp", enterVolume: 0.4 }),
+      again: O("Play again", { enter: "slideUp", delay: 500, duration: 420, distance: 30, ease: "spring" }, { tapSound: "tap" }),
     },
   }),
   "p-notify": step({
