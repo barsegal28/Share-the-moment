@@ -109,7 +109,7 @@ export function KidScreens() {
               zIndex: id === "burst" && layout === LAYOUT_CARD ? 5 : undefined,
             }}
             onTap={() => {}}
-            still={layout === LAYOUT_CARD}
+            still={s === "k-notify"}
           >
             {/* Behind the card the stickers sit at 70% (Figma "Sticker sheet · dark"); the gold burst is on top, at 100%. */}
             <span className="block transition-opacity duration-500" style={{ opacity: layout === LAYOUT_CARD && id !== "burst" ? 0.7 : 1 }}>
