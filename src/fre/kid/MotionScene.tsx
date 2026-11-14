@@ -1,29 +1,60 @@
 /**
- * Plays a scene from the "Share the Moment · motion" artifact (public/motion/, copied as-is; see its README).
- * The scenes are drawn by the artifact's own embed API. This wrapper only drives which frame shows, from the
- * prototype's pausable clock, so the scene pauses with the Pause button and its sound cues stay in sync.
+ * Plays a scene from the "Share the Moment · motion" artifact. Its scene code lives unchanged in
+ * src/fre/motion-artifact/ (see that README). This file does what the artifact's embed.js does (load the font
+ * and stickers, then draw sheet + scene per frame), with two differences that the prototype needs:
+ * - the font and sticker images are bundled into the app as data URIs, so they load inside the claude.ai
+ *   artifact frame, which won't load files that a script asks for by path;
+ * - the frame shown comes from the prototype's pausable clock, so the scene pauses with the Pause button
+ *   and the step's sound cues stay on their frames.
  */
 import { useEffect, useRef } from "react"
 import { now } from "@/lib/clock"
+import { STAGE } from "../motion-artifact/src/glowup.js"
+import { makePaperGrain } from "../motion-artifact/src/paint.js"
+import { createBackground } from "../motion-artifact/src/background.js"
+import { LETTERING_FONT } from "../motion-artifact/src/lettering.js"
+import { createSuccess } from "../motion-artifact/src/scenes/success.js"
+import { createShare, SHARE_ASSETS } from "../motion-artifact/src/scenes/share.js"
+import fontUrl from "../motion-artifact/fonts/bagel-fat-one-latin-400-normal.woff2?inline"
 
-type Motion = {
-  showFrame: (id: string, frame: number) => void
-  stop: () => void
-  destroy: () => void
-}
-type Embed = { createMotion: (canvas: HTMLCanvasElement, o?: { base?: string; background?: boolean }) => Promise<Motion> }
+const IMAGE_URLS = import.meta.glob("../motion-artifact/assets/share/*.webp", { query: "?inline", import: "default", eager: true }) as Record<string, string>
+const imageUrl = (name: string) => IMAGE_URLS[`../motion-artifact/assets/share/${name}.webp`]
 
-// Resolved against the page (not this module), so it works on a sub-path and inside the claude.ai artifact.
-const BASE = typeof document === "undefined" ? "./motion/" : new URL(`${import.meta.env.BASE_URL}motion/`, document.baseURI).href
-let embed: Promise<Embed> | null = null
-/** Load the motion module (and warm its assets) once. */
-export function loadMotion() {
-  embed ??= import(/* @vite-ignore */ `${BASE}src/embed.js`) as Promise<Embed>
-  return embed
-}
+type Scene = ReturnType<typeof createSuccess>
+type Loaded = { scenes: Record<SceneId, Scene>; drawBackground: (ctx: CanvasRenderingContext2D, cut: number) => void }
 
 export const SCENE_FRAMES = { glowup: 108, share: 128 } as const
 export type SceneId = keyof typeof SCENE_FRAMES
+
+let loading: Promise<Loaded> | null = null
+/** Load the font, stickers and scenes once (the first call warms everything up). */
+export function loadMotion(): Promise<Loaded> {
+  loading ??= (async () => {
+    const { width: W, height: H } = STAGE
+    const font = new FontFace("Bagel Fat One", `url(${fontUrl})`)
+    document.fonts.add(await font.load())
+    await document.fonts.load(`100px ${LETTERING_FONT}`)
+    const images = Object.fromEntries(
+      await Promise.all(
+        SHARE_ASSETS.map(
+          (name) =>
+            new Promise<[string, HTMLImageElement]>((ok, fail) => {
+              const i = new Image()
+              i.onload = () => ok([name, i])
+              i.onerror = fail
+              i.src = imageUrl(name)
+            }),
+        ),
+      ),
+    )
+    const paperGrain = makePaperGrain(W, H)
+    return {
+      scenes: { glowup: createSuccess({ paperGrain }), share: createShare({ images, paperGrain }) },
+      drawBackground: createBackground(W, H),
+    }
+  })()
+  return loading
+}
 
 export function MotionScene({
   scene,
@@ -49,17 +80,28 @@ export function MotionScene({
 
   useEffect(() => {
     const canvas = ref.current
-    if (!canvas) return
+    const ctx = canvas?.getContext("2d")
+    if (!canvas || !ctx) return
+    const { width: W, height: H } = STAGE
+    const k = Math.min(window.devicePixelRatio || 1, 2)
+    canvas.width = W * k
+    canvas.height = H * k
     let alive = true
     let raf = 0
-    let motion: Motion | null = null
     const last = Math.min(SCENE_FRAMES[scene] - 1, endFrame ?? SCENE_FRAMES[scene] - 1)
     loadMotion()
-      .then((m) => m.createMotion(canvas, { base: BASE }))
-      .then((mo) => {
-        if (!alive) return mo.destroy()
-        motion = mo
-        mo.showFrame(scene, 0)
+      .then(({ scenes, drawBackground }) => {
+        if (!alive) return
+        const sc = scenes[scene]
+        const draw = (f: number) => {
+          // Same as the artifact's embed.js draw(): sheet, then the scene, on the 3-cut boil.
+          const cut = Math.floor(f / 2) % 3
+          ctx.setTransform(k, 0, 0, k, 0, 0)
+          ctx.clearRect(0, 0, W, H)
+          drawBackground(ctx, cut)
+          sc.draw(ctx, k, f, cut)
+        }
+        draw(0)
         cb.current.onStart?.()
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
           window.setTimeout(() => alive && cb.current.onDone?.(), 1500)
@@ -72,21 +114,29 @@ export function MotionScene({
           const f = Math.min(last, Math.floor(((now() - t0) / 1000) * fps))
           if (f !== shown) {
             shown = f
-            mo.showFrame(scene, f)
+            draw(f)
           }
           if (f >= last) return cb.current.onDone?.()
           raf = requestAnimationFrame(tick)
         }
         raf = requestAnimationFrame(tick)
       })
-      .catch(() => alive && cb.current.onDone?.())
+      .catch((e) => {
+        console.error("Motion scene failed to load", e)
+        if (alive) cb.current.onDone?.()
+      })
     return () => {
       alive = false
       cancelAnimationFrame(raf)
-      motion?.destroy()
     }
   }, [scene, run, fps, endFrame])
 
-  // The embed sizes the canvas to its parent's on-screen box; the stage is already scaled, so pin it to the stage size.
-  return <canvas ref={ref} className="!h-[834px] !w-[1194px]" role="img" aria-label={scene === "glowup" ? "A planet sticker glows and bursts into paper light under the headline You did it!" : "The song crumples into a comet that flies off to Mom: Mom got it!"} />
+  return (
+    <canvas
+      ref={ref}
+      style={{ width: STAGE.width, height: STAGE.height }}
+      role="img"
+      aria-label={scene === "glowup" ? "A planet sticker glows and bursts into paper light under the headline You did it!" : "The song crumples into a comet that flies off to Mom: Mom got it!"}
+    />
+  )
 }

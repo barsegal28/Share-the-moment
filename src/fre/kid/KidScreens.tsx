@@ -11,7 +11,10 @@ import { DEMO_SONG } from "@/config"
 import { Obj, EASING } from "../Obj"
 import { useFlow, useRecordingProgress } from "../runtime"
 import { InkSheetCanvas } from "./canvases"
-import { MotionScene } from "./MotionScene"
+import { MotionScene, loadMotion } from "./MotionScene"
+
+// Warm the motion scenes (font + stickers) so the glow-up starts at once.
+if (typeof window !== "undefined") void loadMotion().catch(() => {})
 import { ArrowRightIcon, DismissIcon, RibbonIcon, ShareIcon } from "../icons"
 import { DieCutText, KidActionButton, SONG_SECONDS, fmt, useReplyChoice } from "../shared"
 import { playSound } from "../sounds"
