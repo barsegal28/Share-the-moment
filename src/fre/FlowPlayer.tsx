@@ -37,7 +37,7 @@ export function FlowPlayer({ initial, mode = "overview" }: { initial?: StepId; m
       <div className="ui-root flex h-dvh flex-col bg-white">
         <SoundUnlock />
         <Header mode={mode} />
-        <main className="relative min-h-0 flex-1 bg-zinc-50 px-6 py-5">
+        <main className="relative min-h-0 flex-1 bg-white px-6 py-5">
           <FlowStage />
           {!started && <StartOverlay onStart={() => { setStarted(true); setPaused(false) }} />}
         </main>
