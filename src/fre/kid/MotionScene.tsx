@@ -15,7 +15,6 @@ import { BACKGROUND_ASSETS, createBackground } from "../motion-artifact/src/back
 import { LETTERING_FONT } from "../motion-artifact/src/lettering.js"
 import { createSuccess } from "../motion-artifact/src/scenes/success.js"
 import { createShare, SHARE_ASSETS } from "../motion-artifact/src/scenes/share.js"
-import fontUrl from "../motion-artifact/fonts/bagel-fat-one-latin-400-normal.woff2?inline"
 
 const IMAGE_URLS = import.meta.glob("../motion-artifact/assets/*/*.webp", { query: "?inline", import: "default", eager: true }) as Record<string, string>
 const imageUrl = (name: string, dir = "share") => IMAGE_URLS[`../motion-artifact/assets/${dir}/${name}.webp`]
@@ -32,12 +31,12 @@ let base: Promise<{ paperGrain: unknown; drawBackground: Loaded["drawBackground"
 /** Font + sheet: all the glow-up needs. A slow or blocked font never stops the scene (it falls back to a system font). */
 function loadBase() {
   base ??= (async () => {
+    // The app already ships Bagel Fat One (index.css), so the scene doesn't load its own copy; it only waits a
+    // moment for it to be ready, and never holds the animation for it.
     try {
-      const font = new FontFace("Bagel Fat One", `url(${fontUrl})`)
-      document.fonts.add(await timeout(font.load(), 3000))
-      await timeout(document.fonts.load(`100px ${LETTERING_FONT}`), 2000)
-    } catch (e) {
-      console.warn("Motion font did not load; using a fallback", e)
+      await timeout(document.fonts.load(`100px ${LETTERING_FONT}`), 600)
+    } catch {
+      /* draw with whatever is ready */
     }
     const { width: W, height: H } = STAGE
     // The Figma background (sheet, specks, top bar with Noa and 18/25 · Level 2) — drawn by the scenes.
