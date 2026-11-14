@@ -72,6 +72,7 @@ export function KidScreens() {
     return (
       <div className="relative h-full w-full bg-ink" onClick={() => !flow.edit && flow.next()}>
         <MotionScene scene="glowup" run={flow.run} fps={p.fps ?? 17} endFrame={p.endFrame} onStart={() => flow.signal("motionStart")} onDone={() => flow.signal("motionDone")} />
+        <ExitButton className="absolute top-[21px] left-[148px]" />
       </div>
     )
   }
