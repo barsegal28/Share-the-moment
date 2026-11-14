@@ -1,0 +1,195 @@
+{
+  "k-glow": {
+    "voice": [
+      {
+        "text": "You did it!",
+        "voice": "guide",
+        "delay": 0,
+        "rate": 1,
+        "pitch": 1.35,
+        "claudeVoice": "airy"
+      },
+      {
+        "text": "You played Let It Go with almost no mistakes!",
+        "voice": "guide",
+        "delay": 150,
+        "rate": 1,
+        "pitch": 1.35,
+        "claudeVoice": "airy"
+      }
+    ],
+    "after": 1850
+  },
+  "k-success": {
+    "sounds": [],
+    "voice": [
+      {
+        "text": "You are a star!",
+        "voice": "guide",
+        "delay": 0,
+        "rate": 1,
+        "pitch": 1.35,
+        "claudeVoice": "airy"
+      },
+      {
+        "text": "Every note right!",
+        "voice": "guide",
+        "delay": 0,
+        "rate": 1,
+        "pitch": 1.35,
+        "claudeVoice": "airy"
+      },
+      {
+        "text": "Right on the beat!",
+        "voice": "guide",
+        "delay": 150,
+        "rate": 1,
+        "pitch": 1.35,
+        "claudeVoice": "airy"
+      },
+      {
+        "text": "Both hands together!",
+        "voice": "guide",
+        "delay": 150,
+        "rate": 1,
+        "pitch": 1.35,
+        "claudeVoice": "airy"
+      }
+    ],
+    "objects": {
+      "card": {
+        "motion": {
+          "enter": "none"
+        },
+        "enterSound": "none"
+      },
+      "title": {
+        "motion": {
+          "enter": "stamp",
+          "ease": "bounce",
+          "idle": "none"
+        },
+        "enterSound": "none"
+      },
+      "star1": {
+        "motion": {
+          "idle": "none"
+        },
+        "enterSound": "pop"
+      },
+      "star2": {
+        "motion": {
+          "idle": "none"
+        },
+        "enterSound": "pop"
+      },
+      "star3": {
+        "motion": {
+          "idle": "none"
+        },
+        "enterSound": "pop"
+      }
+    }
+  },
+  "k-share": {
+    "voice": [
+      {
+        "text": "Want Mom to hear you play?\nTap Share, and it goes straight to her!",
+        "voice": "guide",
+        "delay": 500,
+        "rate": 1,
+        "pitch": 1.35,
+        "claudeVoice": "airy"
+      }
+    ],
+    "recording": {
+      "mode": "off",
+      "volume": 0.14
+    }
+  },
+  "p-message": {
+    "sounds": [
+      {
+        "sound": "tap",
+        "at": 100,
+        "volume": 0.5,
+        "pitch": 1
+      }
+    ],
+    "objects": {
+      "paper": {
+        "motion": {
+          "enter": "none"
+        }
+      },
+      "comet": {
+        "motion": {
+          "idle": "wiggle"
+        },
+        "enterSound": "none"
+      },
+      "sparkle": {
+        "enterSound": "none"
+      },
+      "burst": {
+        "motion": {
+          "idle": "wiggle",
+          "idleAmp": 4
+        },
+        "enterSound": "none"
+      },
+      "headline": {
+        "motion": {
+          "enter": "none"
+        }
+      },
+      "song": {
+        "motion": {
+          "enter": "pop"
+        },
+        "tapSound": "none"
+      },
+      "sendBack": {
+        "motion": {
+          "enter": "none"
+        }
+      }
+    },
+    "recording": {
+      "mode": "off",
+      "volume": 0.15
+    }
+  },
+  "k-notify": {
+    "voice": [
+      {
+        "text": "Mom sent you a surprise!",
+        "voice": "guide",
+        "delay": 900,
+        "rate": 1,
+        "pitch": 1.35,
+        "claudeVoice": "airy"
+      },
+      {
+        "text": "Tap to open it!",
+        "voice": "guide",
+        "delay": 200,
+        "rate": 1,
+        "pitch": 1.35,
+        "claudeVoice": "airy"
+      }
+    ]
+  },
+  "k-reveal": {
+    "voice": [
+      {
+        "text": "Proud of you, Noa! I loved hearing you play!",
+        "voice": "mom",
+        "delay": 1300,
+        "rate": 1,
+        "pitch": 1.15,
+        "claudeVoice": "rounded"
+      }
+    ]
+  }
+}

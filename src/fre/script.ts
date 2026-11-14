@@ -123,7 +123,7 @@ const step = (s: Omit<StepCfg, "sounds" | "voice" | "objects" | "params" | "reco
 const scatterSticker = (label: string, i: number, rot: number, pitch: number) =>
   O(label, { enter: "scatter", delay: 60 + i * 70, duration: 760, ease: "overshoot", scaleFrom: 0.15, rotateFrom: rot, idle: "float", idleAmp: 5 + (i % 3) * 2, idleSpeed: 3 + (i % 4) * 0.45 }, { enterSound: "pop", enterVolume: 0.5, enterPitch: pitch, tapSound: "boing" })
 
-export const DEFAULT_SCRIPT: Script = {
+const BASE_SCRIPT: Script = {
   "k-glow": step({
     id: "k-glow", title: "You did it! · glow-up", node: "kid-success", device: "ipad",
     note: "Figma 1. Motion scene “glowup” from the motion artifact. The planet glows (frame 36), condenses (54) and bursts (66); the flow cuts to the scatter at the burst. Sounds are timed to those frames (frame / 17 fps).",
@@ -328,3 +328,23 @@ export const DEFAULT_SCRIPT: Script = {
     },
   }),
 }
+
+// ─── Edits made in the editor and synced into the repo (script-edits.json) ───
+import EDITS from "./script-edits.json"
+
+/** Apply saved editor edits (only the changed fields) on top of a script. */
+export function applyEdits(base: Script, edits: Partial<Record<string, Partial<StepCfg>>>): Script {
+  const out = JSON.parse(JSON.stringify(base)) as Script
+  for (const id of STEP_IDS) {
+    const e = edits[id]
+    if (!e) continue
+    const d = out[id]
+    const objects: Record<string, ObjCfg> = { ...d.objects }
+    for (const [k, o] of Object.entries(e.objects ?? {})) if (d.objects[k]) objects[k] = { ...d.objects[k], ...o, motion: { ...d.objects[k].motion, ...(o?.motion ?? {}) } }
+    out[id] = { ...d, ...e, id, node: d.node, device: d.device, objects, params: { ...d.params, ...(e.params ?? {}) }, recording: { ...d.recording, ...(e.recording ?? {}) }, voice: e.voice ?? d.voice, sounds: e.sounds ?? d.sounds }
+  }
+  return out
+}
+
+/** The flow as it plays by default: the script above with the synced editor edits. */
+export const DEFAULT_SCRIPT: Script = applyEdits(BASE_SCRIPT, EDITS as unknown as Partial<Record<string, Partial<StepCfg>>>)
