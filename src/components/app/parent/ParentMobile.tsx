@@ -7,7 +7,6 @@
  *                                 the toolbar and "Send to Noa".
  */
 import { useState, type ReactNode } from "react"
-import { Sticker } from "@/art/stickers"
 import { PRAISE_STICKERS, PraiseSticker, type PraiseId } from "@/art/praise"
 import { cn } from "@/lib/utils"
 import { BackButton, Button, IconButton } from "../Button"
