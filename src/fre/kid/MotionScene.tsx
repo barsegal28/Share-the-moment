@@ -26,34 +26,50 @@ type Loaded = { scenes: Record<SceneId, Scene>; drawBackground: (ctx: CanvasRend
 export const SCENE_FRAMES = { glowup: 108, share: 150 } as const
 export type SceneId = keyof typeof SCENE_FRAMES
 
-let loading: Promise<Loaded> | null = null
-/** Load the font, stickers and scenes once (the first call warms everything up). */
-export function loadMotion(): Promise<Loaded> {
-  loading ??= (async () => {
-    const { width: W, height: H } = STAGE
-    const font = new FontFace("Bagel Fat One", `url(${fontUrl})`)
-    document.fonts.add(await font.load())
-    await document.fonts.load(`100px ${LETTERING_FONT}`)
-    const images = Object.fromEntries(
-      await Promise.all(
-        SHARE_ASSETS.map(
-          (name) =>
-            new Promise<[string, HTMLImageElement]>((ok, fail) => {
-              const i = new Image()
-              i.onload = () => ok([name, i])
-              i.onerror = fail
-              i.src = imageUrl(name)
-            }),
-        ),
-      ),
-    )
-    const paperGrain = makePaperGrain(W, H)
-    return {
-      scenes: { glowup: createSuccess({ paperGrain }), share: createShare({ images, paperGrain }) },
-      drawBackground: createBackground(W, H),
+const timeout = <T,>(p: Promise<T>, ms: number) => Promise.race([p, new Promise<T>((_, no) => setTimeout(() => no(new Error("timeout")), ms))])
+
+let base: Promise<{ paperGrain: unknown; drawBackground: Loaded["drawBackground"] }> | null = null
+/** Font + sheet: all the glow-up needs. A slow or blocked font never stops the scene (it falls back to a system font). */
+function loadBase() {
+  base ??= (async () => {
+    try {
+      const font = new FontFace("Bagel Fat One", `url(${fontUrl})`)
+      document.fonts.add(await timeout(font.load(), 3000))
+      await timeout(document.fonts.load(`100px ${LETTERING_FONT}`), 2000)
+    } catch (e) {
+      console.warn("Motion font did not load; using a fallback", e)
     }
+    const { width: W, height: H } = STAGE
+    return { paperGrain: makePaperGrain(W, H), drawBackground: createBackground(W, H) }
   })()
-  return loading
+  return base
+}
+
+const loadImage = (name: string) =>
+  new Promise<[string, HTMLImageElement | null]>((ok) => {
+    const src = imageUrl(name)
+    if (!src) return ok([name, null])
+    const i = new Image()
+    i.onload = () => ok([name, i])
+    i.onerror = () => (console.warn("Motion image failed", name), ok([name, null]))
+    i.src = src
+  })
+
+const scenes: Partial<Record<SceneId, Promise<Scene>>> = {}
+/** Load one scene. The glow-up never waits for the share scene's images. */
+function loadScene(id: SceneId): Promise<Scene> {
+  scenes[id] ??= (async () => {
+    const { paperGrain } = await loadBase()
+    if (id === "glowup") return createSuccess({ paperGrain } as never)
+    const images = Object.fromEntries((await Promise.all(SHARE_ASSETS.map(loadImage))).filter(([, i]) => i))
+    return createShare({ images, paperGrain } as never)
+  })()
+  return scenes[id]!
+}
+
+/** Warm up both scenes (the glow-up first). */
+export function loadMotion() {
+  return loadScene("glowup").then(() => loadScene("share"))
 }
 
 export function MotionScene({
@@ -92,10 +108,9 @@ export function MotionScene({
     let alive = true
     let raf = 0
     const last = Math.min(SCENE_FRAMES[scene] - 1, endFrame ?? SCENE_FRAMES[scene] - 1)
-    loadMotion()
-      .then(({ scenes, drawBackground }) => {
+    Promise.all([loadBase(), loadScene(scene)])
+      .then(([{ drawBackground }, sc]) => {
         if (!alive) return
-        const sc = scenes[scene]
         const draw = (f: number) => {
           // Same as the artifact's embed.js draw(): sheet, then the scene, on the 3-cut boil.
           const cut = Math.floor(f / 2) % 3
