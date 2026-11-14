@@ -101,7 +101,10 @@ export function KidScreens() {
             }}
             onTap={() => {}}
           >
-            <Sticker name={ART[id]} size={p.size} tilt={p.rot} />
+            {/* Behind the card the stickers sit at 70% (Figma "Sticker sheet · dark"); the gold burst is on top, at 100%. */}
+            <span className="block transition-opacity duration-500" style={{ opacity: layout === LAYOUT_CARD && id !== "burst" ? 0.7 : 1 }}>
+              <Sticker name={ART[id]} size={p.size} tilt={p.rot} />
+            </span>
           </Obj>
         )
       })}

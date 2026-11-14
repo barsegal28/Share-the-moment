@@ -86,9 +86,11 @@ export function createShare({ images, paperGrain }) {
   }
 
   // ---- the background stickers: idle boil, then peel off one by one (lift → drop → gone) ----
-  function drawStickers(ctx, f, cut) {
+  // The gold star sits on top of the panel (Figma); the other stickers are behind it. `top` picks which layer.
+  function drawStickers(ctx, f, cut, top = false) {
     for (let i = 0; i < STICKERS.length; i++) {
       const [name, box, order] = STICKERS[i]; const [bx, by, br] = boil[i][cut];
+      if ((name === 'star') !== top) continue;
       let o = { dx: bx, dy: by, rot: br, scale: 1 }, a = name === 'star' ? 1 : (f < 42 ? DIM : 1);
       const r = f - (44 + O + order * 2);
       if (r >= 4) continue; // peeled off
@@ -188,6 +190,7 @@ export function createShare({ images, paperGrain }) {
   function draw(ctx, k, f, cut) {
     drawStickers(ctx, f, cut);
     if (f < 20) drawCard(ctx, f);
+    drawStickers(ctx, f, cut, true);
     drawNotes(ctx, f, cut);
     if (f >= 30 && f < 42) drawCrumple(ctx, k, f, cut);
     const pose = cometPose(f, cut);

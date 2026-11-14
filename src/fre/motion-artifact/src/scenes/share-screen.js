@@ -84,8 +84,10 @@ export function createShareScreen({ images, paperGrain, variant = 'a' }) {
 
   function draw(ctx, k, f, cut) {
     STICKERS.forEach(([name, [x, y, w, h]]) => { // background stickers hold still here (less going on)
-      ctx.save(); ctx.globalAlpha = name === 'star' ? 1 : DIM; ctx.drawImage(images[name], x, y, w, h); ctx.restore(); });
+      if (name === 'star') return; // the gold star goes on top of the panel (Figma)
+      ctx.save(); ctx.globalAlpha = DIM; ctx.drawImage(images[name], x, y, w, h); ctx.restore(); });
     const [x, y, w, h] = CARD; ctx.drawImage(images['share-card'], x, y, w, h); // panel with both planets and the Share button
+    STICKERS.forEach(([name, [sx, sy, sw, sh]]) => { if (name === 'star') ctx.drawImage(images[name], sx, sy, sw, sh); });
     drawTraveller(ctx, pose(f, cut));
     sparkle(ctx, k, f);
   }
