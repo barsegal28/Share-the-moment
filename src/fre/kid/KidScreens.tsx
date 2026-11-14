@@ -6,7 +6,7 @@ import { useEffect, useState, type CSSProperties } from "react"
 import { Sticker, type StickerName } from "@/art/stickers"
 import { Obj, EASING } from "../Obj"
 import { useFlow } from "../runtime"
-import { ArrowExitIcon, BUTTON_ICON_SIZE, Button, KidBackground, Learner, MomMessageCard, ReplyNotification, ResultCard, RewardProgress, ShareIcon, SurpriseLabel } from "@/components/app"
+import { BUTTON_ICON_SIZE, Button, KidBackground, Learner, MomMessageCard, ReplyNotification, ResultCard, RewardProgress, ShareIcon, SurpriseLabel } from "@/components/app"
 import { useReplyChoice } from "../shared"
 import { MotionScene, loadMotion } from "./MotionScene"
 import goldStar from "../motion-artifact/assets/share/star.webp"
@@ -262,10 +262,6 @@ function MessageFromMom({ onDone }: { onDone: () => void }) {
   return (
     <KidBackground learner={false} progress={false} className="font-mono">
       <Learner />
-      <span className="text-functional-subtitle absolute top-[21px] left-[148px] flex h-16 items-center gap-2 rounded-[24px] px-6 text-white">
-        <ArrowExitIcon size={28} />
-        Exit
-      </span>
       <RewardProgress count={18} progress={144 / 214} className="absolute top-4 right-4" />
       <Obj step="k-surprise" id="label" className="absolute top-[91px] left-1/2 -translate-x-1/2">
         <SurpriseLabel />

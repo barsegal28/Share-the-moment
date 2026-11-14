@@ -6,6 +6,7 @@
 import type { ReactNode } from "react"
 import { RisoGrain } from "@/components/sticker/Sheet"
 import { cn } from "@/lib/utils"
+import { ArrowExitIcon } from "./icons"
 import { Avatar, type AvatarCharacter } from "./Avatar"
 import { RewardProgress } from "./RewardProgress"
 
@@ -68,11 +69,20 @@ export function ConfettiBits({ className }: { className?: string }) {
   )
 }
 
-export function Learner({ name = "Noa", character = "cone" }: { name?: string; character?: AvatarCharacter }) {
+/** Figma "background" top-left: the learner (avatar + name) and the ghost Exit button (Arrow Exit 28), same type size. */
+export function Learner({ name = "Noa", character = "cone", exit = true, onExit }: { name?: string; character?: AvatarCharacter; exit?: boolean; onExit?: () => void }) {
   return (
-    <div className="absolute top-7 left-8 flex items-center gap-3.5">
-      <Avatar character={character} />
-      <p className="text-mono-lg text-white">{name}</p>
+    <div className="absolute top-[21px] left-8 flex h-16 items-center gap-4">
+      <div className="flex items-center gap-3.5">
+        <Avatar character={character} />
+        <p className="text-mono-lg text-white">{name}</p>
+      </div>
+      {exit && (
+        <button type="button" onClick={onExit} className="text-mono-lg flex h-16 items-center gap-2 rounded-[24px] px-6 text-white">
+          <ArrowExitIcon size={28} />
+          Exit
+        </button>
+      )}
     </div>
   )
 }
