@@ -1,9 +1,9 @@
+import brandComet from "./overview/brand-comet.svg"
 /**
  * The flow pages: #/overview — the whole first-time flow, kid → parent → kid, following the flow chart;
  * #/kid — only the kid's screens (iPad); #/parent — only the parent's screens (phone).
  */
 import { cn } from "@/lib/utils"
-import { Sticker } from "@/art/stickers"
 import { SlidersIcon } from "./overview/icons"
 import { useEffect, useState } from "react"
 import { ChevronLeft, ChevronRight, Hand, Pause, Play, RotateCcw, Volume2, VolumeX } from "lucide-react"
@@ -44,11 +44,7 @@ export function Brand({ sub }: { sub: string }) {
   // Figma "Brand": the drippy-comet sticker (40, flipped and turned −137.62°) beside the name, clipped to 40px.
   return (
     <a href="#/overview" className="flex h-[40.112px] shrink-0 items-center">
-      <span className="grid h-[40.112px] w-[56.509px] shrink-0 place-items-center">
-        <span className="block" style={{ transform: "scaleY(-1) rotate(-137.62deg)" }}>
-          <Sticker name="drippyComet" size={30} />
-        </span>
-      </span>
+      <img src={brandComet} alt="" className="h-[40.112px] w-[56.509px] shrink-0" />
       <span className="flex flex-col whitespace-nowrap">
         <span className="text-[14px] leading-[18px] font-semibold tracking-[-0.14px] text-[#09090b]">Share the Moment</span>
         <span className="text-[12px] leading-[16px] text-[#71717a]">{sub}</span>
