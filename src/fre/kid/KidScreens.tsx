@@ -9,6 +9,13 @@ import { useFlow } from "../runtime"
 import { ArrowExitIcon, BUTTON_ICON_SIZE, Button, KidBackground, Learner, MomMessageCard, ReplyNotification, ResultCard, RewardProgress, ShareIcon, SurpriseLabel } from "@/components/app"
 import { useReplyChoice } from "../shared"
 import { MotionScene, loadMotion } from "./MotionScene"
+import goldStar from "../motion-artifact/assets/share/star.webp"
+
+/** The gold burst on top of the card: the same image (and box) the share scenes paint, so it never jumps between screens. */
+const GOLD = [788, 477, 313, 313] as const
+function GoldStar() {
+  return <img src={goldStar} alt="" draggable={false} className="pointer-events-none absolute z-[5] max-w-none select-none" style={{ left: GOLD[0], top: GOLD[1], width: GOLD[2], height: GOLD[3] }} />
+}
 
 // Warm the motion scenes (font + stickers) so the glow-up starts at once.
 if (typeof window !== "undefined") void loadMotion().catch(() => {})
@@ -82,7 +89,9 @@ export function KidScreens() {
           the scene, not backdrop-filter, which smears the scaled stage edges. */}
       <div className="absolute inset-0" style={{ filter: s === "k-notify" ? "blur(2.15px)" : undefined }}>
       {/* Stickers that scatter out of the planet */}
+      {layout === LAYOUT_CARD && <GoldStar />}
       {ORDER.map((id) => {
+        if (id === "burst" && layout === LAYOUT_CARD) return null
         const p = layout[id]
         return (
           <Obj
@@ -291,7 +300,6 @@ function CardSwap() {
     return () => cancelLater(t)
   }, [])
   if (gone) return null
-  const b = LAYOUT_CARD.burst
   const px = (v: readonly number[]) => ({ left: v[0], top: v[1], width: v[2], height: v[3] })
   return (
     <div className="pointer-events-none absolute inset-0">
@@ -314,9 +322,7 @@ function CardSwap() {
           <ResultCard timeline="FRE" className="bg-transparent" />
         </div>
       </div>
-      <span className="absolute" style={{ left: b.cx - b.size / 2, top: b.cy - b.size / 2 }}>
-        <Sticker name="burst" size={b.size} tilt={b.rot} />
-      </span>
+      <GoldStar />
     </div>
   )
 }
