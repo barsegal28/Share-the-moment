@@ -159,5 +159,43 @@
       "mode": "off",
       "volume": 0.15
     }
+  },
+  "p-reply": {
+    "sounds": [],
+    "objects": {
+      "header": {
+        "motion": {
+          "enter": "none"
+        }
+      },
+      "card": {
+        "motion": {
+          "enter": "none"
+        }
+      },
+      "tag": {
+        "motion": {
+          "enter": "none"
+        }
+      },
+      "sticker": {
+        "motion": {
+          "enter": "none"
+        }
+      },
+      "toolbar": {
+        "motion": {
+          "enter": "none"
+        }
+      },
+      "send": {
+        "motion": {
+          "enter": "none"
+        }
+      }
+    }
+  },
+  "p-sent": {
+    "sounds": []
   }
 }

@@ -271,7 +271,7 @@ export function ParentSendBack({
       {slot(
         "header",
         <div className="flex w-full flex-col items-start gap-1">
-          <p className="text-mono-lg w-[306px] text-gold">Send Noa a surprise</p>
+          <p className="text-mono-lg w-[306px] text-gold">Tell Noa you’re proud</p>
           <p className="text-paragraph-body w-full text-gold/80">It pops up for Noa with a sound.</p>
         </div>,
       )}

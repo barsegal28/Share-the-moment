@@ -274,7 +274,7 @@ const BASE_SCRIPT: Script = {
     },
   }),
   "p-reply": step({
-    id: "p-reply", title: "Send Noa a surprise", node: "parent-reply", device: "phone",
+    id: "p-reply", title: "Tell Noa you’re proud", node: "parent-reply", device: "phone",
     note: "Sticker first: the fastest reply. Voice and video are one tap away.",
     advance: "tap", next: "p-sent",
     sounds: [S("paper", 0, 0.4)],
