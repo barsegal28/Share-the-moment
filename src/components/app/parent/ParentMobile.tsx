@@ -219,8 +219,6 @@ export function StickerCard({
           </div>
         </div>
       )}
-      {/* Figma annotation: keep the sparkle, don't turn it into an avatar. */}
-      <div className="absolute size-[71px]" style={{ left: 26, top: 230 }}>{slot("sparkle", <Sticker name="sparkle" size={71} />)}</div>
       <span className="absolute right-3.5 bottom-[13.5px] text-[var(--fluent-icon-default)]"><CollectionsIcon size={24} /></span>
     </div>
   )
