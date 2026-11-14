@@ -125,8 +125,8 @@ const scatterSticker = (label: string, i: number, rot: number, pitch: number) =>
 const BASE_SCRIPT: Script = {
   "k-glow": step({
     id: "k-glow", title: "You did it! · glow-up", node: "kid-success", device: "ipad",
-    note: "Figma 1. Motion scene “glowup” from the motion artifact. The planet glows (frame 36), condenses (54) and bursts (66); the flow cuts to the scatter at the burst. Sounds are timed to those frames (frame / 17 fps).",
-    advance: "motion", after: 0, next: "k-scatter",
+    note: "Figma 1. Motion scene “glowup” from the motion artifact. The planet glows (frame 36), condenses (54) and bursts (66); the flow moves on to the scatter on a fixed timer from the scene's first frame (6.4 s), never waiting for the voice-over. Sounds are timed to those frames (frame / 17 fps).",
+    advance: "auto", after: 6400, next: "k-scatter",
     voice: [V("You did it!", "guide", 250), V("You played Let It Go with almost no mistakes!", "guide", 150)],
     sounds: [S("success", 0, 0.7), S("glow", 2118, 0.8), S("swoosh", 3176, 0.6, 0.8), S("burst", 3882, 0.9), S("sparkle", 4118, 0.6)],
     recording: { mode: "background", volume: 0.14 },
