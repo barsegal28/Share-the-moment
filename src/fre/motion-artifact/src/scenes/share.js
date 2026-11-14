@@ -86,7 +86,7 @@ export function createShare({ images, paperGrain }) {
   }
 
   // ---- the background stickers: idle boil, then peel off one by one (lift → drop → gone) ----
-  // The gold star sits on top of the panel (Figma); the other stickers are behind it. `top` picks which layer.
+  // App patch: the gold star sits on top of the panel (Figma); the other stickers are behind it. `top` picks which layer.
   function drawStickers(ctx, f, cut, top = false) {
     for (let i = 0; i < STICKERS.length; i++) {
       const [name, box, order] = STICKERS[i]; const [bx, by, br] = boil[i][cut];

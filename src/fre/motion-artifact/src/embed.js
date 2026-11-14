@@ -15,10 +15,13 @@ import { createBackground, BACKGROUND_ASSETS } from './background.js';
 import { LETTERING_FONT } from './lettering.js';
 import { createSuccess } from './scenes/success.js';
 import { createShare, SHARE_ASSETS } from './scenes/share.js';
-import { createShareScreen, SHARE_SCREEN_ASSETS } from './scenes/share-screen.js';
+import { createShareScreen, createShareScreenC, SHARE_SCREEN_ASSETS } from './scenes/share-screen.js';
 import { createRecording } from './recording.js';
 
-export async function createMotion(canvas, { base = './', background = true, recording: recSrc = null, sound = true } = {}) {
+// animationOnly: true → only the share-screen motion (C/D) on a transparent canvas, no background, card or stickers,
+//   for laying over the flow's own share screen. characters: false → leave the characters out too (they won't wiggle).
+export async function createMotion(canvas, { base = './', background = true, recording: recSrc = null, sound = true, animationOnly = false, characters = true } = {}) {
+  if (animationOnly) background = false;
   const { width: W, height: H } = STAGE;
   const ctx = canvas.getContext('2d');
   const font = new FontFace('Bagel Fat One', `url(${base}fonts/bagel-fat-one-latin-400-normal.woff2)`);
@@ -29,17 +32,17 @@ export async function createMotion(canvas, { base = './', background = true, rec
   const bgImages = Object.fromEntries(await Promise.all(BACKGROUND_ASSETS.map(n => load(n, 'bg'))));
   const paperGrain = makePaperGrain(W, H), drawBackground = createBackground(W, H, bgImages);
   const scenes = { glowup: createSuccess({ paperGrain }), share: createShare({ images, paperGrain }),
-    'share-screen-a': createShareScreen({ images, paperGrain, variant: 'a' }), 'share-screen-b': createShareScreen({ images, paperGrain, variant: 'b' }) };
+    'share-screen-a': createShareScreen({ images, paperGrain, variant: 'a' }), 'share-screen-b': createShareScreen({ images, paperGrain, variant: 'b' }), 'share-screen-c': createShareScreenC({ images, paperGrain, animationOnly, characters }), 'share-screen-d': createShareScreenC({ images, paperGrain, layout: 'd', animationOnly, characters }) };
   const recording = createRecording({ src: recSrc });
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  let k = 1, run = null;
-  const draw = (scene, f) => { ctx.setTransform(k, 0, 0, k, 0, 0); ctx.clearRect(0, 0, W, H); const cut = Math.floor(f / 2) % 3; if (background) drawBackground(ctx, scene.stillBackground ? 0 : cut); scene.draw(ctx, k, f, cut); };
+  let k = 1, run = null, shown = null; // shown: the last frame drawn, redrawn when the canvas is resized
+  const draw = (scene, f) => { shown = [scene, f]; ctx.setTransform(k, 0, 0, k, 0, 0); ctx.clearRect(0, 0, W, H); const cut = Math.floor(f / 2) % 3; if (background) drawBackground(ctx, scene.stillBackground ? 0 : cut); scene.draw(ctx, k, f, cut); };
   const fit = () => {
     const box = canvas.parentElement.getBoundingClientRect(), scale = Math.min(box.width / W, box.height / H), dpr = Math.min(devicePixelRatio || 1, 2);
     canvas.style.width = `${W * scale}px`; canvas.style.height = `${H * scale}px`;
     canvas.width = Math.round(W * scale * dpr); canvas.height = Math.round(H * scale * dpr); k = scale * dpr;
-    if (run) draw(run.scene, run.frame);
+    if (shown) draw(...shown);
   };
   const ro = new ResizeObserver(fit); ro.observe(canvas.parentElement); fit();
 

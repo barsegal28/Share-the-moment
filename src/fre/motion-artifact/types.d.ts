@@ -23,6 +23,7 @@ declare module "*/motion-artifact/src/scenes/share.js" {
 declare module "*/motion-artifact/src/scenes/share-screen.js" {
   export const SHARE_SCREEN_ASSETS: string[]
   export function createShareScreen(o: { images: Record<string, HTMLImageElement>; paperGrain: HTMLCanvasElement; variant: "a" | "b" }): MotionScene
+  export function createShareScreenC(o: { images: Record<string, HTMLImageElement>; paperGrain: HTMLCanvasElement; layout?: "c" | "d"; animationOnly?: boolean; characters?: boolean }): MotionScene
 }
 declare module "*/little-pianist.js" {
   export function mountLittlePianist(root: HTMLElement): { readonly time: number; readonly end: number; readonly playing: boolean; readonly started: boolean; play(): void; pause(): void; destroy(): void }

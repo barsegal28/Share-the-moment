@@ -10,6 +10,10 @@ import { ExitButton, BUTTON_ICON_SIZE, Button, KidBackground, Learner, MomMessag
 import { useReplyChoice } from "../shared"
 import { MotionScene, loadMotion } from "./MotionScene"
 import goldStar from "../motion-artifact/assets/share/star.webp"
+import shareCard from "../motion-artifact/assets/share/share-card-blank.webp"
+import momAvatar from "../motion-artifact/assets/share/mom-avatar.webp"
+import kidAvatar from "../motion-artifact/assets/share/kid-avatar.webp"
+import songPlayer from "../motion-artifact/assets/share/player.webp"
 
 /** The gold burst on top of the card: the same image (and box) the share scenes paint, so it never jumps between screens. */
 const GOLD = [788, 477, 313, 313] as const
@@ -203,42 +207,65 @@ function Card({ state }: { state: CardState }) {
 const SHARE_HIT = { share: [478, 604.5, 240, 80], close: [824, 140, 64, 64] } as const
 const box = ([left, top, width, height]: readonly number[]): CSSProperties => ({ position: "absolute", left, top, width, height })
 
+/**
+ * Share screen (Figma 228:16325, option D): the flow's own screen — background, stickers at 70%, the share panel
+ * with the kid's and Mom's avatars and the song player, the gold star on top — with ONLY the motion laid over it
+ * (scene "share-screen-d", animationOnly: a transparent 1194 × 834 canvas, pointer-events none). While the overlay
+ * plays, the screen's own player and avatars are hidden (visibility, so nothing shifts): the overlay draws them,
+ * moving. On the Share tap the overlay stops and the "share" scene (send to Mom) plays as before.
+ */
+const SHARE_D = {
+  player: [303, 299.5, 322, 123], // the overlay's player at frame 0 (C_K1, 322 × 123)
+  mom: [503.6, 298.2, 283.1, 283.1],
+  kid: [409.3, 388.5, 160, 162.3],
+} as const
+const CARD_IMG = [278, 102.5, 640, 680] as const // the panel image, shadow included (panel itself 288, 107.5, 620 × 660)
 function ShareMoment() {
   const flow = useFlow()
   const sending = flow.step === "k-send"
   const p = flow.script["k-send"].params
+  const [overlayOn, setOverlayOn] = useState(false)
+  useEffect(() => setOverlayOn(false), [flow.run, sending])
+  if (sending)
+    return (
+      <div className="relative h-full w-full bg-ink">
+        <MotionScene scene="share" run={flow.run} fps={p.fps ?? 17} onStart={() => flow.signal("motionStart")} endFrame={p.endFrame} onDone={() => flow.signal("motionDone")} />
+        <ExitButton className="absolute top-[21px] left-[148px]" />
+      </div>
+    )
+  const hidden = overlayOn ? "hidden" : "visible"
   return (
-    <div className="relative h-full w-full bg-ink">
-      <MotionScene
-        // Share screen: the "share-screen-a" invitation loops (the song travels kid → Mom); on the Share tap the
-        // "share" scene plays once, with its own built-in sound (comet engine, "mom got it" slap, heart pop).
-        scene={sending ? "share" : "share-screen-a"}
-        loop={!sending}
-        run={flow.run}
-        fps={p.fps ?? 17}
-        onStart={() => sending && flow.signal("motionStart")}
-        endFrame={sending ? p.endFrame : undefined}
-        onDone={() => sending && flow.signal("motionDone")}
-      />
-      {/* The scenes paint the learner bar without Exit; the background's Exit button sits next to it (left 32 + 100 + 16). */}
-      <ExitButton className="absolute top-[21px] left-[148px]" />
-      {!sending && <CardSwap key={flow.run} />}
-      {!sending && (
-        <>
-          {/* The scene paints the Share button into its first frame. A real Share button sits on top so it can
-              move (idle wiggle), over a paper patch that hides the painted one. */}
-          <div aria-hidden className="absolute rounded-[30px] bg-paper" style={box([SHARE_HIT.share[0] - 3, SHARE_HIT.share[1] - 3, SHARE_HIT.share[2] + 6, SHARE_HIT.share[3] + 8])} />
-          <Obj step="k-share" id="share" hint onTap={() => flow.go("k-send")} className="rounded-[28px]" style={box(SHARE_HIT.share)}>
-            <Button className="w-[240px]" iconEnd={<ShareIcon size={BUTTON_ICON_SIZE.xxl} />}>
-              Share
-            </Button>
-          </Obj>
-          <Obj step="k-share" id="close" className="rounded-full" style={box(SHARE_HIT.close)} onTap={() => {}}>
-            <span className="block h-full w-full" aria-label="Close" />
-          </Obj>
-        </>
-      )}
-    </div>
+    <KidBackground learner={false} progress={false}>
+      {ORDER.filter((id) => id !== "burst").map((id) => {
+        const q = LAYOUT_CARD[id]
+        return (
+          <span key={id} className="absolute opacity-70" style={{ left: q.cx - q.size / 2, top: q.cy - q.size / 2 }}>
+            <Sticker name={ART[id]} size={q.size} tilt={q.rot} />
+          </span>
+        )
+      })}
+      <Learner />
+      <RewardProgress count={18} progress={144 / 214} className="absolute top-4 right-4" />
+      {/* the share panel (Figma), then its avatars and song player */}
+      <img src={shareCard} alt="" draggable={false} className="absolute max-w-none select-none" style={box(CARD_IMG)} />
+      <img src={momAvatar} alt="Mom" draggable={false} className="absolute max-w-none select-none" style={{ ...box(SHARE_D.mom), visibility: hidden }} />
+      <img src={kidAvatar} alt="Noa" draggable={false} className="absolute max-w-none select-none" style={{ ...box(SHARE_D.kid), visibility: hidden }} />
+      <img src={songPlayer} alt="Your song, played by you" draggable={false} className="absolute max-w-none select-none" style={{ ...box(SHARE_D.player), visibility: hidden }} />
+      <GoldStar />
+      {/* ONLY the animation, on top: transparent, same stage, taps go through */}
+      <div className="pointer-events-none absolute inset-0">
+        <MotionScene scene="share-screen-d" loop run={flow.run} fps={17} onStart={() => setOverlayOn(true)} />
+      </div>
+      <CardSwap key={flow.run} />
+      <Obj step="k-share" id="share" hint onTap={() => flow.go("k-send")} className="rounded-[28px]" style={box(SHARE_HIT.share)}>
+        <Button className="w-[240px]" iconEnd={<ShareIcon size={BUTTON_ICON_SIZE.xxl} />}>
+          Share
+        </Button>
+      </Obj>
+      <Obj step="k-share" id="close" className="rounded-full" style={box(SHARE_HIT.close)} onTap={() => {}}>
+        <span className="block h-full w-full" aria-label="Close" />
+      </Obj>
+    </KidBackground>
   )
 }
 

@@ -15,7 +15,7 @@ import { BACKGROUND_ASSETS, createBackground } from "../motion-artifact/src/back
 import { LETTERING_FONT } from "../motion-artifact/src/lettering.js"
 import { createSuccess } from "../motion-artifact/src/scenes/success.js"
 import { createShare, SHARE_ASSETS } from "../motion-artifact/src/scenes/share.js"
-import { createShareScreen, SHARE_SCREEN_ASSETS } from "../motion-artifact/src/scenes/share-screen.js"
+import { createShareScreen, createShareScreenC, SHARE_SCREEN_ASSETS } from "../motion-artifact/src/scenes/share-screen.js"
 
 const IMAGE_URLS = import.meta.glob("../motion-artifact/assets/*/*.webp", { query: "?inline", import: "default", eager: true }) as Record<string, string>
 const imageUrl = (name: string, dir = "share") => IMAGE_URLS[`../motion-artifact/assets/${dir}/${name}.webp`]
@@ -23,7 +23,9 @@ const imageUrl = (name: string, dir = "share") => IMAGE_URLS[`../motion-artifact
 type Scene = ReturnType<typeof createSuccess>
 type Loaded = { scenes: Record<SceneId, Scene>; drawBackground: (ctx: CanvasRenderingContext2D, cut: number) => void }
 
-export const SCENE_FRAMES = { glowup: 108, share: 120, "share-screen-a": 68, "share-screen-b": 68 } as const
+export const SCENE_FRAMES = { glowup: 108, share: 120, "share-screen-a": 68, "share-screen-b": 68, "share-screen-d": 84 } as const
+/** Scenes drawn animation-only on a transparent canvas, laid over the flow's own screen (no background, card or stickers). */
+const ANIMATION_ONLY: Partial<Record<SceneId, true>> = { "share-screen-d": true }
 export type SceneId = keyof typeof SCENE_FRAMES
 
 const timeout = <T,>(p: Promise<T>, ms: number) => Promise.race([p, new Promise<T>((_, no) => setTimeout(() => no(new Error("timeout")), ms))])
@@ -67,6 +69,7 @@ function loadScene(id: SceneId): Promise<Scene> {
     const names = [...new Set([...SHARE_ASSETS, ...SHARE_SCREEN_ASSETS])]
     const images = Object.fromEntries((await Promise.all(names.map((n) => loadImage(n)))).filter(([, i]) => i))
     if (id === "share") return createShare({ images, paperGrain } as never)
+    if (id === "share-screen-d") return createShareScreenC({ images, paperGrain, layout: "d", animationOnly: true, characters: true } as never)
     return createShareScreen({ images, paperGrain, variant: id === "share-screen-b" ? "b" : "a" } as never)
   })()
   return scenes[id]!
@@ -128,7 +131,7 @@ export function MotionScene({
           const cut = Math.floor(f / 2) % 3
           ctx.setTransform(k, 0, 0, k, 0, 0)
           ctx.clearRect(0, 0, W, H)
-          drawBackground(ctx, sc.stillBackground ? 0 : cut)
+          if (!ANIMATION_ONLY[scene]) drawBackground(ctx, sc.stillBackground ? 0 : cut)
           sc.draw(ctx, k, f, cut)
         }
         if (still !== undefined) return draw(Math.min(SCENE_FRAMES[scene] - 1, still))
@@ -175,6 +178,7 @@ export function MotionScene({
   return (
     <canvas
       ref={ref}
+      className={ANIMATION_ONLY[scene] ? "pointer-events-none absolute inset-0" : undefined}
       style={{ width: STAGE.width, height: STAGE.height }}
       role="img"
       aria-label={scene === "glowup" ? "A planet sticker glows and bursts into paper light under the headline You did it!" : scene === "share" ? "The song crumples into a comet that flies off to Mom: Mom got it!" : "Your song travels from your planet to Mom's planet and becomes a heart"}
