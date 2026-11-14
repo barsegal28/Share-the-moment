@@ -91,6 +91,7 @@ export function Obj({
   onTap,
   hint,
   disabled,
+  still,
 }: {
   step: StepId
   id: string
@@ -103,6 +104,8 @@ export function Obj({
   /** Pulse a "tap here" ring when the step is waiting for this tap. */
   hint?: boolean
   disabled?: boolean
+  /** No idle loop (background objects hold still). */
+  still?: boolean
 }) {
   const flow = useFlow()
   const cfg = flow.script[step].objects[id]
@@ -157,7 +160,7 @@ export function Obj({
         const t = later(sound, m.delay)
         anims.push({ cancel: () => cancelLater(t) } as unknown as Animation)
       }
-      if (m.idle !== "none" && !reduced()) {
+      if (m.idle !== "none" && !still && !reduced()) {
         enter.finished.then(
           () => {
             const a = inEl.animate(idleKeyframes(m), { duration: Math.max(200, m.idleSpeed * 1000), iterations: Infinity, easing: m.idle === "spin" || m.idle === "boil" ? "linear" : "ease-in-out" })
@@ -166,12 +169,12 @@ export function Obj({
           () => {},
         )
       }
-    } else if (m.idle !== "none" && !reduced()) {
+    } else if (m.idle !== "none" && !still && !reduced()) {
       anims.push(inEl.animate(idleKeyframes(m), { duration: Math.max(200, m.idleSpeed * 1000), iterations: Infinity, easing: m.idle === "spin" || m.idle === "boil" ? "linear" : "ease-in-out" }))
     }
     return () => anims.forEach((a) => a.cancel())
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flow.run, isCurrent, key, cfg?.enterSound, cfg?.enterVolume, cfg?.enterPitch])
+  }, [flow.run, isCurrent, key, still, cfg?.enterSound, cfg?.enterVolume, cfg?.enterPitch])
 
   const isSelected = flow.edit && flow.selected?.step === step && flow.selected.obj === id
   const selectable = flow.edit && flow.selecting
