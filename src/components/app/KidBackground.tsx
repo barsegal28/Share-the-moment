@@ -112,7 +112,7 @@ export function KidBackground({
       <RisoGrain className="-z-10" />
       <ConfettiBits />
       {learner && <Learner />}
-      {progress && <RewardProgress count={rewardCount} progress={rewardProgress} className="absolute top-4 right-4" />}
+      {progress && <RewardProgress count={rewardCount} progress={rewardProgress} className="absolute top-9 right-4" />}
       {children}
     </div>
   )

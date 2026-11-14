@@ -30,6 +30,11 @@ export function createBackground(W, H, images = {}) {
     const [gx, gy] = GRAIN_SHIFT[cut];
     ctx.drawImage(grain, -MARGIN + gx, -MARGIN + gy);
     if (images.specks) { const [sx, sy] = SPECK_SHIFT[cut]; ctx.drawImage(images.specks, sx, sy, W, H); }
-    if (topbar && images.topbar) ctx.drawImage(images.topbar, 0, 0, W, H);
+    if (topbar && images.topbar) {
+      // Figma (15 Nov): the reward progress sits 36px from the top (was 16). Learner stays; the progress half moves down 20.
+      const t = images.topbar, k = t.width / W, SPLIT = 900;
+      ctx.drawImage(t, 0, 0, SPLIT * k, t.height, 0, 0, SPLIT, H);
+      ctx.drawImage(t, SPLIT * k, 0, t.width - SPLIT * k, t.height, SPLIT, 20, W - SPLIT, H);
+    }
   };
 }

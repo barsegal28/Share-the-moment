@@ -161,7 +161,7 @@ function TopBar() {
       <Obj step="k-scatter" id="avatar" className="absolute top-0 left-0">
         <Learner />
       </Obj>
-      <Obj step="k-scatter" id="progress" className="absolute top-4 right-4">
+      <Obj step="k-scatter" id="progress" className="absolute top-9 right-4">
         {/* Figma: 144 of 214px at 18/25 */}
         <RewardProgress count={n} progress={(144 / 214) * (n / 18)} />
       </Obj>
@@ -248,7 +248,7 @@ function ShareMoment() {
         )
       })}
       <Learner />
-      <RewardProgress count={18} progress={144 / 214} className="absolute top-4 right-4" />
+      <RewardProgress count={18} progress={144 / 214} className="absolute top-9 right-4" />
       {/* the share panel (Figma), then its avatars and song player */}
       <img src={shareCard} alt="" draggable={false} className="absolute max-w-none select-none" style={box(CARD_IMG)} />
       <img src={momAvatar} alt="Mom" draggable={false} className="absolute max-w-none select-none" style={{ ...box(SHARE_D.mom), visibility: hidden }} />
@@ -296,7 +296,7 @@ function MessageFromMom({ onDone }: { onDone: () => void }) {
   return (
     <KidBackground learner={false} progress={false} className="font-mono">
       <Learner />
-      <RewardProgress count={18} progress={144 / 214} className="absolute top-4 right-4" />
+      <RewardProgress count={18} progress={144 / 214} className="absolute top-9 right-4" />
       <Obj step="k-surprise" id="label" className="absolute top-[91px] left-1/2 -translate-x-1/2">
         <SurpriseLabel />
       </Obj>
@@ -348,7 +348,7 @@ function CardSwap() {
           )
         })}
         <Learner />
-        <RewardProgress count={18} progress={144 / 214} className="absolute top-4 right-4" />
+        <RewardProgress count={18} progress={144 / 214} className="absolute top-9 right-4" />
         <div className="absolute overflow-hidden rounded-[40px] bg-paper" style={{ animation: `fre-swap-card 420ms ease-out both` }}>
           <div className="absolute inset-0 grid place-items-center" style={{ animation: "fre-swap-out 300ms ease-out both" }}>
             <ResultCard timeline="FRE" className="bg-transparent" />
