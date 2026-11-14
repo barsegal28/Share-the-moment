@@ -1,6 +1,6 @@
 /**
  * Figma "Parent.Mobile" (129:4277), 393 × 650 — the page Mom opens from the SMS link.
- *   share the moment (129:4276) — the paper sheet, "I got 3 stars on this song, MOM!", the song row and
+ *   share the moment (129:4276) — the paper sheet, "Listen to me play, MOM!", the song row and
  *                                 "Send Noa a surprise" (outline, XL) at top 559.
  *   play (129:4275)             — the same page under the bottom sheet that plays the recording.
  *   send back (129:4278)        — the composer: header, the sticker card with the editable message tag,
@@ -9,7 +9,7 @@
 import { useState, type ReactNode } from "react"
 import { Sticker, type StickerName } from "@/art/stickers"
 import { cn } from "@/lib/utils"
-import { Button, IconButton } from "../Button"
+import { BackButton, Button, IconButton } from "../Button"
 import { CameraIcon, CheckmarkCircleIcon, CollectionsIcon, DismissSmallIcon, MicIcon, StickerIcon } from "../icons"
 import { PlayButton } from "../PlayButton"
 import { ProgressBar } from "../ProgressBar"
@@ -57,7 +57,7 @@ export function ListenSheet({
   playing,
   onPlay,
   onClose,
-  note = "It took 6 tries but they kept going until both hands were together!",
+  note = "It took 6 tries but I kept going until both hands were together!",
   slot = same,
   className,
 }: {
@@ -105,7 +105,7 @@ export function ListenSheet({
       {slot(
         "note",
         <div className="flex w-[320px] flex-col items-start gap-2 px-1">
-          <p className="text-mono-md whitespace-nowrap text-gold">Noa got 3 stars!</p>
+          <p className="text-mono-md whitespace-nowrap text-gold">I got 3 stars!</p>
           <p className="text-paragraph-body w-full text-gold/90">{note}</p>
         </div>,
       )}
@@ -253,11 +253,14 @@ export function ParentSendBack({
   sticker,
   onSticker,
   onSend,
+  onBack,
   sendState = "idle",
   slot = same,
 }: {
   /** The send confirmation (Figma 187:9339): idle → sending (spinner) → sent (check). */
   sendState?: SendState
+  /** Back to the message page (the outline Back button above the header). */
+  onBack?: () => void
   message?: string
   onMessage?: (v: string) => void
   sticker?: StickerName
@@ -270,9 +273,12 @@ export function ParentSendBack({
     <div className="flex flex-col items-center justify-between overflow-clip bg-cream px-5 pt-5 pb-10" style={{ width: PARENT_STAGE.w, height: PARENT_STAGE.h }}>
       {slot(
         "header",
-        <div className="flex w-full flex-col items-start gap-1">
-          <p className="text-mono-lg w-[306px] text-gold">Tell Noa you’re proud</p>
-          <p className="text-paragraph-body w-full text-gold/80">It pops up for Noa with a sound.</p>
+        <div className="flex w-full flex-col items-start gap-[19px]">
+          {slot("back", <BackButton onClick={onBack} />)}
+          <div className="flex w-full flex-col items-start gap-1">
+            <p className="text-mono-lg w-[306px] text-gold">Tell Noa you’re proud</p>
+            <p className="text-paragraph-body w-full text-gold/80">It pops up for Noa with a sound.</p>
+          </div>
         </div>,
       )}
       <div className="flex flex-col items-center gap-7">

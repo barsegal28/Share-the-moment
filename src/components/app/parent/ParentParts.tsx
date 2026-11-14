@@ -73,8 +73,8 @@ export function ParentPaperSheet({
   )
 }
 
-/** "I got 3 stars on this song, MOM!" — Sticker/Paragraph/Title, the last word in orange. */
-export function KidHeadline({ text = "I got 3 stars on this song,", shout = "mom!", className }: { text?: string; shout?: string; className?: string }) {
+/** "Listen to me play, MOM!" — Sticker/Paragraph/Title, the last word in orange. */
+export function KidHeadline({ text = "Listen to me play,", shout = "mom!", className }: { text?: string; shout?: string; className?: string }) {
   return (
     <p className={cn("text-paragraph-title w-[306px] text-teal", className)}>
       {text} <br />

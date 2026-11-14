@@ -12,6 +12,7 @@
  */
 import type { ButtonHTMLAttributes, ReactNode } from "react"
 import { cn } from "@/lib/utils"
+import { ArrowLeftIcon } from "./icons"
 
 export type ButtonVariant = "primary" | "outline" | "outline-light" | "ghost"
 export type ButtonSize = "xxl" | "xl"
@@ -90,6 +91,23 @@ export function IconButton({
       {...props}
     >
       {children}
+    </button>
+  )
+}
+
+/**
+ * Back (library Button, Layout=Icon only, Style=Outline, Radius=Rounded, Size=Medium): 32 × 32, padding 6,
+ * radius 12, 1px gold border, Arrow Left 20 in black 86%. Parent.Mobile › send back.
+ */
+export function BackButton({ label = "Back", className, type = "button", ...props }: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "children"> & { label?: string }) {
+  return (
+    <button
+      type={type}
+      aria-label={label}
+      className={cn("inline-grid size-8 shrink-0 place-items-center rounded-[12px] border border-gold p-1.5 text-black/86 transition-transform active:scale-95", className)}
+      {...props}
+    >
+      <ArrowLeftIcon size={20} />
     </button>
   )
 }
