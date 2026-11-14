@@ -141,7 +141,8 @@ export function FlowProvider({
       go(s.next)
     }
     seenRef.current.add(step)
-    stopSpeech()
+    // keepVoice: let the line that's still being spoken finish (the glow-up cuts to the scatter mid-sentence).
+    if (!s.params.keepVoice) stopSpeech()
 
     // Recording
     const rec = s.recording
