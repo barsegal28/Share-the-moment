@@ -43,7 +43,11 @@
         "volume": 0.6,
         "pitch": 1
       }
-    ]
+    ],
+    "recording": {
+      "mode": "off",
+      "volume": 0.14
+    }
   },
   "k-success": {
     "sounds": [],
