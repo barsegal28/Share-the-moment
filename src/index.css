@@ -369,3 +369,9 @@
     @apply border-border outline-ring/50;
   }
 }
+
+/* Device chrome (iOS status bar, lock screen, Messages, Safari): the system UI font, not the app's type. */
+@utility font-ios {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+  letter-spacing: normal;
+}

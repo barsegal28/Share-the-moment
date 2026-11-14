@@ -32,7 +32,7 @@ export function ParentShareMoment({
   slot?: Slot
 }) {
   return (
-    <ParentPaperSheet>
+    <ParentPaperSheet slot={slot}>
       <div className="absolute" style={{ left: 39, top: 279 }}>{slot("headline", <KidHeadline />)}</div>
       <div className="absolute -translate-x-1/2" style={{ left: "calc(50% + 9.5px)", top: 417 }}>
         {slot("song", <ParentSongRow onPlay={onPlay} playing={playing} />)}

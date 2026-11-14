@@ -3,17 +3,15 @@
  * One persistent scene, so the stickers that scatter out of the planet stay on the sheet and glide into place.
  */
 import { useEffect, useRef, useState, type CSSProperties } from "react"
-import { CircleCheck, RotateCw } from "lucide-react"
 import { Sticker, type StickerName } from "@/art/stickers"
 import { Obj, EASING } from "../Obj"
 import { useFlow } from "../runtime"
-import { InkSheetCanvas } from "./canvases"
+import { ArrowRightIcon, BUTTON_ICON_SIZE, Button, KidBackground, Learner, Lettering, ResultCard, RewardProgress } from "@/components/app"
 import { MotionScene, loadMotion } from "./MotionScene"
 
 // Warm the motion scenes (font + stickers) so the glow-up starts at once.
 if (typeof window !== "undefined") void loadMotion().catch(() => {})
-import { ArrowRightIcon, RibbonIcon } from "../icons"
-import { DieCutText, KidActionButton, useReplyChoice } from "../shared"
+import { useReplyChoice } from "../shared"
 import { cancelLater, later } from "@/lib/clock"
 import type { StepId } from "../script"
 
@@ -46,11 +44,9 @@ const LAYOUT_CARD: Record<StickerId, Place> = {
   heart: { cx: 654, cy: 594, size: 150, rot: -14 },
   spark2: { cx: 74, cy: 358, size: 150, rot: -10 },
   spark3: { cx: 1014, cy: 389, size: 150, rot: 20 },
-  burst: { cx: 944, cy: 633, size: 270, rot: 10 },
+  burst: { cx: 944, cy: 633, size: 270, rot: 100 },
 }
 const ORDER: StickerId[] = ["striped", "ringed", "drippy", "cloud", "burst", "heart", "spark1", "spark2", "spark3"]
-/** Card: Figma "main", 620 × 660 centred at (598, 437). */
-const CARD = { left: 288, top: 107, w: 620, h: 660 }
 
 const KID_STEPS: StepId[] = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "k-notify", "k-reveal"]
 export const isKidStep = (s: StepId) => KID_STEPS.includes(s)
@@ -75,8 +71,7 @@ export function KidScreens() {
   const cardState: CardState | null = s === "k-success" ? "success" : s === "k-notify" || s === "k-reveal" ? "shared" : null
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-ink font-sans">
-      <InkSheetCanvas className="absolute inset-0" />
+    <KidBackground learner={false} progress={false} className="font-mono">
 
       {/* Stickers that scatter out of the planet */}
       {ORDER.map((id) => {
@@ -113,11 +108,11 @@ export function KidScreens() {
       {cardState && <Card state={cardState} />}
       {s === "k-notify" && <ReplyBanner />}
       {s === "k-reveal" && <Reveal />}
-    </div>
+    </KidBackground>
   )
 }
 
-// ─── Top bar: profile avatar + reward progress ─────────────────────────────
+// ─── Top bar: the learner and Reward progress (Figma "background") ─────────
 function TopBar() {
   const flow = useFlow()
   const [n, setN] = useState(flow.step === "k-success" && flow.animate ? 17 : 18)
@@ -136,94 +131,45 @@ function TopBar() {
   }, [flow.step, flow.run, flow.animate, flow.script])
   return (
     <>
-      <Obj step="k-scatter" id="avatar" className="absolute" style={{ left: 32, top: 26, width: 52, height: 52 }}>
-        <div className="grid h-[52px] w-[52px] place-items-center rounded-[26px] bg-surface">
-          <Sticker name="stripedPlanet" size={42} lift={false} />
-        </div>
+      <Obj step="k-scatter" id="avatar" className="absolute top-0 left-0">
+        <Learner />
       </Obj>
-      <Obj step="k-scatter" id="progress" className="absolute" style={{ left: 864, top: 16, width: 314, height: 78 }}>
-        <div className="flex h-[78px] items-center gap-[14px] rounded-[22px] py-3 pr-[18px] pl-[14px]">
-          <div className="relative grid size-[54px] shrink-0 place-items-center">
-            <RibbonIcon size={34} />
-            <span className="absolute top-[4px] left-1/2 -translate-x-1/2 text-[24px] font-extrabold tracking-[-0.48px] text-ink">2</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <p className="font-mono text-[20px] leading-7 font-medium tracking-[-0.15px] whitespace-nowrap text-white">{n}/25 · Level 2</p>
-            <div className="mt-[10px] h-3 w-[214px] overflow-hidden rounded-full bg-[rgb(251_249_242/0.4)]">
-              <div className="h-full rounded-full bg-notebook transition-[width] duration-700" style={{ width: `${(n / 25) * 100}%`, transitionTimingFunction: EASING.spring }} />
-            </div>
-          </div>
-        </div>
+      <Obj step="k-scatter" id="progress" className="absolute top-4 right-4">
+        {/* Figma: 144 of 214px at 18/25 */}
+        <RewardProgress count={n} progress={(144 / 214) * (n / 18)} />
       </Obj>
     </>
   )
 }
 
-// ─── The card: success → share (FRE) → shared ─────────────────────────────
+// ─── The card: Figma "main" ───────────────────────────────────────────────
 type CardState = "success" | "shared"
-const BIG_STARS: { name: StickerName; rot: number }[] = [
-  { name: "ratingStar1", rot: -8 },
-  { name: "ratingStar2", rot: 4 },
-  { name: "ratingStar3", rot: 10 },
-]
-
-function TitleStars({ step }: { step: StepId }) {
-  return (
-    <>
-      <Obj step={step} id="title">
-        <p className="font-display text-[60px] leading-[0.98] whitespace-nowrap text-teal">
-          <DieCutText stroke={20}>You are a star!</DieCutText>
-        </p>
-      </Obj>
-      <div className="flex items-center">
-        {BIG_STARS.map((st, i) => (
-          <Obj key={i} step={step} id={`star${i + 1}`} className="-mr-[10px] last:mr-0" onTap={() => {}}>
-            <div className="grid size-[160px] place-items-center">
-              <Sticker name={st.name} size={142} tilt={st.rot} />
-            </div>
-          </Obj>
-        ))}
-      </div>
-    </>
-  )
-}
+const CARD_POS = { left: 288, top: 107 }
 
 function Card({ state }: { state: CardState }) {
   const flow = useFlow()
+  // k-success: main · timeline=FRE (title + stars). k-notify / k-reveal: main · default, Shared (Figma screen 5).
+  const step: StepId = state === "success" ? "k-success" : "k-notify"
   return (
-    <Obj step="k-success" id="card" className="absolute" style={{ left: CARD.left, top: CARD.top, width: CARD.w, height: CARD.h }}>
-      <div className="relative flex h-[660px] w-[620px] flex-col items-center justify-center overflow-visible rounded-[40px] bg-paper px-[79px] py-[65px] shadow-[0_5px_10px_rgb(0_0_0/0.2)]">
-        <PaperGrain />
-        {state === "success" && (
-          // Figma frame 3: title and the three stars only; the card turns into the share screen on its own.
-          <div className="relative flex flex-col items-center gap-10">
-            <TitleStars step="k-success" />
-          </div>
+    <Obj step="k-success" id="card" className="absolute" style={{ left: CARD_POS.left, top: CARD_POS.top, width: 620, height: 660 }}>
+      <ResultCard
+        timeline={state === "success" ? "FRE" : "default"}
+        shared
+        slot={(part, node) =>
+          part === "title" ? (
+            <Obj step={step} id="title">{node}</Obj>
+          ) : (
+            node
+          )
+        }
+        renderStar={(star, i) => (
+          <Obj key={i} step={step} id={`star${i + 1}`} onTap={() => {}}>
+            {star}
+          </Obj>
         )}
-        {state === "shared" && (
-          // Figma frame 5: back here after the share animation.
-          <div className="relative flex flex-col items-center gap-10">
-            <TitleStars step="k-notify" />
-            <div className="flex w-[240px] flex-col items-center gap-6">
-              <Obj step="k-notify" id="next" onTap={() => flow.restart()}>
-                <KidActionButton>
-                  <ArrowRightIcon size={32} /> Play next
-                </KidActionButton>
-              </Obj>
-              <Obj step="k-notify" id="shared">
-                <KidActionButton tone="light" className="gap-2">
-                  <CircleCheck className="size-8 fill-teal text-paper" strokeWidth={2} /> Shared
-                </KidActionButton>
-              </Obj>
-              <Obj step="k-notify" id="again" onTap={() => flow.go("k-glow")}>
-                <div className="flex h-16 items-center justify-center gap-2 font-mono text-[20px] font-medium tracking-[-0.15px] text-black/86 select-none active:scale-95">
-                  <RotateCw className="size-6" strokeWidth={2} /> Play again
-                </div>
-              </Obj>
-            </div>
-          </div>
-        )}
-      </div>
+        onPlayNext={() => flow.restart()}
+        onPlayAgain={() => flow.go("k-glow")}
+      />
     </Obj>
   )
 }
@@ -281,18 +227,6 @@ function ShareMoment() {
   )
 }
 
-function PaperGrain() {
-  return (
-    <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full rounded-[40px] opacity-60 mix-blend-multiply">
-      <filter id="card-grain">
-        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves={2} seed={4} />
-        <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.08" />
-      </filter>
-      <rect width="100%" height="100%" filter="url(#card-grain)" opacity="0.35" />
-    </svg>
-  )
-}
-
 // ─── A surprise arrives ────────────────────────────────────────────────────
 function ReplyBanner() {
   const flow = useFlow()
@@ -326,7 +260,7 @@ function Reveal() {
       <Confetti key={flow.run} delay={confettiAt} play={flow.animate} />
       <Obj step="k-reveal" id="tag" className="absolute" style={{ left: 0, right: 0, top: 96 }}>
         <p className="text-center font-display text-[72px] leading-none text-teal uppercase">
-          <DieCutText stroke={22}>{phrase}</DieCutText>
+          <Lettering stroke={22}>{phrase}</Lettering>
         </p>
       </Obj>
       <Obj step="k-reveal" id="sticker" className="absolute" style={{ left: IPAD.w / 2 - 170, top: 230, width: 340, height: 340 }} onTap={() => {}}>
@@ -336,9 +270,9 @@ function Reveal() {
         <Sticker name="mom" size={150} tilt={-10} />
       </Obj>
       <Obj step="k-reveal" id="next" className="absolute" style={{ left: IPAD.w / 2 - 120, top: 680 }} onTap={() => flow.restart()}>
-        <KidActionButton tone="light">
-          Play next <ArrowRightIcon size={32} />
-        </KidActionButton>
+        <Button className="w-[240px]" iconStart={<ArrowRightIcon size={BUTTON_ICON_SIZE.xxl} />}>
+          Play next
+        </Button>
       </Obj>
     </div>
   )

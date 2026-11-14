@@ -37,24 +37,37 @@ export function ScoreRow({ stars = 3 }: { stars?: number }) {
  * The pink sheet with the cream paper cut across it (share the moment, play): pink background, the paper
  * polygon (Scrapbook/Lifted paper: 0 5 10 black 20%), the three stickers and the "Today at 14:05" stamp.
  */
-export function ParentPaperSheet({ time = "Today at 14:05", children }: { time?: string; children?: ReactNode }) {
+const same = (_: string, n: ReactNode) => n
+export function ParentPaperSheet({
+  time = "Today at 14:05",
+  slot = same,
+  children,
+}: {
+  time?: string
+  /** Wrap parts for motion: paper, comet, sparkle, burst, time. */
+  slot?: (part: string, node: ReactNode) => ReactNode
+  children?: ReactNode
+}) {
   return (
     <div className="relative isolate overflow-hidden bg-white" style={{ width: PARENT_STAGE.w, height: PARENT_STAGE.h }}>
       <div className="absolute top-0 left-0 h-[956px] w-[440px] bg-pink" />
       <RisoGrain className="z-0" />
-      <svg aria-hidden className="absolute" style={{ left: -24, top: 83.5, filter: "drop-shadow(0 5px 10px rgb(0 0 0 / 0.2))" }} width={488} height={847.5} viewBox="0 0 488 847.5">
-        <path d="M0 0L488 181.5L488 847.5L0 847.5Z" fill="var(--sticker-cream)" />
-      </svg>
+      {slot(
+        "paper",
+        <svg aria-hidden className="absolute" style={{ left: -24, top: 83.5, filter: "drop-shadow(0 5px 10px rgb(0 0 0 / 0.2))" }} width={488} height={847.5} viewBox="0 0 488 847.5">
+          <path d="M0 0L488 181.5L488 847.5L0 847.5Z" fill="var(--sticker-cream)" />
+        </svg>,
+      )}
       <div className="absolute grid size-[205.3px] place-items-center" style={{ left: 35, top: 14 }}>
-        <Sticker name="cloudComet" size={181.771} tilt={-8} />
+        {slot("comet", <Sticker name="cloudComet" size={181.771} tilt={-8} />)}
       </div>
       <div className="absolute grid size-[101.626px] place-items-center" style={{ left: 243, top: 20 }}>
-        <Sticker name="sparkle" size={85.684} tilt={12} />
+        {slot("sparkle", <Sticker name="sparkle" size={85.684} tilt={12} />)}
       </div>
       <div className="absolute grid size-[174.416px] place-items-center" style={{ left: 207, top: 93 }}>
-        <Sticker name="burst" size={150.559} tilt={10} />
+        {slot("burst", <Sticker name="burst" size={150.559} tilt={10} />)}
       </div>
-      <p className="text-mono-lg absolute top-4 left-4 w-[220px] text-cream">{time}</p>
+      <div className="absolute top-4 left-4 w-[220px]">{slot("time", <p className="text-mono-lg text-cream">{time}</p>)}</div>
       {children}
     </div>
   )
