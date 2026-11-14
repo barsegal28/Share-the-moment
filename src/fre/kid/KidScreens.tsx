@@ -6,7 +6,7 @@ import { useEffect, useState, type CSSProperties } from "react"
 import { Sticker, type StickerName } from "@/art/stickers"
 import { Obj, EASING } from "../Obj"
 import { useFlow } from "../runtime"
-import { BUTTON_ICON_SIZE, Button, KidBackground, Learner, MomMessageCard, ReplyNotification, ResultCard, RewardProgress, ShareIcon, SurpriseLabel } from "@/components/app"
+import { ExitButton, BUTTON_ICON_SIZE, Button, KidBackground, Learner, MomMessageCard, ReplyNotification, ResultCard, RewardProgress, ShareIcon, SurpriseLabel } from "@/components/app"
 import { useReplyChoice } from "../shared"
 import { MotionScene, loadMotion } from "./MotionScene"
 import goldStar from "../motion-artifact/assets/share/star.webp"
@@ -219,6 +219,8 @@ function ShareMoment() {
         endFrame={sending ? p.endFrame : undefined}
         onDone={() => sending && flow.signal("motionDone")}
       />
+      {/* The scenes paint the learner bar without Exit; the background's Exit button sits next to it (left 32 + 100 + 16). */}
+      <ExitButton className="absolute top-[21px] left-[148px]" />
       {!sending && <CardSwap key={flow.run} />}
       {!sending && (
         <>

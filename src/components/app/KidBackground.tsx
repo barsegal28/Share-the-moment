@@ -69,6 +69,16 @@ export function ConfettiBits({ className }: { className?: string }) {
   )
 }
 
+/** Ghost Exit button (Figma "background" › Button: Arrow Exit 28, 64 tall, padding 24, gap 8). */
+export function ExitButton({ onClick, className }: { onClick?: () => void; className?: string }) {
+  return (
+    <button type="button" onClick={onClick} className={cn("text-mono-lg flex h-16 items-center gap-2 rounded-[24px] px-6 text-white", className)}>
+      <ArrowExitIcon size={28} />
+      Exit
+    </button>
+  )
+}
+
 /** Figma "background" top-left: the learner (avatar + name) and the ghost Exit button (Arrow Exit 28), same type size. */
 export function Learner({ name = "Noa", character = "cone", exit = true, onExit }: { name?: string; character?: AvatarCharacter; exit?: boolean; onExit?: () => void }) {
   return (
@@ -77,12 +87,7 @@ export function Learner({ name = "Noa", character = "cone", exit = true, onExit 
         <Avatar character={character} />
         <p className="text-mono-lg text-white">{name}</p>
       </div>
-      {exit && (
-        <button type="button" onClick={onExit} className="text-mono-lg flex h-16 items-center gap-2 rounded-[24px] px-6 text-white">
-          <ArrowExitIcon size={28} />
-          Exit
-        </button>
-      )}
+      {exit && <ExitButton onClick={onExit} />}
     </div>
   )
 }
