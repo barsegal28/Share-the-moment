@@ -8,107 +8,154 @@
     {
       "id": "b2",
       "type": "lead",
-      "text": "When a kid earns 3 stars on a song, they can send the recording to Mom, and Mom can send something back. A first-time flow for kids aged 6–9 on iPad, and for their parent on the phone."
+      "text": "Home assignment · Simply · Bar Segal"
     },
     {
       "id": "b3",
       "type": "links",
-      "text": ""
+      "text": "Play Noa’s flow|Play mom flow"
     },
     {
       "id": "b4",
-      "type": "p",
-      "text": "The goal from the brief: strengthen the kid's own sense of accomplishment, and turn it into a positive, empowering moment with their parents. The kid only decides whether to share, never with whom: the recording goes to the parent set up on the kid's profile."
+      "type": "h2",
+      "text": "Goal"
     },
     {
       "id": "b5",
-      "type": "h2",
-      "text": "Who it's for"
+      "type": "p",
+      "text": "Strengthen the kid's own sense of accomplishment, and turn it into a positive, empowering moment with their parents."
     },
     {
       "id": "b6",
-      "type": "p",
-      "text": "Kids aged 6–9 play for different reasons, and each changes what sharing means to them."
+      "type": "divider",
+      "text": ""
     },
     {
       "id": "b7",
-      "type": "ul",
-      "text": "Wants to learn: sharing is proof of mastery, \"I can really play this now\".\nParents said so: practice becomes pride, and Mom's reply replaces \"did you practice?\".\nIt's a game: the send animation and the reply reveal feel like a reward round."
+      "type": "h2",
+      "text": "Personas"
     },
     {
       "id": "b8",
-      "type": "h2",
-      "text": "Design rules"
+      "type": "sub",
+      "text": "Age group 6-9 years. 3 types of learners using the app:"
     },
     {
       "id": "b9",
       "type": "ul",
-      "text": "Voice-over on every prompt. Text is a backup, never the only cue.\nPeople are avatars, not names. \"Mom\" is her avatar in the app.\nOne obvious action per screen, with large touch targets and no typing.\nEvery tap gets sound and motion feedback.\nNo negative signals for the kid: no \"not opened yet\", no \"0 listens\".\nThe kid always chooses to send. Nothing is shared automatically."
+      "text": "Wants to learn: sharing is proof of mastery.\nParents said so: practice becomes pride.\nIt's a game: the send and the reply feel like a reward round.",
+      "gap": 4
     },
     {
       "id": "b10",
       "type": "h2",
-      "text": "The flow"
+      "text": "Solution"
     },
     {
       "id": "b11",
-      "type": "h3",
-      "text": "Kid flow"
+      "type": "p",
+      "text": "Kids share a recording of themselves playing a piece successfully with their parents, and the parents listen and reply in the app. Many parents might never hear their kid play otherwise, so the recording makes it far more likely they will, and their praise reaches the kid soon after the win, while it still means the most. \n**In the future**, these shared moments can become a part of a bigger accomplishment celebration, with a progress timeline, so kids can look back and hear how much they’ve improved."
     },
     {
       "id": "b12",
-      "type": "p",
-      "text": "You did it! (glow-up) → the stickers scatter → You are a star! with three stars → Share the moment → the song flies to Mom → Shared. Later, Mom's reply arrives as a notification and opens as a message with her sticker."
+      "type": "callout",
+      "text": "☝️|In this assignment i covered only the flow of the first run experience of this feature, hence the first time the kid get 3 stars on."
     },
     {
       "id": "b13",
-      "type": "h3",
-      "text": "Parent flow"
+      "type": "divider",
+      "text": ""
     },
     {
       "id": "b14",
-      "type": "p",
-      "text": "An SMS → the listen page with the kid's recording and the effort story → a short message and a sticker → Sent."
+      "type": "h2",
+      "text": "Conceptual flows"
     },
     {
       "id": "b15",
-      "type": "callout",
-      "text": "Each step is designed in layers: what's on screen, what the kid hears, what moves, and what they can do. Sound carries the meaning, so reading is never required."
+      "type": "sub",
+      "text": "Based on the basic flow we defined together in the whiteboard session. I expanded them to cover more aspects and behaviors of the feature."
     },
     {
       "id": "b16",
-      "type": "h2",
-      "text": "What the 3 stars mean"
+      "type": "button",
+      "text": "See in figma|https://www.figma.com/design/vlOm4rX8pbg54I4chyh3Wy/Share-the-moment?node-id=63-1009"
     },
     {
       "id": "b17",
-      "type": "ul",
-      "text": "Every note: every note played, no wrong or missed keys.\nOn the beat: each note played on time.\nBoth hands: played hands-together, not one hand at a time."
+      "type": "h2",
+      "text": "Main design principles"
     },
     {
       "id": "b18",
-      "type": "p",
-      "text": "A missing star tells the kid exactly what to work on next. Mom sees the same three, so she can praise something specific."
+      "type": "ul",
+      "text": "Designing for young kids;\n  Playful, relatable and celebratory design language. Theme kids know and love.\n  Simple messaging\n  Voice-over on every screen along with text\n  One obvious action per screen\n  Multi modal feedback (e.g sound, motion), always positive\nThe kid is in control, choosing if to send or not\nFeature promotion should be subtle to avoid negative sentiment"
     },
     {
       "id": "b19",
       "type": "h2",
-      "text": "Metrics"
+      "text": "Decisions & assumptions"
     },
     {
       "id": "b20",
-      "type": "ul",
-      "text": "Sharing: shares ÷ 3-star results, first-time vs. habitual sharers.\nParent engagement: link open rate, listen-through, reply rate, time to reply.\nStickiness: the kid comes back within 24 hours of a reply.\nRetention: 7- and 30-day retention, sharers vs. non-sharers."
+      "type": "label",
+      "text": "Assumptions"
     },
     {
       "id": "b21",
-      "type": "h2",
-      "text": "Next steps"
+      "type": "ul",
+      "text": "Parents configured their emails and phone numbers in the app in advance. The uses this details by default.\nRecordings are audio only"
     },
     {
       "id": "b22",
+      "type": "label",
+      "text": "Decisions"
+    },
+    {
+      "id": "b23",
       "type": "ul",
-      "text": "Confirm the thresholds behind the prompt's sub-states.\nMultiple receivers: both parents, grandparents, separate households.\nSticker book: a sticker for every completed song, and maybe Mom's reply stickers too."
+      "text": "One message per song share, no multiple songs in one message\nOne receiver in this version"
+    },
+    {
+      "id": "b24",
+      "type": "h2",
+      "text": "Edge cases"
+    },
+    {
+      "id": "b25",
+      "type": "sub",
+      "text": "I didn’t cover them in this assignment."
+    },
+    {
+      "id": "b26",
+      "type": "ul",
+      "text": "No parent contact yet: \"Ask a grown-up\" behind a parent gate.\nApp is offline: queued, same animation for the kid.\nParent listened, no reply: nothing is shown to the kid."
+    },
+    {
+      "id": "b27",
+      "type": "h2",
+      "text": "Future directions and improvements"
+    },
+    {
+      "id": "b28",
+      "type": "sub",
+      "text": "Where this can grow to?"
+    },
+    {
+      "id": "b29",
+      "type": "ul",
+      "text": "Multiple receivers.\nA sticker notebook (and all messages types) for every completed song.\nA weekly digest for parents.\nRefined animations and sounds.\nSemantic tokens are not defined; Currently tokens (especially colors) are not describing what they should be used for. For example, primary and secondary text colors."
+    },
+    {
+      "id": "b30",
+      "type": "h2",
+      "text": "Notes"
+    },
+    {
+      "id": "b31",
+      "type": "ul",
+      "text": "I used Claude text to speech capability for time and resources limitations. For a real product, the voice over should sound MUCH MORE natural, and also friendly, encouraging and excited.",
+      "gap": 0
     }
   ]
 }

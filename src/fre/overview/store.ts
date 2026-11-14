@@ -6,22 +6,35 @@
 import { useSyncExternalStore } from "react"
 import DEFAULT from "./overview-content.json"
 
-export type BlockType = "h1" | "lead" | "h2" | "h3" | "p" | "ul" | "callout" | "links"
-export type Block = { id: string; type: BlockType; text: string }
+export type BlockType = "h1" | "lead" | "links" | "h2" | "sub" | "label" | "h3" | "p" | "ul" | "callout" | "button" | "divider"
+export type Block = { id: string; type: BlockType; text: string; /** list item spacing (px), default 8 */ gap?: number }
 export type Doc = { blocks: Block[] }
 
 export const BLOCK_LABELS: Record<BlockType, string> = {
   h1: "Title",
   lead: "Description",
+  links: "Flow buttons",
   h2: "Heading",
+  sub: "Heading note",
+  label: "Label",
   h3: "Subheading",
   p: "Paragraph",
   ul: "List",
   callout: "Callout",
-  links: "Flow buttons",
+  button: "Link button",
+  divider: "Divider",
 }
 
-const KEY = "share-the-moment/overview/v1"
+/** How each block's raw text is written (shown to the editor). */
+export const BLOCK_HINTS: Partial<Record<BlockType, string>> = {
+  p: "**bold** for bold; a new line is a line break.",
+  ul: "One item per line; start a line with two spaces for a sub-item.",
+  links: "Kid flow label | Mom flow label",
+  callout: "emoji | text",
+  button: "label | link",
+}
+
+const KEY = "share-the-moment/overview/v2"
 export const DEFAULT_DOC = DEFAULT as Doc
 const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v))
 

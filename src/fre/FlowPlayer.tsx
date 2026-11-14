@@ -3,16 +3,17 @@
  * #/kid — only the kid's screens (iPad); #/parent — only the parent's screens (phone).
  */
 import { cn } from "@/lib/utils"
+import { Sticker } from "@/art/stickers"
+import { SlidersIcon } from "./overview/icons"
 import { useEffect, useState } from "react"
-import { ChevronLeft, ChevronRight, Hand, Pause, Play, RotateCcw, SlidersHorizontal, Volume2, VolumeX } from "lucide-react"
+import { ChevronLeft, ChevronRight, Hand, Pause, Play, RotateCcw, Volume2, VolumeX } from "lucide-react"
 import { setPaused, usePaused } from "@/lib/clock"
 import { setMuted, unlockAudio } from "@/lib/audio"
 import { FlowProvider, useFlow } from "./runtime"
 import { FlowStage } from "./FlowStage"
 import { useScript } from "./store"
-import { LINKS } from "@/config"
 import { STEP_IDS, type StepId } from "./script"
-import { Badge, Btn, btnClass } from "./ui"
+import { Badge, Btn } from "./ui"
 
 export type FlowMode = "overview" | "kid" | "parent"
 export const MODE_STEPS: Record<FlowMode, readonly StepId[]> = {
@@ -40,16 +41,17 @@ export function FlowPlayer({ initial, mode = "overview" }: { initial?: StepId; m
 }
 
 export function Brand({ sub }: { sub: string }) {
+  // Figma "Brand": the drippy-comet sticker (40, flipped and turned −137.62°) beside the name, clipped to 40px.
   return (
-    <a href="#/overview" className="flex shrink-0 items-center gap-2.5">
-      <span className="grid size-7 place-items-center rounded-md bg-zinc-900 text-white">
-        <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden>
-          <path d="M12 2.5l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6L3.4 8.8l6-.7z" />
-        </svg>
+    <a href="#/overview" className="flex h-[40.112px] shrink-0 items-center">
+      <span className="grid h-[40.112px] w-[56.509px] shrink-0 place-items-center">
+        <span className="block" style={{ transform: "scaleY(-1) rotate(-137.62deg)" }}>
+          <Sticker name="drippyComet" size={30} />
+        </span>
       </span>
-      <span className="leading-tight">
-        <span className="block text-sm font-semibold tracking-tight">Share the Moment</span>
-        <span className="block text-xs text-zinc-500">{sub}</span>
+      <span className="flex flex-col whitespace-nowrap">
+        <span className="text-[14px] leading-[18px] font-semibold tracking-[-0.14px] text-[#09090b]">Share the Moment</span>
+        <span className="text-[12px] leading-[16px] text-[#71717a]">{sub}</span>
       </span>
     </a>
   )
@@ -95,24 +97,29 @@ function Header({ mode }: { mode: FlowMode }) {
  * the right. Opening the editor keeps this header as it is and shows the editor under it.
  */
 export function SiteHeader({ page, step }: { page: FlowMode | "editor"; step: string }) {
-  const tab = (active: boolean) => cn("rounded-md px-3 py-1.5 text-sm", active ? "font-medium text-zinc-900" : "text-zinc-500 hover:text-zinc-900")
+  // Figma "Site header" (237:4828): 57 tall, 24 side padding, 16 gap, no border; nav tabs 14/20, Editor button 32.
+  const tab = (active: boolean) =>
+    cn("rounded-[6px] px-3 py-1.5 text-[14px] leading-[20px] whitespace-nowrap", active ? "font-medium text-[#18181b]" : "text-[#71717a] hover:text-[#18181b]")
+  const onEditor = page === "editor"
   return (
-    <header className="shrink-0 border-b border-zinc-200">
-      <div className="flex h-14 items-center gap-4 px-6">
-        <Brand sub="First-time flow · prototype" />
-        <nav className="ml-4 flex items-center gap-1">
-          <a href="#/overview" className={tab(page === "overview")}>Overview</a>
-          <a href="#/kid" className={tab(page === "kid")}>Kid flow</a>
-          <a href="#/parent" className={tab(page === "parent")}>Parent flow</a>
-        </nav>
-        <div className="flex-1" />
-        <a href={LINKS.figma} target="_blank" rel="noreferrer" className={tab(false)}>Figma</a>
-        <a href={LINKS.storybook} target="_blank" rel="noreferrer" className={tab(false)}>Storybook</a>
-        <a href={LINKS.repo} target="_blank" rel="noreferrer" className={tab(false)}>GitHub</a>
-        <a href={page === "overview" ? "#/editor?page=overview" : `#/editor?step=${step}`} className={cn(btnClass(page === "editor" ? "default" : "outline", "sm"))} aria-current={page === "editor" ? "page" : undefined}>
-          <SlidersHorizontal /> Editor
-        </a>
-      </div>
+    <header className="flex h-[57px] shrink-0 items-center gap-4 bg-white px-6">
+      <Brand sub="First-time flow · prototype" />
+      <nav className="flex items-start gap-1 pl-4">
+        <a href="#/overview" className={tab(page === "overview")}>Overview</a>
+        <a href="#/kid" className={tab(page === "kid")}>Kid flow</a>
+        <a href="#/parent" className={tab(page === "parent")}>Parent flow</a>
+      </nav>
+      <div className="h-px min-w-px flex-1" />
+      <a
+        href={page === "overview" ? "#/editor?page=overview" : `#/editor?step=${step}`}
+        aria-current={onEditor ? "page" : undefined}
+        className={cn(
+          "inline-flex h-8 shrink-0 items-center gap-2 rounded-[8px] border px-4 text-[14px] leading-[20px] font-medium",
+          onEditor ? "border-[#18181b] bg-[#18181b] text-white" : "border-[#e4e4e7] bg-white text-[#18181b] hover:bg-[#fafafa]",
+        )}
+      >
+        <SlidersIcon /> Editor
+      </a>
     </header>
   )
 }

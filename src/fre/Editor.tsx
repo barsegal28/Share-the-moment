@@ -15,6 +15,7 @@ import { FlowStage } from "./FlowStage"
 import { firstStepOf } from "./FlowChart"
 import { SiteHeader, SoundUnlock } from "./FlowPlayer"
 import { OverviewDoc } from "./overview/OverviewDoc"
+import { OverviewLayout } from "./overview/OverviewPage"
 import { overviewStore } from "./overview/store"
 import { scriptStore, useSaveStatus, useScript } from "./store"
 import { playSound, SOUND_LABELS, SOUND_NAMES, type SoundName } from "./sounds"
@@ -44,12 +45,14 @@ function OverviewEditor() {
       <SiteHeader page="editor" step="k-success" />
       <div className="flex h-12 shrink-0 items-center gap-3 border-b border-zinc-200 px-3">
         <EditorTabs page="overview" step="k-success" />
-        <p className="flex-1 text-center text-xs text-zinc-500">Click any text to edit it. Enter adds a paragraph; hover a block to change its type, move, delete or add below.</p>
+        <p className="flex-1 text-center text-xs text-zinc-500">Click any block to edit its text. Hover a block to change its type, move, delete or add one below.</p>
         <Btn variant="ghost" onClick={() => confirm("Reset the Overview to its default text?") && overviewStore.reset()}><RotateCcw /> Reset text</Btn>
         <a href="#/overview" className={btnClass("outline", "sm")}>View page</a>
       </div>
       <main className="min-h-0 flex-1 overflow-y-auto bg-white">
-        <OverviewDoc editable />
+        <OverviewLayout>
+          <OverviewDoc editable />
+        </OverviewLayout>
       </main>
     </div>
   )
