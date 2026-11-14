@@ -10,7 +10,7 @@ import { useState, type ReactNode } from "react"
 import { Sticker, type StickerName } from "@/art/stickers"
 import { cn } from "@/lib/utils"
 import { Button, IconButton } from "../Button"
-import { CameraIcon, CollectionsIcon, DismissSmallIcon, MicIcon, StickerIcon } from "../icons"
+import { CameraIcon, CheckmarkCircleIcon, CollectionsIcon, DismissSmallIcon, MicIcon, StickerIcon } from "../icons"
 import { PlayButton } from "../PlayButton"
 import { ProgressBar } from "../ProgressBar"
 import { KidHeadline, PARENT_STAGE, ParentPaperSheet, ParentSongRow, ScoreRow, SongInfo } from "./ParentParts"
@@ -128,23 +128,56 @@ export function ParentPlay(props: Parameters<typeof ListenSheet>[0]) {
 // ─── send back: the composer ─────────────────────────────────────────────────
 export type ComposerTool = "sticker" | "voice" | "video"
 
-/** The editable "Proud of you!" tag (Figma annotation: editable text). Blue 1px frame, 6px handles, a text caret. */
-export function MessageTag({ value, onChange, maxLength = 18 }: { value: string; onChange?: (v: string) => void; maxLength?: number }) {
+/**
+ * The editable "Proud of you!" tag. Figma annotations: "text editor" and "wrap text: when the line gets to the
+ * maximum width, break to a new line". Blue 1px frame, padding 2/6, 6px handles at the sides; it grows with the
+ * text up to the card's content width (275) and then wraps.
+ */
+export function MessageTag({ value, onChange, maxLength = 40 }: { value: string; onChange?: (v: string) => void; maxLength?: number }) {
   return (
-    <span className="relative inline-flex items-center justify-center gap-2 border border-blue px-1.5 py-0.5">
-      <input
+    <span className="relative inline-flex max-w-[275px] items-center justify-center gap-2 border border-blue px-1.5 py-0.5">
+      <textarea
         aria-label="Message"
+        rows={1}
         value={value}
         maxLength={maxLength}
         readOnly={!onChange}
-        onChange={(e) => onChange?.(e.target.value)}
+        onChange={(e) => onChange?.(e.target.value.replace(/\n/g, " "))}
+        onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
         onFocus={(e) => e.target.select()}
         style={{ fieldSizing: "content" } as React.CSSProperties}
-        className="text-title-md max-w-[270px] min-w-[3ch] bg-transparent text-center whitespace-nowrap text-teal uppercase caret-grey outline-none"
+        className="text-title-md block max-w-[261px] min-w-[3ch] resize-none overflow-hidden bg-transparent text-center break-words text-teal uppercase caret-grey outline-none"
       />
       <span aria-hidden className="absolute top-3 left-[-3.5px] size-1.5 rounded-full border border-blue bg-white" />
       <span aria-hidden className="absolute top-3 right-[-4px] size-1.5 rounded-full border border-blue bg-white" />
     </span>
+  )
+}
+
+export type SendState = "idle" | "sending" | "sent"
+
+/**
+ * "Send to Noa" (outline, XL). Figma annotation: "send confirmation — add a spinner animation and then pop the
+ * check icon". sending: a 28px spinner in the label colour; sent: Checkmark Circle (28, filled) pops in, label "Sent".
+ */
+export function SendButton({ state = "idle", onClick, label = "Send to Noa" }: { state?: SendState; onClick?: () => void; label?: string }) {
+  return (
+    <Button
+      variant="outline"
+      size="xl"
+      onClick={state === "idle" ? onClick : undefined}
+      aria-live="polite"
+      aria-busy={state === "sending" || undefined}
+      iconStart={
+        state === "sending" ? (
+          <span aria-hidden className="block size-7 animate-spin rounded-full border-[3px] border-current border-t-transparent" />
+        ) : state === "sent" ? (
+          <CheckmarkCircleIcon size={28} className="animate-[pop-check_420ms_cubic-bezier(0.34,1.56,0.64,1)_both]" />
+        ) : undefined
+      }
+    >
+      {state === "sent" ? "Sent" : label}
+    </Button>
   )
 }
 
@@ -220,8 +253,11 @@ export function ParentSendBack({
   sticker,
   onSticker,
   onSend,
+  sendState = "idle",
   slot = same,
 }: {
+  /** The send confirmation (Figma 187:9339): idle → sending (spinner) → sent (check). */
+  sendState?: SendState
   message?: string
   onMessage?: (v: string) => void
   sticker?: StickerName
@@ -243,12 +279,7 @@ export function ParentSendBack({
         {slot("card", <StickerCard message={message} onMessage={onMessage} sticker={sticker} onSticker={onSticker} tool={tool} slot={slot} />)}
         {slot("toolbar", <ComposerToolbar tool={tool} onTool={setTool} />)}
       </div>
-      {slot(
-        "send",
-        <Button variant="outline" size="xl" onClick={onSend}>
-          Send to Noa
-        </Button>,
-      )}
+      {slot("send", <SendButton state={sendState} onClick={onSend} />)}
     </div>
   )
 }

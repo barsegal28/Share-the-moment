@@ -2,16 +2,16 @@
  * Parent flow, phone web (Figma "Parent.Mobile", 393 × 650 content inside an iPhone + Safari shell).
  * SMS → listen page → listen sheet → send a surprise → sent.
  */
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import { BatteryFull, ChevronLeft, ChevronRight, Lock, RotateCw, Signal, Wifi, BookOpen, Copy, Share } from "lucide-react"
 import { Sticker } from "@/art/stickers"
 import { playRecording, stopRecording } from "@/lib/audio"
 import { cn } from "@/lib/utils"
 import { DEMO_SONG } from "@/config"
-import { Obj, EASING } from "../Obj"
+import { Obj } from "../Obj"
 import { useFlow, useRecordingProgress } from "../runtime"
-import { ListenSheet, ParentSendBack, ParentShareMoment } from "@/components/app"
-import { RisoGrain } from "@/components/sticker/Sheet"
+import { ListenSheet, ParentSendBack, ParentShareMoment, type SendState } from "@/components/app"
+import { cancelLater, later } from "@/lib/clock"
 import { SONG_SECONDS, fmt, replyChoice, useReplyChoice } from "../shared"
 import type { StepId } from "../script"
 
@@ -243,49 +243,22 @@ function ReplyComposer() {
   )
 }
 
-// ─── Reply sent ───
+// ─── Reply sent · Figma Parent.Mobile 187:9339 (send confirmation) ───
+/** The composer stays; "Send to Noa" spins, then the check pops in and it reads "Sent". */
 function ReplySent() {
   const flow = useFlow()
   const choice = useReplyChoice()
-  const ref = useRef<HTMLDivElement>(null)
-  const m = flow.script["p-sent"].objects.fly.motion
+  const spinMs = flow.script["p-sent"].params.spinMs ?? 1100
+  const [state, setState] = useState<SendState>(flow.animate ? "sending" : "sent")
   useEffect(() => {
-    if (!flow.animate) return
-    const a = ref.current?.animate(
-      [
-        { transform: "translate(0,0) scale(1) rotate(0)", opacity: 1 },
-        { transform: "translate(10px, 30px) scale(0.92) rotate(-4deg)", opacity: 1, offset: 0.25 },
-        { transform: "translate(160px, -620px) scale(0.3) rotate(24deg)", opacity: 0 },
-      ],
-      { duration: m.duration, delay: m.delay, easing: EASING[m.ease], fill: "both" },
-    )
-    return () => a?.cancel()
-  }, [flow.run, flow.animate, m.duration, m.delay, m.ease])
+    if (!flow.animate) return setState("sent")
+    setState("sending")
+    const t = later(() => setState("sent"), spinMs)
+    return () => cancelLater(t)
+  }, [flow.run, flow.animate, spinMs])
   return (
-    <div className="absolute inset-0 isolate flex flex-col items-center justify-center gap-6 overflow-hidden bg-cream px-8 text-center">
-      <RisoGrain className="-z-10" />
-      {flow.animate && (
-        <div ref={ref} className="pointer-events-none absolute" style={{ left: 37, top: 110 }}>
-          <div className="flex h-[328px] w-[319px] flex-col items-center justify-center gap-4 rounded-[40px] border-2 border-periwinkle bg-paper">
-            <span className="font-display text-[32px] text-teal uppercase">{choice.phrase}</span>
-            <Sticker name={choice.sticker} size={180} tilt={-8} />
-          </div>
-        </div>
-      )}
-      <Obj step="p-sent" id="done">
-        <span className="sticker grid size-24 place-items-center rounded-full bg-teal text-cream [--kiss:var(--sticker-orange)]">
-          <svg viewBox="0 0 24 24" className="size-12" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d="M5 12.5l4.5 4.5L19 7.5" />
-          </svg>
-        </span>
-      </Obj>
-      <Obj step="p-sent" id="text" className="flex flex-col items-center gap-3">
-        <p className="font-display text-[34px] leading-none text-teal uppercase">Sent to Noa!</p>
-        <p className="font-mono text-[16px] leading-[20px] font-medium text-gold">It pops up for Noa with a sound, next time the app is open.</p>
-        <button type="button" onClick={() => flow.go("p-reply")} className="mt-2 font-mono text-[16px] text-orange underline underline-offset-4">
-          Send another
-        </button>
-      </Obj>
+    <div className="absolute inset-0">
+      <ParentSendBack message={choice.index.text ?? choice.phrase} sticker={choice.sticker} sendState={state} />
     </div>
   )
 }

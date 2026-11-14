@@ -4,7 +4,7 @@ import { Check, CornerLeftDown, CornerRightUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { NODES, STEP_IDS, type NodeId, type Script, type StepId } from "./script"
 
-const COLS: Record<NodeId, number> = { "kid-success": 1, "kid-confirm": 2, "parent-message": 3, "parent-listen": 4, "parent-reply": 5, "parent-confirm": 6, "kid-reveal": 7 }
+const COLS: Record<NodeId, number> = { "kid-success": 1, "kid-confirm": 2, "parent-message": 3, "parent-listen": 4, "parent-reply": 5, "parent-confirm": 6 }
 
 export const firstStepOf = (script: Script, node: NodeId) => STEP_IDS.find((s) => script[s].node === node)!
 

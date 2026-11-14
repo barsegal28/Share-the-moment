@@ -87,7 +87,7 @@ export interface StepCfg {
   params: Record<string, number>
 }
 
-export const STEP_IDS = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "p-notify", "p-sms", "p-message", "p-listen", "p-reply", "p-sent", "k-notify", "k-reveal"] as const
+export const STEP_IDS = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "p-notify", "p-sms", "p-message", "p-listen", "p-reply", "p-sent"] as const
 export type StepId = (typeof STEP_IDS)[number]
 
 /** The flow chart from the plan doc. */
@@ -98,7 +98,6 @@ export const NODES = [
   { id: "parent-listen", lane: "parent", title: "Listen widget", sub: "kid's recording" },
   { id: "parent-reply", lane: "parent", title: "Send a reply", sub: "pick a reply type" },
   { id: "parent-confirm", lane: "parent", title: "Confirmation", sub: "reply sent" },
-  { id: "kid-reveal", lane: "kid", title: "Reply reveal", sub: "sticker + voice" },
 ] as const
 export type NodeId = (typeof NODES)[number]["id"]
 
@@ -292,40 +291,11 @@ const BASE_SCRIPT: Script = {
   }),
   "p-sent": step({
     id: "p-sent", title: "Reply sent", node: "parent-confirm", device: "phone",
-    note: "The sticker card flies off to Noa; the parent can send another.",
-    advance: "auto", after: 3200, next: "k-notify",
-    sounds: [S("send", 0, 0.7), S("chime", 900, 0.5)],
-    objects: {
-      fly: O("Card flies away", { enter: "none", duration: 900, ease: "inOut" }),
-      done: O("Sent check", { enter: "stamp", delay: 900, duration: 420, scaleFrom: 2 }),
-      text: O("Sent text", { enter: "slideUp", delay: 1050, duration: 420, distance: 20 }),
-    },
-  }),
-  "k-notify": step({
-    id: "k-notify", title: "A surprise arrives", node: "kid-reveal", device: "ipad",
-    note: "The reply arrives as a banner led by Mom's face, with a sound and a voice line, since the kid may not read.",
-    advance: "tap", next: "k-reveal",
-    voice: [V("Mom sent you a surprise!", "guide", 900), V("Tap to open it!", "guide", 200)],
-    sounds: [S("chime", 450, 0.7)],
-    recording: { mode: "off", volume: 0 },
-    objects: {
-      banner: O("Notification banner", { enter: "slideDown", delay: 400, duration: 560, distance: 220, ease: "spring", idle: "wiggle", idleAmp: 1.5, idleSpeed: 2.2 }, { tapSound: "pop" }),
-    },
-  }),
-  "k-reveal": step({
-    id: "k-reveal", title: "Reply reveal", node: "kid-reveal", device: "ipad",
-    note: "Mom's sticker pops in with her voice message. The end of the exchange: the kid doesn't reply back.",
+    note: "Figma 187:9339: the send confirmation. Send to Noa spins, then the check pops in and it reads Sent. The end of the flow (the kid's side of the reply is still being designed).",
     advance: "tap", next: null,
-    voice: [V("Proud of you, Noa! I loved hearing you play!", "mom", 1300), V("Mom loved it!", "guide", 400)],
-    sounds: [S("magic", 300, 0.7), S("burst", 900, 0.6), S("sparkle", 1100, 0.6)],
-    objects: {
-      dim: O("Dim", { enter: "fade", duration: 350, ease: "out" }),
-      mom: O("Mom", { enter: "drop", delay: 200, duration: 600, distance: 200, ease: "bounce", idle: "bob", idleAmp: 4, idleSpeed: 2.6 }),
-      tag: O("Proud of you! tag", { enter: "pop", delay: 650, duration: 520, rotateFrom: -10, idle: "boil", idleAmp: 1, idleSpeed: 0.35 }),
-      sticker: O("Mom's sticker", { enter: "stamp", delay: 900, duration: 520, scaleFrom: 3, rotateFrom: -40, idle: "float", idleAmp: 8, idleSpeed: 3 }, { tapSound: "boing" }),
-      confetti: O("Confetti", { enter: "fade", delay: 900, duration: 200 }),
-      next: O("Play next button", { enter: "slideUp", delay: 2200, duration: 460, distance: 40, ease: "spring" }, { tapSound: "tap" }),
-    },
+    sounds: [S("send", 0, 0.5), S("chime", 1100, 0.6), S("sparkle", 1150, 0.5)],
+    recording: { mode: "off", volume: 0 },
+    params: { spinMs: 1100 },
   }),
 }
 

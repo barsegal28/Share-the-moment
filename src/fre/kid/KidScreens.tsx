@@ -2,16 +2,15 @@
  * Kid flow, iPad landscape (1194 × 834, the Figma frames 1–4 plus the send overlay and the reply).
  * One persistent scene, so the stickers that scatter out of the planet stay on the sheet and glide into place.
  */
-import { useEffect, useRef, useState, type CSSProperties } from "react"
+import { useEffect, useState, type CSSProperties } from "react"
 import { Sticker, type StickerName } from "@/art/stickers"
 import { Obj, EASING } from "../Obj"
 import { useFlow } from "../runtime"
-import { ArrowRightIcon, BUTTON_ICON_SIZE, Button, KidBackground, Learner, Lettering, ResultCard, RewardProgress } from "@/components/app"
+import { KidBackground, Learner, ResultCard, RewardProgress } from "@/components/app"
 import { MotionScene, loadMotion } from "./MotionScene"
 
 // Warm the motion scenes (font + stickers) so the glow-up starts at once.
 if (typeof window !== "undefined") void loadMotion().catch(() => {})
-import { useReplyChoice } from "../shared"
 import { cancelLater, later } from "@/lib/clock"
 import type { StepId } from "../script"
 
@@ -48,7 +47,7 @@ const LAYOUT_CARD: Record<StickerId, Place> = {
 }
 const ORDER: StickerId[] = ["striped", "ringed", "drippy", "cloud", "burst", "heart", "spark1", "spark2", "spark3"]
 
-const KID_STEPS: StepId[] = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "k-notify", "k-reveal"]
+const KID_STEPS: StepId[] = ["k-glow", "k-scatter", "k-success", "k-share", "k-send"]
 export const isKidStep = (s: StepId) => KID_STEPS.includes(s)
 
 export function KidScreens() {
@@ -68,7 +67,7 @@ export function KidScreens() {
   if (s === "k-share" || s === "k-send") return <ShareMoment />
 
   const layout = s === "k-scatter" ? LAYOUT_SCATTER : LAYOUT_CARD
-  const cardState: CardState | null = s === "k-success" ? "success" : s === "k-notify" || s === "k-reveal" ? "shared" : null
+  const cardState: CardState | null = s === "k-success" ? "success" : null
 
   return (
     <KidBackground learner={false} progress={false} className="font-mono">
@@ -106,8 +105,6 @@ export function KidScreens() {
 
       {(cardState || s === "k-scatter") && <TopBar />}
       {cardState && <Card state={cardState} />}
-      {s === "k-notify" && <ReplyBanner />}
-      {s === "k-reveal" && <Reveal />}
     </KidBackground>
   )
 }
@@ -143,13 +140,13 @@ function TopBar() {
 }
 
 // ─── The card: Figma "main" ───────────────────────────────────────────────
-type CardState = "success" | "shared"
+type CardState = "success"
 const CARD_POS = { left: 288, top: 107 }
 
 function Card({ state }: { state: CardState }) {
   const flow = useFlow()
-  // k-success: main · timeline=FRE (title + stars). k-notify / k-reveal: main · default, Shared (Figma screen 5).
-  const step: StepId = state === "success" ? "k-success" : "k-notify"
+  // k-success: main · timeline=FRE (title + stars). The Shared state (Figma screen 5) is the end of the share scene.
+  const step: StepId = "k-success"
   return (
     <Obj step="k-success" id="card" className="absolute" style={{ left: CARD_POS.left, top: CARD_POS.top, width: 620, height: 660 }}>
       <ResultCard
@@ -223,87 +220,6 @@ function ShareMoment() {
           </Obj>
         </>
       )}
-    </div>
-  )
-}
-
-// ─── A surprise arrives ────────────────────────────────────────────────────
-function ReplyBanner() {
-  const flow = useFlow()
-  const { sticker } = useReplyChoice()
-  return (
-    <Obj step="k-notify" id="banner" hint onTap={() => flow.go("k-reveal")} className="absolute z-10 rounded-[36px]" style={{ left: (IPAD.w - 600) / 2, top: 28, width: 600 }}>
-      <div className="sticker flex items-center gap-5 rounded-[36px] bg-paper py-4 pr-6 pl-5 [--kiss:var(--sticker-pink)]">
-        <Sticker name="mom" size={96} tilt={-6} />
-        <div className="flex-1">
-          <p className="font-display text-[34px] leading-none text-teal">Mom sent you</p>
-          <p className="font-display text-[34px] leading-none text-orange">a surprise!</p>
-        </div>
-        <div className="grid size-[92px] place-items-center rounded-[24px] bg-cream/70">
-          <Sticker name={sticker} size={70} tilt={8} motion="wiggle" />
-        </div>
-      </div>
-    </Obj>
-  )
-}
-
-// ─── The reveal ────────────────────────────────────────────────────────────
-function Reveal() {
-  const flow = useFlow()
-  const { sticker, phrase } = useReplyChoice()
-  const confettiAt = flow.script["k-reveal"].objects.confetti.motion.delay
-  return (
-    <div className="absolute inset-0 z-10">
-      <Obj step="k-reveal" id="dim" className="absolute inset-0">
-        <div className="h-full w-full bg-ink/85" />
-      </Obj>
-      <Confetti key={flow.run} delay={confettiAt} play={flow.animate} />
-      <Obj step="k-reveal" id="tag" className="absolute" style={{ left: 0, right: 0, top: 96 }}>
-        <p className="text-center font-display text-[72px] leading-none text-teal uppercase">
-          <Lettering stroke={22}>{phrase}</Lettering>
-        </p>
-      </Obj>
-      <Obj step="k-reveal" id="sticker" className="absolute" style={{ left: IPAD.w / 2 - 170, top: 230, width: 340, height: 340 }} onTap={() => {}}>
-        <Sticker name={sticker} size={340} tilt={-8} />
-      </Obj>
-      <Obj step="k-reveal" id="mom" className="absolute" style={{ left: 300, top: 470, width: 150, height: 150 }}>
-        <Sticker name="mom" size={150} tilt={-10} />
-      </Obj>
-      <Obj step="k-reveal" id="next" className="absolute" style={{ left: IPAD.w / 2 - 120, top: 680 }} onTap={() => flow.restart()}>
-        <Button className="w-[240px]" iconStart={<ArrowRightIcon size={BUTTON_ICON_SIZE.xxl} />}>
-          Play next
-        </Button>
-      </Obj>
-    </div>
-  )
-}
-
-const CONF_COLORS = ["var(--sticker-orange)", "var(--sticker-pink)", "var(--sticker-periwinkle)", "var(--sticker-teal)", "var(--sticker-gold)", "var(--sticker-cream)"]
-function Confetti({ delay, play }: { delay: number; play: boolean }) {
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const root = ref.current
-    if (!root || !play) return
-    const anims = Array.from(root.children).map((el, i) => {
-      const a = (i / root.children.length) * Math.PI * 2 + (i % 3) * 0.2
-      const d = 260 + ((i * 97) % 300)
-      return (el as HTMLElement).animate(
-        [
-          { transform: "translate(0,0) rotate(0) scale(0.4)", opacity: 0 },
-          { opacity: 1, offset: 0.1 },
-          { transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d * 0.75 + 120}px) rotate(${(i % 2 ? 1 : -1) * 540}deg) scale(1)`, opacity: 0 },
-        ],
-        { duration: 1600 + (i % 5) * 160, delay, easing: "cubic-bezier(0.1, 0.7, 0.3, 1)", fill: "both" },
-      )
-    })
-    return () => anims.forEach((x) => x.cancel())
-  }, [delay, play])
-  return (
-    <div ref={ref} className="pointer-events-none absolute" style={{ left: IPAD.w / 2, top: 400 }}>
-      {Array.from({ length: 28 }, (_, i) => {
-        const st: CSSProperties = { background: CONF_COLORS[i % CONF_COLORS.length], position: "absolute", width: 18, height: i % 3 ? 26 : 18, opacity: 0, borderRadius: i % 3 ? 3 : 2, clipPath: i % 3 === 0 ? "polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)" : "polygon(50% 0, 100% 50%, 50% 100%, 0 50%)" }
-        return <span key={i} style={st} />
-      })}
     </div>
   )
 }

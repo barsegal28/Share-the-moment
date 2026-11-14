@@ -375,3 +375,8 @@
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
   letter-spacing: normal;
 }
+
+@keyframes pop-check {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}

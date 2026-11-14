@@ -159,37 +159,5 @@
       "mode": "off",
       "volume": 0.15
     }
-  },
-  "k-notify": {
-    "voice": [
-      {
-        "text": "Mom sent you a surprise!",
-        "voice": "guide",
-        "delay": 900,
-        "rate": 1,
-        "pitch": 1.35,
-        "claudeVoice": "airy"
-      },
-      {
-        "text": "Tap to open it!",
-        "voice": "guide",
-        "delay": 200,
-        "rate": 1,
-        "pitch": 1.35,
-        "claudeVoice": "airy"
-      }
-    ]
-  },
-  "k-reveal": {
-    "voice": [
-      {
-        "text": "Proud of you, Noa! I loved hearing you play!",
-        "voice": "mom",
-        "delay": 1300,
-        "rate": 1,
-        "pitch": 1.15,
-        "claudeVoice": "rounded"
-      }
-    ]
   }
 }
