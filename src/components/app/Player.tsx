@@ -5,7 +5,7 @@
  *   mobile-blue       — 357 wide, padding 20/30, gap 20; Play S; Title/Small teal, Mono/Medium gold, details gap 8;
  *                       compact progress (gap 8, Mono/Small).
  *   mobile-green      — as mobile-blue on teal: notebook title, cream meta and timestamps.
- *   mobile-blue-large — Play M, meta on two lines ("Frozen" / "Played by Noa").
+ *   mobile-blue-large — Play M, meta on two lines ("Winter" / "Played by Noa").
  */
 import { cn } from "@/lib/utils"
 import { PlayButton, type PlayTone } from "./PlayButton"
@@ -36,8 +36,8 @@ export interface PlayerProps {
 
 export function Player({
   surface = "tablet",
-  title = "Let it go",
-  from = "Frozen",
+  title = "Jingle Bells",
+  from = "Winter",
   by = "Played by Noa",
   progress = 0.38,
   current = "0:34",

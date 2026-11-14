@@ -11,7 +11,7 @@ export const PROJECT = {
 }
 
 /** The example song in the prototype. Only the title is used: the demo recording is an original tune. */
-export const DEMO_SONG = { title: "Let It Go", from: "Frozen" }
+export const DEMO_SONG = { title: "Jingle Bells", from: "Winter" }
 
 export const LINKS = {
   /** Paste the Figma file link ("Share the moment"). The page embeds it automatically. */

@@ -1,34 +1,32 @@
 // "Little Pianist" (claude.ai artifact R6JdkhrcSf7EQ93gkd8GvH), Mom's player: animated sheet music + keyboard with
-// a synthesised piano take. The code below is the artifact's script, unchanged except that it is wrapped in a
+// a synthesised piano take (Jingle Bells). The code below is the artifact's script, unchanged except that it is wrapped in a
 // mount function: element lookups go through `root` (ids prefixed lp-), and the loops stop on destroy().
 /* eslint-disable */
 // @ts-nocheck
 export function mountLittlePianist(root) {
   let alive = true;
 
-// ---------- song: Ode to Joy (Beethoven, public domain), beginner C-position arrangement ----------
-const RH_MEAS = [
- [['E4',1,3],['E4',1],['F4',1],['G4',1]],
- [['G4',1],['F4',1],['E4',1],['D4',1]],
- [['C4',1],['C4',1],['D4',1],['E4',1]],
- [['E4',1.5],['D4',.5],['D4',2]],
- [['E4',1,3],['E4',1],['F4',1],['G4',1]],
- [['G4',1],['F4',1],['E4',1],['D4',1]],
- [['C4',1],['C4',1],['D4',1],['E4',1]],
- [['D4',1.5],['C4',.5],['C4',2]],
- [['D4',1,2],['D4',1],['E4',1],['C4',1]],
- [['D4',1],['E4',.5],['F4',.5,null,'G4'],['E4',1],['C4',1]],
- [['D4',1],['E4',.5],['F4',.5],['E4',1],['D4',1]],
- [['C4',1],['D4',1],['G3',2,1]],
- [['E4',1,3],['E4',1],['F4',1],['G4',1]],
- [['G4',1],['F4',1],['E4',1],['D4',1]],
- [['C4',1],['C4',1],['D4',1],['E4',1]],
- [['D4',1.5],['C4',.5],['C4',2]],
+// ---------- song: Jingle Bells chorus (J. Pierpont, 1857, public domain), beginner C-position arrangement, twice ----------
+const A_ = [
+ [['E4',1,3],['E4',1],['E4',2]],
+ [['E4',1],['E4',1],['E4',2]],
+ [['E4',1],['G4',1,5],['C4',1.5,1],['D4',.5,2]],
+ [['E4',4,3]],
+ [['F4',1,4],['F4',1],['F4',1.5],['F4',.5]],
+ [['F4',1],['E4',1],['E4',1],['E4',.5],['E4',.5]],
 ];
-const C=['C3','G3'], G=['D3','G3'];
-const LH_MEAS=[[[C,4]],[[G,4]],[[C,4]],[[G,4]],[[C,4]],[[G,4]],[[C,4]],[[G,2],[C,2]],
-               [[G,4]],[[C,4]],[[G,4]],[[G,4]],[[C,4]],[[G,4]],[[C,4]],[[G,2],[C,2]]];
-const LH_FING={C3:5,G3:1,D3:4};
+const RH_MEAS = [
+ ...A_,
+ [['E4',1],['D4',1,2],['D4',1],['E4',1]],
+ [['D4',2],['G4',2,5]],
+ ...A_,
+ [['G4',1,5],['G4',1],['F4',1],['D4',1]],
+ [['C4',4,1]],
+];
+const C=['C3','G3'], G=['D3','G3'], F=['F3','A3'];
+const LH_MEAS=[[[C,4]],[[C,4]],[[C,4]],[[C,4]],[[F,4]],[[C,4]],[[G,4]],[[G,4]],
+               [[C,4]],[[C,4]],[[C,4]],[[C,4]],[[F,4]],[[C,4]],[[G,4]],[[C,4]]];
+const LH_FING={C3:5,G3:1,D3:4,F3:5,A3:2};
 
 const NAMES={C:0,D:2,E:4,F:5,G:7,A:9,B:11}, DIA={C:0,D:1,E:2,F:3,G:4,A:5,B:6};
 const midi=n=>12*(+n[1]+1)+NAMES[n[0]];
@@ -52,9 +50,9 @@ function seeded(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s
 let perf;
 function makePerformance(seed){
   rand=seeded(seed); const r=(a,b)=>a+(b-a)*rand();
-  const beat=60/r(92,100);
+  const beat=60/r(108,114);
   let clock=1.6, drift=1, events=[], map=[{b:-3,t:clock-3*beat}];
-  const wrongMeasure = rand()<.5?9:10; // which tricky bar gets the slip this take
+  const wrongMeasure = -1; // this take is clean (no slip)
   rh.forEach((n,i)=>{
     // hesitations: new section, the hand jump down to G, and after the slip
     if(n.b===32) clock+=r(.25,.45);
@@ -263,7 +261,7 @@ function draw(){
   // caption
   ctx.fillStyle='#5b6a70'; ctx.font='700 17px Fredoka, Nunito, sans-serif'; ctx.textAlign='center';
   const fin=started&&t>perf.end-.6;
-  ctx.fillText(fin?'Bravo! 👏':'Ode to Joy · L. van Beethoven · easy piano',W/2,770);
+  ctx.fillText(fin?'Bravo! 👏':'Jingle Bells · J. Pierpont · easy piano',W/2,770);
   if(fin&&playing){ppBtn.textContent='Play again';}
   if(alive) requestAnimationFrame(draw);
 }

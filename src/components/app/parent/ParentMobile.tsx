@@ -85,12 +85,12 @@ export function ListenSheet({
         {slot(
           "cover",
           <div className="relative h-[210px] w-full overflow-hidden rounded-[20px] border border-gold bg-white">
-            {coverNode ?? <img src={cover} alt="Let it go — sheet music and keyboard" className="absolute top-[-1px] left-1/2 h-[196px] w-[345px] -translate-x-1/2" />}
+            {coverNode ?? <img src={cover} alt="Jingle Bells — sheet music and keyboard" className="absolute top-[-1px] left-1/2 h-[196px] w-[345px] -translate-x-1/2" />}
           </div>,
         )}
         <div className="flex w-full flex-col items-start px-1">
           <div className="flex w-full flex-col items-start gap-3">
-            <p className="text-title-md whitespace-nowrap text-teal">Let it go</p>
+            <p className="text-title-md whitespace-nowrap text-teal">Jingle Bells</p>
             <div className="flex w-full flex-col items-start gap-1">
               <SongInfo fromWidth={58} />
               <ScoreRow />

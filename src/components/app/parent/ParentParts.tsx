@@ -10,8 +10,8 @@ import { PlayButton } from "../PlayButton"
 
 export const PARENT_STAGE = { w: 393, h: 650 }
 
-/** "Frozen · Played by Noa" — Mono/Medium gold, gap 4; the last part takes the rest of the line. */
-export function SongInfo({ from = "Frozen", by = "Played by Noa", fromWidth }: { from?: string; by?: string; fromWidth?: number }) {
+/** "Winter · Played by Noa" — Mono/Medium gold, gap 4; the last part takes the rest of the line. */
+export function SongInfo({ from = "Winter", by = "Played by Noa", fromWidth }: { from?: string; by?: string; fromWidth?: number }) {
   return (
     <div className="text-mono-md flex w-full items-center gap-1 text-gold">
       <span className="shrink-0 whitespace-nowrap" style={fromWidth ? { width: fromWidth } : undefined}>{from}</span>
@@ -84,7 +84,7 @@ export function KidHeadline({ text = "Listen to me play,", shout = "mom!", class
 }
 
 /** The kid's song on the parent's message: Play S (orange), title, song info and score. 340 wide, pl 12 pr 30 py 20, gap 20. */
-export function ParentSongRow({ title = "Let it go", playing, onPlay, className }: { title?: string; playing?: boolean; onPlay?: () => void; className?: string }) {
+export function ParentSongRow({ title = "Jingle Bells", playing, onPlay, className }: { title?: string; playing?: boolean; onPlay?: () => void; className?: string }) {
   return (
     <div className={cn("flex w-[340px] items-center gap-5 rounded-[60px] py-5 pr-[30px] pl-3", className)}>
       <PlayButton size="S" tone="orange" playing={playing} onClick={onPlay} />

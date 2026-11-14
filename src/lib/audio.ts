@@ -69,15 +69,17 @@ export const sfx = {
 }
 
 // ─── The kid's recording ──────────────────────────────────────────────────────
-// An original 8-bar demo tune in C major. [midi, beats]
+// Jingle Bells chorus, twice (J. Pierpont, 1857, public domain), C position, one bass note per bar. [midi, beats]
 export const MELODY: [number, number][] = [
-  [64, 1], [67, 1], [69, 1], [67, 1], [64, 1], [62, 1], [60, 2],
-  [62, 1], [64, 1], [67, 1], [64, 1], [62, 2], [60, 1], [62, 1],
-  [64, 1], [67, 1], [69, 1], [72, 1], [71, 1], [69, 1], [67, 2],
-  [69, 1], [67, 1], [64, 1], [62, 1], [60, 4],
+  [64, 1], [64, 1], [64, 2], [64, 1], [64, 1], [64, 2], [64, 1], [67, 1], [60, 1.5], [62, 0.5],
+  [64, 4], [65, 1], [65, 1], [65, 1.5], [65, 0.5], [65, 1], [64, 1], [64, 1], [64, 0.5], [64, 0.5],
+  [64, 1], [62, 1], [62, 1], [64, 1], [62, 2], [67, 2], [64, 1], [64, 1], [64, 2], [64, 1],
+  [64, 1], [64, 2], [64, 1], [67, 1], [60, 1.5], [62, 0.5], [64, 4], [65, 1], [65, 1], [65, 1.5],
+  [65, 0.5], [65, 1], [64, 1], [64, 1], [64, 0.5], [64, 0.5], [67, 1], [67, 1], [65, 1], [62, 1],
+  [60, 4],
 ]
-const BASS: Record<number, number> = { 0: 48, 7: 43, 14: 53, 22: 45, 26: 48 }
-export const BEAT = 0.42
+const BASS: Record<number, number> = { 0: 48, 3: 48, 6: 48, 10: 48, 11: 53, 15: 48, 20: 55, 24: 55, 26: 48, 29: 48, 32: 48, 36: 48, 37: 53, 41: 48, 46: 55, 50: 48 }
+export const BEAT = 0.536 // ≈112 bpm
 export const RECORDING_SECONDS = MELODY.reduce((s, [, b]) => s + b, 0) * BEAT
 
 let recording: { stop: () => void; setVolume: (v: number) => void; startedAt: number; volume: number } | null = null
