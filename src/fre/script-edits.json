@@ -17,6 +17,32 @@
         "pitch": 1.35,
         "claudeVoice": "airy"
       }
+    ],
+    "sounds": [
+      {
+        "sound": "glow",
+        "at": 2118,
+        "volume": 0.8,
+        "pitch": 1
+      },
+      {
+        "sound": "swoosh",
+        "at": 3176,
+        "volume": 0.6,
+        "pitch": 0.8
+      },
+      {
+        "sound": "burst",
+        "at": 3882,
+        "volume": 0.9,
+        "pitch": 1
+      },
+      {
+        "sound": "sparkle",
+        "at": 4118,
+        "volume": 0.6,
+        "pitch": 1
+      }
     ]
   },
   "k-success": {
@@ -246,7 +272,8 @@
           "enter": "none"
         }
       }
-    }
+    },
+    "sounds": []
   },
   "k-surprise": {
     "sounds": [
@@ -299,5 +326,8 @@
         }
       }
     }
+  },
+  "p-listen": {
+    "sounds": []
   }
 }
