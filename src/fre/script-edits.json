@@ -206,5 +206,36 @@
   },
   "p-sent": {
     "sounds": []
+  },
+  "k-shared": {
+    "objects": {
+      "card": {
+        "motion": {
+          "enter": "none"
+        }
+      },
+      "title": {
+        "motion": {
+          "idle": "none"
+        }
+      },
+      "next": {
+        "motion": {
+          "enter": "none",
+          "idle": "wiggle",
+          "idleAmp": 3
+        }
+      },
+      "shared": {
+        "motion": {
+          "enter": "none"
+        }
+      },
+      "again": {
+        "motion": {
+          "enter": "none"
+        }
+      }
+    }
   }
 }
