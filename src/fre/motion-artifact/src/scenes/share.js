@@ -31,7 +31,9 @@ export const STICKERS = [ // name, box [x, y, w, h], peel order
   ['sparkle-right', [918, 293, 192.5, 192.5], 6],
   ['star', [788, 477, 313, 313], 7],
 ];
-const CARD = [278, 102.5, 640, 680];                // share panel (frame 6), captured without the notes
+const CARD = [278, 102.5, 640, 680];                // share panel, blank (card, close, Share) — same as the share screen
+// the avatars on the panel (Figma illustration 228:16414), as on share screen D; they fade out with the card
+const AVATARS = [['mom-avatar', [503.6, 298.2, 283.1, 283.1]], ['kid-avatar', [409.3, 388.5, 160, 162.3]]];
 const SHARE_BTN = [478, 604.5, 240, 80];             // the Share button on it
 const NOTES = [['note-quarter', [347, 298.8, 99, 111.5]], ['note-beamed', [432.4, 280.8, 108.2, 111.5]]];
 const NC = [443.8, 336.5];                            // centre of the two notes
@@ -86,11 +88,11 @@ export function createShare({ images, paperGrain }) {
   }
 
   // ---- the background stickers: idle boil, then peel off one by one (lift → drop → gone) ----
-  // App patch: the gold star sits on top of the panel (Figma); the other stickers are behind it. `top` picks which layer.
-  function drawStickers(ctx, f, cut, top = false) {
+  // which: 'back' = every sticker but the star (behind the card), 'front' = the gold star, which sits above the card
+  function drawStickers(ctx, f, cut, which) {
     for (let i = 0; i < STICKERS.length; i++) {
       const [name, box, order] = STICKERS[i]; const [bx, by, br] = boil[i][cut];
-      if ((name === 'star') !== top) continue;
+      if ((name === 'star') !== (which === 'front')) continue;
       let o = { dx: bx, dy: by, rot: br, scale: 1 }, a = name === 'star' ? 1 : (f < 42 ? DIM : 1);
       const r = f - (44 + O + order * 2);
       if (r >= 4) continue; // peeled off
@@ -102,10 +104,11 @@ export function createShare({ images, paperGrain }) {
 
   // ---- share panel: tap Share, then the card turns transparent in held steps (notes stay) ----
   function drawCard(ctx, f) {
-    const [x, y, w, h] = CARD, img = images['share-card'];
+    const [x, y, w, h] = CARD, img = images['share-card-blank'];
     const a = f < 12 ? 1 : [.75, .5, .25, .1][Math.floor((f - 12) / 2)];
     if (a === undefined) return;
-    ctx.save(); ctx.globalAlpha = a; ctx.drawImage(img, x, y, w, h); ctx.restore();
+    ctx.save(); ctx.globalAlpha = a; ctx.drawImage(img, x, y, w, h);
+    AVATARS.forEach(([name, [ax, ay, aw, ah]]) => ctx.drawImage(images[name], ax, ay, aw, ah)); ctx.restore();
     if (f >= 10 && f < 12) { const [bx, by, bw, bh] = SHARE_BTN; const p = new Path2D(); p.roundRect(bx, by, bw, bh, 40); ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fill(p); }
   }
 
@@ -188,9 +191,9 @@ export function createShare({ images, paperGrain }) {
   }
 
   function draw(ctx, k, f, cut) {
-    drawStickers(ctx, f, cut);
+    drawStickers(ctx, f, cut, 'back');
     if (f < 20) drawCard(ctx, f);
-    drawStickers(ctx, f, cut, true);
+    drawStickers(ctx, f, cut, 'front');
     drawNotes(ctx, f, cut);
     if (f >= 30 && f < 42) drawCrumple(ctx, k, f, cut);
     const pose = cometPose(f, cut);
@@ -211,4 +214,4 @@ export function createShare({ images, paperGrain }) {
   return { id: 'share', title: 'Share · send to mom', frameCount: N, fps: FPS, phases: SHARE_PHASES, draw, sfx: createShareSfx() }; // sound: comet engine + "mom got it" only
 }
 
-export const SHARE_ASSETS = ['share-card', 'note-quarter', 'note-beamed', 'heart-big', 'drippy-comet', ...STICKERS.map(s => s[0])];
+export const SHARE_ASSETS = ['share-card-blank', 'mom-avatar', 'kid-avatar', 'note-quarter', 'note-beamed', 'heart-big', 'drippy-comet', ...STICKERS.map(s => s[0])];
