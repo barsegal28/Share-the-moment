@@ -44,7 +44,7 @@ const LAYOUT_CARD: Record<StickerId, Place> = {
   heart: { cx: 654, cy: 594, size: 150, rot: -14 },
   spark2: { cx: 74, cy: 358, size: 150, rot: -10 },
   spark3: { cx: 1014, cy: 389, size: 150, rot: 20 },
-  burst: { cx: 944, cy: 633, size: 270, rot: 100 },
+  burst: { cx: 944.5, cy: 643, size: 270, rot: -10 },
 }
 const ORDER: StickerId[] = ["striped", "ringed", "drippy", "cloud", "burst", "heart", "spark1", "spark2", "spark3"]
 
@@ -209,6 +209,7 @@ function ShareMoment() {
         endFrame={sending ? p.endFrame : undefined}
         onDone={() => sending && flow.signal("motionDone")}
       />
+      {!sending && <CardSwap key={flow.run} />}
       {!sending && (
         <>
           {/* The scene paints the Share button into its first frame. A real Share button sits on top so it can
@@ -271,5 +272,50 @@ function MessageFromMom({ onDone }: { onDone: () => void }) {
         />
       </Obj>
     </KidBackground>
+  )
+}
+
+// ─── k-success → k-share: the card stays; its content swaps with a pop ───────────
+/**
+ * A DOM copy of the "You are a star!" card sits over the share scene for ~0.6 s: the card grows to the share
+ * card's size while its title and stars pop out, then a hole opens from the centre and reveals the share
+ * content underneath (which pops in). The gold burst is redrawn on top so it never blinks.
+ */
+const RESULT_BOX = [288, 107, 620, 660] as const
+const SHARE_BOX = [278, 102.5, 640, 680] as const
+function CardSwap() {
+  const [gone, setGone] = useState(false)
+  useEffect(() => {
+    const t = later(() => setGone(true), 700)
+    return () => cancelLater(t)
+  }, [])
+  if (gone) return null
+  const b = LAYOUT_CARD.burst
+  const px = (v: readonly number[]) => ({ left: v[0], top: v[1], width: v[2], height: v[3] })
+  return (
+    <div className="pointer-events-none absolute inset-0">
+      <style>{`
+        @keyframes fre-swap-card { from { left:${RESULT_BOX[0]}px; top:${RESULT_BOX[1]}px; width:${RESULT_BOX[2]}px; height:${RESULT_BOX[3]}px } to { left:${SHARE_BOX[0]}px; top:${SHARE_BOX[1]}px; width:${SHARE_BOX[2]}px; height:${SHARE_BOX[3]}px } }
+        @keyframes fre-swap-out { 0% { transform: scale(1); opacity: 1 } 35% { transform: scale(1.06); opacity: 1 } 100% { transform: scale(.4); opacity: 0 } }
+        @property --fre-hole { syntax: "<length>"; inherits: false; initial-value: 0px; }
+        @keyframes fre-swap-hole { from { --fre-hole: 0px } to { --fre-hole: 520px } }
+      `}</style>
+      <div
+        className="absolute overflow-hidden rounded-[40px] bg-paper"
+        style={{
+          ...px(SHARE_BOX),
+          animation: `fre-swap-card 260ms ${EASING.spring} both, fre-swap-hole 360ms cubic-bezier(.5,0,.75,0) 300ms both`,
+          WebkitMaskImage: "radial-gradient(circle at 50% 50%, transparent var(--fre-hole), #000 calc(var(--fre-hole) + 1px))",
+          maskImage: "radial-gradient(circle at 50% 50%, transparent var(--fre-hole), #000 calc(var(--fre-hole) + 1px))",
+        }}
+      >
+        <div className="absolute inset-0 grid place-items-center" style={{ animation: "fre-swap-out 280ms ease-in both" }}>
+          <ResultCard timeline="FRE" className="bg-transparent" />
+        </div>
+      </div>
+      <span className="absolute" style={{ left: b.cx - b.size / 2, top: b.cy - b.size / 2 }}>
+        <Sticker name="burst" size={b.size} tilt={b.rot} />
+      </span>
+    </div>
   )
 }
