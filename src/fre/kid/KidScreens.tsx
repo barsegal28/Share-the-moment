@@ -13,7 +13,8 @@ import goldStar from "../motion-artifact/assets/share/star.webp"
 import shareCard from "../motion-artifact/assets/share/share-card-blank.webp"
 import momAvatar from "../motion-artifact/assets/share/mom-avatar.webp"
 import kidAvatar from "../motion-artifact/assets/share/kid-avatar.webp"
-import songPlayer from "../motion-artifact/assets/share/player.webp"
+import noteQuarter from "../motion-artifact/assets/share/note-quarter.webp"
+import noteBeamed from "../motion-artifact/assets/share/note-beamed.webp"
 
 /** The gold burst on top of the card: the same image (and box) the share scenes paint, so it never jumps between screens. */
 const GOLD = [788, 477, 313, 313] as const
@@ -209,13 +210,15 @@ const box = ([left, top, width, height]: readonly number[]): CSSProperties => ({
 
 /**
  * Share screen (Figma 228:16325, option D): the flow's own screen — background, stickers at 70%, the share panel
- * with the kid's and Mom's avatars and the song player, the gold star on top — with ONLY the motion laid over it
+ * with the kid's and Mom's avatars and the two note stickers, the gold star on top — with ONLY the motion laid over it
  * (scene "share-screen-d", animationOnly: a transparent 1194 × 834 canvas, pointer-events none). While the overlay
- * plays, the screen's own player and avatars are hidden (visibility, so nothing shifts): the overlay draws them,
+ * plays, the screen's own notes and avatars are hidden (visibility, so nothing shifts): the overlay draws them,
  * moving. On the Share tap the overlay stops and the "share" scene (send to Mom) plays as before.
  */
 const SHARE_D = {
-  player: [303, 299.5, 322, 123], // the overlay's player at frame 0 (C_K1, 322 × 123)
+  // the two note stickers at frame 0 (Figma 228:16414), the same spot the send-to-Mom scene starts from
+  quarter: [347, 298.8, 99, 111.5],
+  beamed: [432.4, 280.8, 108.2, 111.5],
   mom: [503.6, 298.2, 283.1, 283.1],
   kid: [409.3, 388.5, 160, 162.3],
 } as const
@@ -250,7 +253,8 @@ function ShareMoment() {
       <img src={shareCard} alt="" draggable={false} className="absolute max-w-none select-none" style={box(CARD_IMG)} />
       <img src={momAvatar} alt="Mom" draggable={false} className="absolute max-w-none select-none" style={{ ...box(SHARE_D.mom), visibility: hidden }} />
       <img src={kidAvatar} alt="Noa" draggable={false} className="absolute max-w-none select-none" style={{ ...box(SHARE_D.kid), visibility: hidden }} />
-      <img src={songPlayer} alt="Your song, played by you" draggable={false} className="absolute max-w-none select-none" style={{ ...box(SHARE_D.player), visibility: hidden }} />
+      <img src={noteQuarter} alt="" draggable={false} className="absolute max-w-none select-none" style={{ ...box(SHARE_D.quarter), visibility: hidden }} />
+      <img src={noteBeamed} alt="Your song" draggable={false} className="absolute max-w-none select-none" style={{ ...box(SHARE_D.beamed), visibility: hidden }} />
       <GoldStar />
       {/* ONLY the animation, on top: transparent, same stage, taps go through */}
       <div className="pointer-events-none absolute inset-0">

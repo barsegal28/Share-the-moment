@@ -138,14 +138,18 @@ function diamond(cx, cy, r, a) { const p = new Path2D(); [[0, -r], [r * .62, 0],
 // the kid's small avatar and mom's big avatar, each on a periwinkle circle (tilted −6° / +6° in Figma).
 const LAYOUTS = {
   c: { id: 'share-screen-c', title: 'Share screen C · planets', mom: ['mom-planet', C_MOM], kid: ['kid-planet', C_KID], k1: C_K1, peak: C_K2, heart: C_HEART },
+  // D travels the two note stickers (no text), the same starting point as the send-to-mom scene (Figma 228:16414, 14 Nov 21:38).
+  // k1/peak are the beamed note's top-left; the quarter note rides along at QUARTER_OFF from it.
   d: { id: 'share-screen-d', title: 'Share screen D · avatars', mom: ['mom-avatar', [503.6, 298.2, 283.1, 283.1]], kid: ['kid-avatar', [409.3, 388.5, 160, 162.3]],
-       k1: [303, 299.5], peak: [443.5, 118], heart: [536, 209, 218, 218] }, // heart centred on the top edge of mom's circle
+       notes: true, k1: [432.4, 280.8], peak: [450, 124], heart: [536, 209, 218, 218] }, // heart centred on the top edge of mom's circle
 };
 
 // animationOnly: draw just the motion (the travelling song, the explosion, the heart) on a transparent canvas, to lay over
 // the flow's own share screen. characters: also draw the wiggling characters (then hide the screen's own static ones).
+const BEAMED = [108.2, 111.5], QUARTER = [99, 111.5], QUARTER_OFF = [-85.4, 18];
 export function createShareScreenC({ images, paperGrain, layout = 'c', animationOnly = false, characters = true }) {
   const L = LAYOUTS[layout], C_K1 = L.k1, C_K2 = L.peak, C_HEART = L.heart;
+  const LEAD_C = L.notes ? [BEAMED[0] / 2, BEAMED[1] / 2] : [61, 62]; // centre of the part that stays and explodes (beamed note / player's note)
   const mid = [(C_K1[0] + C_K2[0]) / 2 - 30, (C_K1[1] + C_K2[1]) / 2 - 30];
   const NOTE_C = [C_K2[0] + 61, C_K2[1] + 62];                                 // note centre at keyframe 2
   const HC = [C_HEART[0] + C_HEART[2] / 2, C_HEART[1] + C_HEART[3] / 2];       // heart centre
@@ -161,7 +165,13 @@ export function createShareScreenC({ images, paperGrain, layout = 'c', animation
     ctx.beginPath(); part === 'note' ? ctx.rect(p[0] - 20, p[1] - 20, C_NOTE_W + 20, C_PH + 40) : ctx.rect(p[0] + C_NOTE_W, p[1] - 20, C_PW, C_PH + 40); ctx.clip();
     ctx.drawImage(images.player, p[0], p[1], C_PW, C_PH); ctx.restore();
   }
-  const FINAL = [HC[0] - 61, HC[1] - 62]; // player top-left that puts the note's centre on the heart's centre
+  // the traveller in two parts: `lead` stays and explodes into the heart; `rest` leaves first (the text, or the quarter note)
+  function notePart(ctx, name, [x, y], [w, h], { s = 1, r = 0, dx = 0, dy = 0 } = {}) {
+    ctx.save(); ctx.translate(x + w / 2 + dx, y + h / 2 + dy); ctx.rotate(r * Math.PI / 180); ctx.scale(s, s); ctx.drawImage(images[name], -w / 2, -h / 2, w, h); ctx.restore();
+  }
+  const lead = (ctx, p, o) => L.notes ? notePart(ctx, 'note-beamed', p, BEAMED, o) : playerPart(ctx, 'note', p, o);
+  const rest = (ctx, p, o) => L.notes ? notePart(ctx, 'note-quarter', [p[0] + QUARTER_OFF[0], p[1] + QUARTER_OFF[1]], QUARTER, o) : playerPart(ctx, 'text', p, o);
+  const FINAL = [HC[0] - LEAD_C[0], HC[1] - LEAD_C[1]]; // traveller position that puts the lead's centre on the heart's centre
   // one smooth jump, in held 2-frame steps: a ballistic arc up to the peak and straight back down onto the heart's spot (no stop at the top)
   const lerp2 = (a, b, x, y) => [a[0] + (b[0] - a[0]) * x, a[1] + (b[1] - a[1]) * y];
   function travellerPos(f) {
@@ -188,20 +198,27 @@ export function createShareScreenC({ images, paperGrain, layout = 'c', animation
       if (f >= 12 && f < 14) { s = .97; r = -2; dy = 2; }
       if (f >= 14 && f < 36) { r = travellerTilt(f); dy = 0; }
       if (f >= 76 && f < 80) { s = f < 78 ? .55 : 1.03; r = -1; dy = 0; }
-      playerPart(ctx, 'note', p, { s, r, dy }); playerPart(ctx, 'text', p, { s, r, dy });
+      // at rest, the two notes take turns hopping a little (like the send-to-mom notes)
+      const hopQ = L.notes && f < 12 && Math.floor(f / 4) % 2 === 0 ? -3 : 0, hopB = L.notes && f < 12 && Math.floor(f / 4) % 2 === 1 ? -3 : 0;
+      rest(ctx, p, { s, r, dy: dy + hopQ }); lead(ctx, p, { s, r, dy: dy + hopB });
       return;
     }
-    // 2. at the heart's spot: the text peels off (lift → drop → gone), the note stays
-    const noteAt = c => [c[0] - 61, c[1] - 62];
+    // 2. at the heart's spot: the rest leaves first, the lead stays
+    const noteAt = c => [c[0] - LEAD_C[0], c[1] - LEAD_C[1]];
     if (f < 42) {
-      if (f < 38) { // landing squash, note and text together
-        playerPart(ctx, 'note', p, { s: .96, dy: 3 });
-        if (f < 38) playerPart(ctx, 'text', p, { s: .96, dy: 3 });
+      if (f < 38) { // landing squash, both parts together
+        rest(ctx, p, { s: .96, dy: 3 }); lead(ctx, p, { s: .96, dy: 3 });
         return;
       }
-      playerPart(ctx, 'note', p, { r: tilt, dy: bob });
-      if (f < 40) playerPart(ctx, 'text', p, { dy: -8, r: 4, s: 1.03 });        // text lifts…
-      else playerPart(ctx, 'text', p, { dy: 34, dx: 10, r: 14, s: .96 });      // …drops, then it's gone at 42
+      if (L.notes) { // the quarter note hops into the beamed note and is gone
+        if (f < 40) rest(ctx, p, { dx: 34, dy: -16, r: -10, s: .8 });
+        else rest(ctx, p, { dx: 74, dy: -8, r: -16, s: .45 });
+        lead(ctx, p, { r: tilt, dy: bob, s: f < 40 ? 1 : 1.04 });
+      } else {
+        lead(ctx, p, { r: tilt, dy: bob });
+        if (f < 40) rest(ctx, p, { dy: -8, r: 4, s: 1.03 });        // text lifts…
+        else rest(ctx, p, { dy: 34, dx: 10, r: 14, s: .96 });      // …drops, then it's gone at 42
+      }
       return;
     }
     // 4. at the heart's spot: torn-paper halos grow behind the note, it shakes, then becomes a light paper blob
@@ -209,7 +226,7 @@ export function createShareScreenC({ images, paperGrain, layout = 'c', animation
       const st = Math.floor((f - 42) / 2), R = [52, 66, 80][st];
       paper(ctx, k, torn(HC[0], HC[1], R * 1.3, R * 1.2, sd + 1), PERI, paperGrain);
       paper(ctx, k, torn(HC[0], HC[1], R, R * .92, sd + 2), PINK, paperGrain);
-      if (st < 2) playerPart(ctx, 'note', noteAt(HC), { r: [3, -4][st], s: [1.04, 1.08][st] });
+      if (st < 2) lead(ctx, noteAt(HC), { r: [3, -4][st], s: [1.04, 1.08][st] });
       else paper(ctx, k, torn(HC[0], HC[1], 50, 54, sd + 3, .1), LIGHT, paperGrain);
       return;
     }
