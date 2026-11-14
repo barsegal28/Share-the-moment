@@ -26,6 +26,12 @@ export function FlowPlayer({ initial, mode = "overview" }: { initial?: StepId; m
   const script = useScript()
   const steps = MODE_STEPS[mode]
   const first = initial && steps.includes(initial) ? initial : steps[0]
+  // Don't start on arrival: hold the first frame until the viewer presses Play.
+  const [started, setStarted] = useState(false)
+  useEffect(() => {
+    document.getAnimations().forEach((a) => { if ((a as CSSAnimation).animationName === "fre-device-in") a.finish() })
+    setPaused(true)
+    return () => setPaused(false) }, [])
   return (
     <FlowProvider script={script} initial={first} steps={mode === "overview" ? undefined : steps}>
       <div className="ui-root flex h-dvh flex-col bg-white">
@@ -33,10 +39,24 @@ export function FlowPlayer({ initial, mode = "overview" }: { initial?: StepId; m
         <Header mode={mode} />
         <main className="relative min-h-0 flex-1 bg-zinc-50 px-6 py-5">
           <FlowStage />
+          {!started && <StartOverlay onStart={() => { setStarted(true); setPaused(false) }} />}
         </main>
         <Footer steps={steps} />
       </div>
     </FlowProvider>
+  )
+}
+
+function StartOverlay({ onStart }: { onStart: () => void }) {
+  const paused = usePaused()
+  const [held, setHeld] = useState(false)
+  useEffect(() => { if (paused) setHeld(true); else if (held) onStart() }, [paused, held, onStart])
+  return (
+    <button type="button" onClick={onStart} aria-label="Play the flow" className="absolute inset-0 z-20 grid place-items-center bg-white/40 backdrop-blur-[2px]">
+      <span className="inline-flex h-12 items-center gap-2 rounded-full bg-[#18181b] px-6 text-[16px] font-medium text-white shadow-lg">
+        <Play className="size-5 fill-current" /> Play
+      </span>
+    </button>
   )
 }
 
