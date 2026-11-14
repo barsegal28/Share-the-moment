@@ -249,10 +249,10 @@ const BASE_SCRIPT: Script = {
   }),
   "p-listen": step({
     id: "p-listen", title: "Listen widget", node: "parent-listen", device: "phone",
-    note: "The recording plays with the song's sheet and keys, plus the effort story, so the parent can praise something specific.",
+    note: "Mom's player is “Little Pianist”: the take plays as scrolling sheet music over a keyboard, with its own piano sound, and drives the progress bar. Plus the effort story, so Mom can praise something specific.",
     advance: "tap", next: "p-message",
     sounds: [S("sheet", 0, 0.5)],
-    recording: { mode: "play", volume: 0.9 },
+    recording: { mode: "off", volume: 0 },
     objects: {
       sheet: O("Bottom sheet", { enter: "slideUp", duration: 520, distance: 640, ease: "spring", scaleFrom: 1 }),
       cover: O("Song card", { enter: "fade", delay: 250, duration: 400, ease: "out" }),

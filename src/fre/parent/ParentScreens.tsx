@@ -2,17 +2,18 @@
  * Parent flow, phone web (Figma "Parent.Mobile", 393 × 650 content inside an iPhone + Safari shell).
  * SMS → listen page → listen sheet → send a surprise → sent.
  */
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import { BatteryFull, ChevronLeft, ChevronRight, Lock, RotateCw, Signal, Wifi, BookOpen, Copy, Share } from "lucide-react"
 import { Sticker } from "@/art/stickers"
-import { playRecording, stopRecording } from "@/lib/audio"
+import { stopRecording } from "@/lib/audio"
 import { cn } from "@/lib/utils"
 import { DEMO_SONG } from "@/config"
 import { Obj } from "../Obj"
-import { useFlow, useRecordingProgress } from "../runtime"
+import { useFlow } from "../runtime"
 import { ListenSheet, ParentSendBack, ParentShareMoment, type SendState } from "@/components/app"
+import { LittlePianist, type LittlePianistHandle } from "@/components/app/parent/LittlePianist"
 import { cancelLater, later } from "@/lib/clock"
-import { SONG_SECONDS, fmt, replyChoice, useReplyChoice } from "../shared"
+import { fmt, replyChoice, useReplyChoice } from "../shared"
 import type { StepId } from "../script"
 
 export const PHONE = { w: 393, h: 852 }
@@ -196,27 +197,40 @@ function MessagePage() {
 // ─── Listen widget · Figma Parent.Mobile "play" (bottom sheet) ───
 function ListenSheetStep() {
   const flow = useFlow()
-  const p = useRecordingProgress(true)
-  const [paused, setPaused] = useState(false)
-  const vol = flow.script["p-listen"].recording.volume
-  const toggle = () => {
-    if (paused) playRecording({ volume: vol, loop: true })
-    else stopRecording()
-    setPaused(!paused)
-  }
-  const close = () => {
+  // Mom's player: "Little Pianist" plays the take with its own piano sound, and drives the sheet's progress.
+  const pianist = useRef<LittlePianistHandle>(null)
+  const [state, setState] = useState({ t: 0, end: 0, playing: false })
+  useEffect(() => {
     stopRecording()
+    const start = later(() => pianist.current?.play(), 350) // after the sheet slides up; Mom's tap allows sound
+    let raf = 0
+    const poll = () => {
+      const p = pianist.current
+      if (p) setState((s) => (Math.abs(s.t - p.time) > 0.05 || s.playing !== p.playing || s.end !== p.end ? { t: p.time, end: p.end, playing: p.playing } : s))
+      raf = requestAnimationFrame(poll)
+    }
+    raf = requestAnimationFrame(poll)
+    return () => {
+      cancelLater(start)
+      cancelAnimationFrame(raf)
+    }
+  }, [flow.run])
+  const toggle = () => (state.playing ? pianist.current?.pause() : pianist.current?.play())
+  const close = () => {
+    pianist.current?.pause()
     flow.go("p-message")
   }
+  const end = state.end || 1
   return (
     <>
       <div className="absolute inset-0" onClick={close} />
       <Obj step="p-listen" id="sheet" className="absolute inset-0 pointer-events-none" innerClassName="[&>*]:pointer-events-auto">
         <ListenSheet
-          progress={p}
-          current={fmt(p * SONG_SECONDS)}
-          total={fmt(SONG_SECONDS)}
-          playing={!paused}
+          cover={<LittlePianist ref={pianist} className="absolute inset-x-0 top-0" />}
+          progress={Math.min(1, Math.max(0, state.t) / end)}
+          current={fmt(Math.max(0, Math.min(state.t, end)))}
+          total={fmt(state.end)}
+          playing={state.playing}
           onPlay={toggle}
           onClose={close}
           slot={objSlot("p-listen", { cover: { className: "w-full" }, playback: { className: "w-full" } })}

@@ -58,9 +58,12 @@ export function ListenSheet({
   onPlay,
   onClose,
   note = "It took 6 tries but I kept going until both hands were together!",
+  cover: coverNode,
   slot = same,
   className,
 }: {
+  /** What plays in the cover frame (Mom's player). Default: the Figma cover image. */
+  cover?: ReactNode
   progress?: number
   current?: string
   total?: string
@@ -82,7 +85,7 @@ export function ListenSheet({
         {slot(
           "cover",
           <div className="relative h-[210px] w-full overflow-hidden rounded-[20px] border border-gold bg-white">
-            <img src={cover} alt="Let it go — sheet music and keyboard" className="absolute top-[-1px] left-1/2 h-[196px] w-[345px] -translate-x-1/2" />
+            {coverNode ?? <img src={cover} alt="Let it go — sheet music and keyboard" className="absolute top-[-1px] left-1/2 h-[196px] w-[345px] -translate-x-1/2" />}
           </div>,
         )}
         <div className="flex w-full flex-col items-start px-1">
