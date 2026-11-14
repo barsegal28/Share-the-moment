@@ -87,7 +87,7 @@ export interface StepCfg {
   params: Record<string, number>
 }
 
-export const STEP_IDS = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "p-notify", "p-sms", "p-message", "p-listen", "p-reply", "p-sent", "k-notify", "k-reveal"] as const
+export const STEP_IDS = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "k-shared", "p-notify", "p-sms", "p-message", "p-listen", "p-reply", "p-sent", "k-notify", "k-reveal"] as const
 export type StepId = (typeof STEP_IDS)[number]
 
 /** The flow chart from the plan doc. */
@@ -139,6 +139,8 @@ export const DEFAULT_SCRIPT: Script = {
     advance: "auto", after: 1500, next: "k-success",
     sounds: [S("whoosh", 0, 0.5)],
     objects: {
+      avatar: O("Profile avatar", { enter: "slideDown", delay: 100, duration: 480, distance: 120, ease: "spring" }),
+      progress: O("Reward progress", { enter: "slideDown", delay: 180, duration: 480, distance: 120, ease: "spring" }),
       flash: O("Light flash", { enter: "fade", duration: 500, ease: "out", scaleFrom: 1 }),
       striped: scatterSticker("Striped planet", 0, -140, 0.9),
       ringed: scatterSticker("Ringed planet", 1, 120, 1.0),
@@ -154,34 +156,31 @@ export const DEFAULT_SCRIPT: Script = {
   }),
   "k-success": step({
     id: "k-success", title: "You are a star!", node: "kid-success", device: "ipad",
-    note: "Figma 3. The success card pops up and each star is stamped in with what it means.",
+    note: "Figma 3. The success card pops up with the title, and each star is stamped in with what it means. No buttons: it turns into the share screen on its own.",
     advance: "voice", after: 700, next: "k-share",
     voice: [V("You are a star!", "guide", 500), V("Every note right!", "guide", 250), V("Right on the beat!", "guide", 150), V("Both hands together!", "guide", 150)],
     sounds: [S("fanfare", 350, 0.45)],
     objects: {
-      avatar: O("Profile avatar", { enter: "slideDown", delay: 100, duration: 480, distance: 120, ease: "spring" }),
-      progress: O("Reward progress", { enter: "slideDown", delay: 180, duration: 480, distance: 120, ease: "spring" }),
       card: O("Card", { enter: "zoom", delay: 200, duration: 620, ease: "spring", scaleFrom: 0.6 }, { enterSound: "paper", enterVolume: 0.6 }),
       title: O("Title · You are a star!", { enter: "pop", delay: 520, duration: 560, ease: "overshoot", scaleFrom: 0.4, rotateFrom: -6, idle: "boil", idleAmp: 1, idleSpeed: 0.35 }, { enterSound: "bubble", enterVolume: 0.5 }),
       star1: O("Star 1 · every note", { enter: "stamp", syncLine: 1, delay: 0, duration: 420, ease: "overshoot", scaleFrom: 2.4, rotateFrom: -30, idle: "wiggle", idleAmp: 4, idleSpeed: 2.6 }, { enterSound: "star", enterVolume: 0.8, enterPitch: 1, tapSound: "sparkle" }),
       star2: O("Star 2 · on the beat", { enter: "stamp", syncLine: 2, delay: 0, duration: 420, ease: "overshoot", scaleFrom: 2.4, rotateFrom: 25, idle: "wiggle", idleAmp: 4, idleSpeed: 2.9 }, { enterSound: "star", enterVolume: 0.8, enterPitch: 1.26, tapSound: "sparkle" }),
       star3: O("Star 3 · both hands", { enter: "stamp", syncLine: 3, delay: 0, duration: 420, ease: "overshoot", scaleFrom: 2.4, rotateFrom: -20, idle: "wiggle", idleAmp: 4, idleSpeed: 2.3 }, { enterSound: "star", enterVolume: 0.8, enterPitch: 1.5, tapSound: "sparkle" }),
-      share: O("Share button", { enter: "slideUp", syncLine: 3, delay: 900, duration: 460, distance: 40, ease: "spring" }, { tapSound: "pop" }),
-      next: O("Play next button", { enter: "slideUp", syncLine: 3, delay: 1020, duration: 460, distance: 40, ease: "spring" }, { tapSound: "tap" }),
     },
     params: { layoutMs: 900 },
   }),
   "k-share": step({
     id: "k-share", title: "Share the moment (first time)", node: "kid-success", device: "ipad",
-    note: "Figma 4. FRE: the card turns into the share screen on its own. The player waits at 0:00 (tap to listen) while the share suggestion is voiced over the quiet background take.",
+    note: "Figma 4. FRE: the card turns into the share screen on its own: Mom's planet listening to the kid's planet. Tapping Share starts the share animation.",
     advance: "tap", after: 0, next: "k-send",
     voice: [V("Want Mom to hear you play?", "guide", 900), V("Tap Share, and it goes straight to her!", "guide", 250)],
     sounds: [S("sheet", 0, 0.5)],
     recording: { mode: "keep", volume: 0.14 },
-    params: { playerVolume: 0.6 },
     objects: {
-      stars: O("Small stars", { enter: "pop", delay: 0, duration: 480, ease: "overshoot", scaleFrom: 1.8 }),
-      player: O("Recording player", { enter: "unfold", delay: 220, duration: 620, ease: "spring", scaleFrom: 0.7, distance: 40 }, { enterSound: "bubble", enterVolume: 0.5, enterPitch: 0.8 }),
+      mom: O("Mom planet", { enter: "pop", delay: 150, duration: 620, ease: "overshoot", scaleFrom: 0.4, rotateFrom: 8, idle: "float", idleAmp: 6, idleSpeed: 3.4 }, { enterSound: "bubble", enterVolume: 0.5, enterPitch: 0.8, tapSound: "boing" }),
+      kid: O("Kid planet", { enter: "pop", delay: 320, duration: 560, ease: "overshoot", scaleFrom: 0.4, rotateFrom: -8, idle: "float", idleAmp: 5, idleSpeed: 2.9 }, { enterSound: "bubble", enterVolume: 0.5, enterPitch: 1.2, tapSound: "boing" }),
+      note1: O("Quarter note", { enter: "scatter", delay: 520, duration: 520, ease: "overshoot", scaleFrom: 0.2, rotateFrom: -30, idle: "bob", idleAmp: 6, idleSpeed: 1.6 }, { enterSound: "pop", enterVolume: 0.4, enterPitch: 1.3 }),
+      note2: O("Eighth notes", { enter: "scatter", delay: 640, duration: 520, ease: "overshoot", scaleFrom: 0.2, rotateFrom: 30, idle: "bob", idleAmp: 6, idleSpeed: 1.9 }, { enterSound: "pop", enterVolume: 0.4, enterPitch: 1.5 }),
       close: O("Close button", { enter: "fade", delay: 600, duration: 300, ease: "out" }, { tapSound: "tap" }),
       share: O("Share button", { enter: "slideUp", delay: 700, duration: 420, distance: 30, ease: "spring", idle: "pulse", idleAmp: 6, idleSpeed: 1.4 }, { tapSound: "pop" }),
     },
@@ -189,7 +188,7 @@ export const DEFAULT_SCRIPT: Script = {
   "k-send": step({
     id: "k-send", title: "Sending to Mom", node: "kid-confirm", device: "ipad",
     note: "Motion scene “share” from the motion artifact: the song widget crumples into the comet, the stickers peel off, the comet flies to Mom and “mom got it” slaps in. Sounds and the voice-over are timed to its frames (frame / 17 fps).",
-    advance: "voice", after: 900, next: "p-notify",
+    advance: "voice", after: 900, next: "k-shared",
     voice: [V("Mom got it!", "guide", 4824), V("When she sends something back, it pops up right here!", "guide", 500)],
     sounds: [
       S("tap", 706, 0.7),
@@ -207,6 +206,21 @@ export const DEFAULT_SCRIPT: Script = {
     ],
     recording: { mode: "off", volume: 0 },
     params: { fps: 17, waitMotion: 1 },
+  }),
+  "k-shared": step({
+    id: "k-shared", title: "Back to the card · Shared", node: "kid-confirm", device: "ipad",
+    note: "Figma 5. After the share animation the kid is back on the card: Play next, Shared (done) and Play again.",
+    advance: "auto", after: 3500, next: "p-notify",
+    recording: { mode: "off", volume: 0 },
+    objects: {
+      title: O("Title · You are a star!", { enter: "fade", duration: 300, ease: "out", idle: "boil", idleAmp: 1, idleSpeed: 0.35 }),
+      star1: O("Star 1", { enter: "fade", duration: 300, ease: "out" }, { tapSound: "sparkle" }),
+      star2: O("Star 2", { enter: "fade", duration: 300, ease: "out" }, { tapSound: "sparkle" }),
+      star3: O("Star 3", { enter: "fade", duration: 300, ease: "out" }, { tapSound: "sparkle" }),
+      next: O("Play next button", { enter: "slideUp", delay: 200, duration: 460, distance: 40, ease: "spring" }, { tapSound: "tap" }),
+      shared: O("Shared (done)", { enter: "stamp", delay: 380, duration: 420, scaleFrom: 1.6, ease: "overshoot" }, { enterSound: "stamp", enterVolume: 0.5 }),
+      again: O("Play again", { enter: "slideUp", delay: 520, duration: 460, distance: 30, ease: "spring" }, { tapSound: "tap" }),
+    },
   }),
   "p-notify": step({
     id: "p-notify", title: "Parent gets an SMS", node: "parent-message", device: "phone",

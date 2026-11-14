@@ -6,7 +6,7 @@ import type { StickerName } from "@/art/stickers"
 // ─── What the parent picked, so the kid's reveal shows the same sticker and words ───
 export const REPLY_STICKERS: StickerName[] = ["stripedPlanet", "heart", "ringedPlanet", "ratingStar2", "burst", "drippyComet"]
 export const REPLY_PHRASES = ["Proud of you!", "Bravo, Noa!", "Wow! Again!", "You rock!"]
-let choice = { sticker: 0, phrase: 0 }
+let choice: { sticker: number; phrase: number; text?: string } = { sticker: 0, phrase: 0 }
 const subs = new Set<() => void>()
 export const replyChoice = {
   get: () => choice,
@@ -21,7 +21,7 @@ export const replyChoice = {
 }
 export function useReplyChoice() {
   const c = useSyncExternalStore(replyChoice.subscribe, replyChoice.get, replyChoice.get)
-  return { index: c, sticker: REPLY_STICKERS[c.sticker % REPLY_STICKERS.length], phrase: REPLY_PHRASES[c.phrase % REPLY_PHRASES.length] }
+  return { index: c, sticker: REPLY_STICKERS[c.sticker % REPLY_STICKERS.length], phrase: c.text?.trim() ? c.text : REPLY_PHRASES[c.phrase % REPLY_PHRASES.length] }
 }
 
 /** The Figma "Functional" buttons (DM Mono 24, 80 tall, radius 28). */

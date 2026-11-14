@@ -414,12 +414,20 @@ function ReplyComposer() {
       <div className="relative flex flex-col items-center gap-7">
         <Obj step="p-reply" id="card">
           <div className="relative flex h-[328px] w-[319px] flex-col items-center justify-between rounded-[40px] border-2 border-periwinkle bg-[rgb(247_242_230/0.6)] px-5 pt-10 pb-5">
-            <Obj step="p-reply" id="tag" onTap={() => replyChoice.set({ phrase: choice.index.phrase + 1 })}>
+            {/* Figma: the tag is an editable text — Mom types her own words. */}
+            <Obj step="p-reply" id="tag">
               <span className="relative inline-flex items-center border border-[#006ee7] px-1.5 py-0.5">
-                <span className="font-display text-[32px] leading-[30px] whitespace-nowrap text-teal uppercase">{choice.phrase}</span>
+                <input
+                  aria-label="Message"
+                  value={choice.index.text ?? choice.phrase}
+                  maxLength={18}
+                  onChange={(e) => replyChoice.set({ text: e.target.value })}
+                  onFocus={(e) => e.target.select()}
+                  style={{ fieldSizing: "content" } as React.CSSProperties}
+                  className="max-w-[270px] min-w-[3ch] bg-transparent text-center font-display text-[32px] leading-[30px] text-teal uppercase caret-[#006ee7] outline-none"
+                />
                 <span className="absolute top-[12px] -left-[3.5px] size-1.5 rounded-full border border-[#006ee7] bg-white" />
                 <span className="absolute top-[12px] -right-1 size-1.5 rounded-full border border-[#006ee7] bg-white" />
-                <span className="absolute top-[-4px] right-1 h-[42px] w-px animate-pulse bg-[#818181]" />
               </span>
             </Obj>
             {tool === "sticker" ? (
