@@ -6,7 +6,7 @@ import { useEffect, useState, type CSSProperties } from "react"
 import { Sticker, type StickerName } from "@/art/stickers"
 import { Obj, EASING } from "../Obj"
 import { useFlow } from "../runtime"
-import { KidBackground, Learner, ResultCard, RewardProgress } from "@/components/app"
+import { BUTTON_ICON_SIZE, Button, KidBackground, Learner, ResultCard, RewardProgress, ShareIcon } from "@/components/app"
 import { MotionScene, loadMotion } from "./MotionScene"
 
 // Warm the motion scenes (font + stickers) so the glow-up starts at once.
@@ -202,8 +202,13 @@ function ShareMoment() {
       />
       {!sending && (
         <>
+          {/* The scene paints the Share button into its first frame. A real Share button sits on top so it can
+              move (idle wiggle), over a paper patch that hides the painted one. */}
+          <div aria-hidden className="absolute rounded-[30px] bg-paper" style={box([SHARE_HIT.share[0] - 3, SHARE_HIT.share[1] - 3, SHARE_HIT.share[2] + 6, SHARE_HIT.share[3] + 8])} />
           <Obj step="k-share" id="share" hint onTap={() => flow.go("k-send")} className="rounded-[28px]" style={box(SHARE_HIT.share)}>
-            <span className="block h-full w-full" aria-label="Share" />
+            <Button className="w-[240px]" iconEnd={<ShareIcon size={BUTTON_ICON_SIZE.xxl} />}>
+              Share
+            </Button>
           </Obj>
           <Obj step="k-share" id="close" className="rounded-full" style={box(SHARE_HIT.close)} onTap={() => {}}>
             <span className="block h-full w-full" aria-label="Close" />

@@ -177,7 +177,7 @@ const BASE_SCRIPT: Script = {
     recording: { mode: "keep", volume: 0.14 },
     objects: {
       close: O("Close button", { enter: "none" }, { tapSound: "tap" }),
-      share: O("Share button", { enter: "none", idle: "pulse", idleAmp: 3, idleSpeed: 1.4 }, { tapSound: "none" }),
+      share: O("Share button", { enter: "none", idle: "wiggle", idleAmp: 4, idleSpeed: 1.6 }, { tapSound: "none" }),
     },
   }),
   "k-send": step({
