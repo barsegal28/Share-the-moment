@@ -23,7 +23,7 @@ const imageUrl = (name: string) => IMAGE_URLS[`../motion-artifact/assets/share/$
 type Scene = ReturnType<typeof createSuccess>
 type Loaded = { scenes: Record<SceneId, Scene>; drawBackground: (ctx: CanvasRenderingContext2D, cut: number) => void }
 
-export const SCENE_FRAMES = { glowup: 108, share: 128 } as const
+export const SCENE_FRAMES = { glowup: 108, share: 150 } as const
 export type SceneId = keyof typeof SCENE_FRAMES
 
 let loading: Promise<Loaded> | null = null
@@ -63,7 +63,10 @@ export function MotionScene({
   endFrame,
   onStart,
   onDone,
+  still,
 }: {
+  /** Show this frame and don't play (e.g. the share panel before the kid taps Share). */
+  still?: number
   scene: SceneId
   /** Changes restart the scene. */
   run: number
@@ -101,6 +104,7 @@ export function MotionScene({
           drawBackground(ctx, cut)
           sc.draw(ctx, k, f, cut)
         }
+        if (still !== undefined) return draw(Math.min(SCENE_FRAMES[scene] - 1, still))
         draw(0)
         cb.current.onStart?.()
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -129,7 +133,7 @@ export function MotionScene({
       alive = false
       cancelAnimationFrame(raf)
     }
-  }, [scene, run, fps, endFrame])
+  }, [scene, run, fps, endFrame, still])
 
   return (
     <canvas

@@ -4,10 +4,6 @@
  */
 import { useEffect, useRef, useState, type CSSProperties } from "react"
 import { CircleCheck, RotateCw } from "lucide-react"
-import momPlanet from "./art/mom-planet.png"
-import kidPlanet from "./art/kid-planet.png"
-import noteQuarter from "./art/note-quarter.png"
-import noteEighth from "./art/note-eighth.png"
 import { Sticker, type StickerName } from "@/art/stickers"
 import { Obj, EASING } from "../Obj"
 import { useFlow } from "../runtime"
@@ -16,7 +12,7 @@ import { MotionScene, loadMotion } from "./MotionScene"
 
 // Warm the motion scenes (font + stickers) so the glow-up starts at once.
 if (typeof window !== "undefined") void loadMotion().catch(() => {})
-import { ArrowRightIcon, DismissIcon, RibbonIcon, ShareIcon } from "../icons"
+import { ArrowRightIcon, RibbonIcon } from "../icons"
 import { DieCutText, KidActionButton, useReplyChoice } from "../shared"
 import { cancelLater, later } from "@/lib/clock"
 import type { StepId } from "../script"
@@ -56,7 +52,7 @@ const ORDER: StickerId[] = ["striped", "ringed", "drippy", "cloud", "burst", "he
 /** Card: Figma "main", 620 × 660 centred at (598, 437). */
 const CARD = { left: 288, top: 107, w: 620, h: 660 }
 
-const KID_STEPS: StepId[] = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "k-shared", "k-notify", "k-reveal"]
+const KID_STEPS: StepId[] = ["k-glow", "k-scatter", "k-success", "k-share", "k-send", "k-notify", "k-reveal"]
 export const isKidStep = (s: StepId) => KID_STEPS.includes(s)
 
 export function KidScreens() {
@@ -64,25 +60,19 @@ export function KidScreens() {
   const s = flow.step
   const layoutMs = flow.script["k-success"].params.layoutMs ?? 900
 
-  if (s === "k-glow" || s === "k-send") {
-    // Motion scenes from the "Share the Moment · motion" artifact, played as-is.
+  if (s === "k-glow") {
+    // Motion scene "glowup" from the "Share the Moment · motion" artifact, played as-is.
     const p = flow.script[s].params
     return (
-      <div className="relative h-full w-full bg-ink" onClick={() => !flow.edit && s === "k-glow" && flow.next()}>
-        <MotionScene
-          scene={s === "k-glow" ? "glowup" : "share"}
-          run={flow.run}
-          fps={p.fps ?? 17}
-          endFrame={s === "k-glow" ? p.endFrame : undefined}
-          onStart={() => flow.signal("motionStart")}
-          onDone={() => flow.signal("motionDone")}
-        />
+      <div className="relative h-full w-full bg-ink" onClick={() => !flow.edit && flow.next()}>
+        <MotionScene scene="glowup" run={flow.run} fps={p.fps ?? 17} endFrame={p.endFrame} onStart={() => flow.signal("motionStart")} onDone={() => flow.signal("motionDone")} />
       </div>
     )
   }
+  if (s === "k-share" || s === "k-send") return <ShareMoment />
 
   const layout = s === "k-scatter" ? LAYOUT_SCATTER : LAYOUT_CARD
-  const cardState: CardState | null = s === "k-success" ? "success" : s === "k-share" ? "share" : s === "k-shared" || s === "k-notify" || s === "k-reveal" ? "shared" : null
+  const cardState: CardState | null = s === "k-success" ? "success" : s === "k-notify" || s === "k-reveal" ? "shared" : null
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-ink font-sans">
@@ -170,7 +160,7 @@ function TopBar() {
 }
 
 // ─── The card: success → share (FRE) → shared ─────────────────────────────
-type CardState = "success" | "share" | "shared"
+type CardState = "success" | "shared"
 const BIG_STARS: { name: StickerName; rot: number }[] = [
   { name: "ratingStar1", rot: -8 },
   { name: "ratingStar2", rot: 4 },
@@ -210,33 +200,22 @@ function Card({ state }: { state: CardState }) {
             <TitleStars step="k-success" />
           </div>
         )}
-        {state === "share" && (
-          // Figma frame 4: Mom's planet listening to the kid's planet. Tapping Share starts the share animation.
-          <div className="relative flex flex-col items-center gap-20">
-            <ShareIllustration />
-            <Obj step="k-share" id="share" hint onTap={() => flow.go("k-send")} className="rounded-[28px]">
-              <KidActionButton>
-                Share <ShareIcon size={32} />
-              </KidActionButton>
-            </Obj>
-          </div>
-        )}
         {state === "shared" && (
           // Figma frame 5: back here after the share animation.
           <div className="relative flex flex-col items-center gap-10">
-            <TitleStars step="k-shared" />
+            <TitleStars step="k-notify" />
             <div className="flex w-[240px] flex-col items-center gap-6">
-              <Obj step="k-shared" id="next" onTap={() => flow.restart()}>
+              <Obj step="k-notify" id="next" onTap={() => flow.restart()}>
                 <KidActionButton>
                   <ArrowRightIcon size={32} /> Play next
                 </KidActionButton>
               </Obj>
-              <Obj step="k-shared" id="shared">
+              <Obj step="k-notify" id="shared">
                 <KidActionButton tone="light" className="gap-2">
                   <CircleCheck className="size-8 fill-teal text-paper" strokeWidth={2} /> Shared
                 </KidActionButton>
               </Obj>
-              <Obj step="k-shared" id="again" onTap={() => flow.go("k-glow")}>
+              <Obj step="k-notify" id="again" onTap={() => flow.go("k-glow")}>
                 <div className="flex h-16 items-center justify-center gap-2 font-mono text-[20px] font-medium tracking-[-0.15px] text-black/86 select-none active:scale-95">
                   <RotateCw className="size-6" strokeWidth={2} /> Play again
                 </div>
@@ -244,35 +223,60 @@ function Card({ state }: { state: CardState }) {
             </div>
           </div>
         )}
-        {state === "share" && (
-          <Obj step="k-share" id="close" className="absolute top-[-33px] right-[-21px]" onTap={() => {}}>
-            <div className="grid size-16 place-items-center rounded-full border border-black/13 bg-white/80 text-[#242424]">
-              <DismissIcon size={28} />
-            </div>
-          </Obj>
-        )}
       </div>
     </Obj>
   )
 }
 
-/** Figma "share illustration" (538 × 352): Mom's ringed planet, the kid's small planet, two notes between them. */
-function ShareIllustration() {
-  const img = (src: string, flip = false): CSSProperties => ({ backgroundImage: `url(${src})`, backgroundSize: "contain", backgroundRepeat: "no-repeat", backgroundPosition: "center", transform: flip ? "scaleX(-1)" : undefined })
+/**
+ * The whole share moment is the motion artifact's "share" scene: it starts on the share panel (frame 0) and
+ * ends on the "You are a star!" result panel with "Shared" (frame 149). k-share holds the first frame until the
+ * kid taps Share; k-send plays it, and its onDone turns the result panel's "Play next" and "Play again" on.
+ * Tap areas are the scene's boxes on the 1194 × 834 stage.
+ */
+const SHARE_HIT = { share: [478, 604.5, 240, 80], close: [824, 140, 64, 64], next: [478, 453.5, 240, 80], again: [478, 668, 240, 56] } as const
+const box = ([left, top, width, height]: readonly number[]): CSSProperties => ({ position: "absolute", left, top, width, height })
+
+function ShareMoment() {
+  const flow = useFlow()
+  const sending = flow.step === "k-send"
+  const [done, setDone] = useState(false)
+  useEffect(() => setDone(false), [flow.run, flow.step])
+  const p = flow.script["k-send"].params
   return (
-    <div className="relative h-[352px] w-[538px]">
-      <Obj step="k-share" id="mom" className="absolute" style={{ left: 235, top: 48, width: 312, height: 270 }}>
-        <div className="h-[270px] w-[312px]" style={img(momPlanet)} />
-      </Obj>
-      <Obj step="k-share" id="kid" className="absolute" style={{ left: 0, top: 204, width: 158, height: 148 }}>
-        <div className="h-[148px] w-[158px]" style={img(kidPlanet, true)} />
-      </Obj>
-      <Obj step="k-share" id="note1" className="absolute" style={{ left: 18, top: 128, width: 99, height: 112 }}>
-        <div className="h-[112px] w-[99px]" style={img(noteQuarter)} />
-      </Obj>
-      <Obj step="k-share" id="note2" className="absolute" style={{ left: 108, top: 110, width: 108, height: 112 }}>
-        <div className="h-[112px] w-[108px]" style={img(noteEighth)} />
-      </Obj>
+    <div className="relative h-full w-full bg-ink">
+      <MotionScene
+        scene="share"
+        run={flow.run}
+        fps={p.fps ?? 17}
+        still={sending ? undefined : 0}
+        onStart={() => sending && flow.signal("motionStart")}
+        onDone={() => {
+          if (!sending) return
+          setDone(true)
+          flow.signal("motionDone")
+        }}
+      />
+      {!sending && (
+        <>
+          <Obj step="k-share" id="share" hint onTap={() => flow.go("k-send")} className="rounded-[28px]" style={box(SHARE_HIT.share)}>
+            <span className="block h-full w-full" aria-label="Share" />
+          </Obj>
+          <Obj step="k-share" id="close" className="rounded-full" style={box(SHARE_HIT.close)} onTap={() => {}}>
+            <span className="block h-full w-full" aria-label="Close" />
+          </Obj>
+        </>
+      )}
+      {sending && done && (
+        <>
+          <Obj step="k-send" id="next" className="rounded-[28px]" style={box(SHARE_HIT.next)} hint onTap={() => flow.next()}>
+            <span className="block h-full w-full" aria-label="Play next" />
+          </Obj>
+          <Obj step="k-send" id="again" className="rounded-[20px]" style={box(SHARE_HIT.again)} onTap={() => flow.go("k-glow")}>
+            <span className="block h-full w-full" aria-label="Play again" />
+          </Obj>
+        </>
+      )}
     </div>
   )
 }

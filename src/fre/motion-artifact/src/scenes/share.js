@@ -1,19 +1,23 @@
-// Share the moment — the kid sends the song to mom.
-// The light-blue song widget crumples like paper into the light-blue comet sticker, the sky clears,
-// the comet flies (its own tail waves + speed dashes, like the reference) and zooms off, then "mom got it".
+// Share the moment — the kid sends the song to mom. Figma "share keyframes": 6 → 7 → 2 → 3 → 4 → 5.
+// The kid taps Share on the share panel; the card turns transparent, leaving the music-note stickers;
+// the notes crumple into a paper ball that unfolds into the light-blue comet; the sky clears, the comet flies
+// (its own tail waves + speed dashes, like the reference) and zooms off; "mom got it"; then the result panel ("Shared").
 // Paper-cut / stop-motion rules (same as the glow-up): everything holds for 2 frames, cycles 3 cuts, no tweening.
 import { drawLettering } from '../lettering.js';
 
 const FPS = 17;
 export const SHARE_PHASES = [
-  { name: 'Ready', from: 0, to: 13 },
-  { name: 'Crumple', from: 14, to: 33 },
-  { name: 'Comet', from: 34, to: 43 },
-  { name: 'Clear sky', from: 44, to: 65 },
-  { name: 'Fly off', from: 66, to: 81 },
-  { name: 'Mom got it', from: 82, to: 127 },
+  { name: 'Share panel', from: 0, to: 11 },
+  { name: 'Card fades', from: 12, to: 25 },
+  { name: 'Crumple', from: 26, to: 41 },
+  { name: 'Comet', from: 42, to: 51 },
+  { name: 'Clear sky', from: 52, to: 73 },
+  { name: 'Fly off', from: 74, to: 89 },
+  { name: 'Mom got it', from: 90, to: 113 },
+  { name: 'Result', from: 114, to: 149 },
 ];
-const N = 128;
+const N = 150;
+const O = 8; // the comet part (pop → fly off → mom got it) starts 8 frames later than in v1
 
 // ---- assets (2x captures from Figma "share keyframes"; boxes are 1x render bounds on the 1194 x 834 stage) ----
 const STICKERS = [ // name, box [x, y, w, h], peel order
@@ -26,7 +30,13 @@ const STICKERS = [ // name, box [x, y, w, h], peel order
   ['sparkle-right', [918, 293, 192.5, 192.5], 6],
   ['star', [788, 477, 313, 313], 7],
 ];
-const WIDGET = { box: [314.5, 289.4, 567, 220.5], card: { cx: 598.5, cy: 394.5, w: 547, h: 201, r: 64 }, color: '#C3CAF7' };
+const CARD = [278, 102.5, 640, 680];                // share panel (frame 6), captured without the notes
+const SHARE_BTN = [478, 604.5, 240, 80];             // the Share button on it
+const NOTES = [['note-quarter', [347, 298.8, 99, 111.5]], ['note-beamed', [432.4, 280.8, 108.2, 111.5]]];
+const NC = [443.8, 336.5];                            // centre of the two notes
+const HUD = [['avatar', [32, 26, 52, 52]], ['progress', [864, 16, 246, 78]]];
+const RESULT = [278, 102.5, 640, 680];               // result panel (frame 5): "You are a star!" + Shared
+const DIM = 0.7;                                      // stickers behind a panel are at 70%
 const COMET = { size: 380.5, center: [187.1, 204.6] }; // silhouette centre inside the comet image (1x)
 const P2 = [271 + 187.1, 230 + 204.6], P3 = [543 + 187.1, 155 + 204.6], EXIT = [1390, -230];
 // Comet die-cut silhouette (relative to its centre), traced from the Figma sticker; starts at the leftmost point, clockwise.
@@ -54,16 +64,7 @@ function smoothPath(pts) { // closed Catmull-Rom through the points
     p.bezierCurveTo(b[0] + (c[0] - a[0]) / 6, b[1] + (c[1] - a[1]) / 6, c[0] - (d[0] - b[0]) / 6, c[1] - (d[1] - b[1]) / 6, c[0], c[1]); }
   p.closePath(); return p;
 }
-function roundedRectOutline(w, h, r, n) { // perimeter samples, starting mid-left, clockwise (y down)
-  const segs = []; const hw = w / 2, hh = h / 2;
-  const arc = (cx, cy, a0) => { for (let i = 0; i <= 8; i++) { const a = a0 + i / 8 * Math.PI / 2; segs.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); } };
-  segs.push([-hw, 0]); arc(-hw + r, -hh + r, Math.PI); arc(hw - r, -hh + r, -Math.PI / 2); arc(hw - r, hh - r, 0); arc(-hw + r, hh - r, Math.PI / 2); segs.push([-hw, 0]);
-  const d = [0]; for (let i = 1; i < segs.length; i++) d.push(d[i - 1] + Math.hypot(segs[i][0] - segs[i - 1][0], segs[i][1] - segs[i - 1][1]));
-  const L = d[d.length - 1], out = [];
-  for (let k = 0; k < n; k++) { const s = L * k / n; let j = 1; while (d[j] < s) j++; const t = (s - d[j - 1]) / (d[j] - d[j - 1] || 1); out.push([lerp(segs[j - 1][0], segs[j][0], t), lerp(segs[j - 1][1], segs[j][1], t)]); }
-  return out;
-}
-const CARD_OUTLINE = roundedRectOutline(WIDGET.card.w, WIDGET.card.h, WIDGET.card.r, COMET_OUTLINE.length);
+
 
 function paper(ctx, k, path, fill, grain, { dy = 5, blur = 6, alpha = .28 } = {}) {
   ctx.save(); ctx.shadowColor = `rgba(0,0,0,${alpha})`; ctx.shadowOffsetY = dy * k; ctx.shadowBlur = blur * k; ctx.fillStyle = fill; ctx.fill(path); ctx.restore();
@@ -87,66 +88,73 @@ export function createShare({ images, paperGrain }) {
   function drawStickers(ctx, f, cut) {
     for (let i = 0; i < STICKERS.length; i++) {
       const [name, box, order] = STICKERS[i]; const [bx, by, br] = boil[i][cut];
-      const start = 44 + order * 2, r = f - start;
-      if (r >= 4) continue; // peeled off
-      let o = { dx: bx, dy: by, rot: br, scale: 1 };
-      if (r >= 0 && r < 2) o = { dx: bx, dy: by - 6, rot: br + 4, scale: 1.06 };
-      if (r >= 2) o = { dx: bx + 6, dy: by + 34, rot: br + 13, scale: 0.97 };
-      drawImg(ctx, name, box, o);
+      let o = { dx: bx, dy: by, rot: br, scale: 1 }, a = name === 'star' ? 1 : (f < 42 ? DIM : 1);
+      if (f >= 116) { // stick back on, reverse order, dimmed behind the result panel
+        const r = f - (116 + (7 - order) * 2); if (r < 0) continue;
+        if (r < 2) o = { dx: bx, dy: by - 28, rot: br - 6, scale: 1.08 };
+        a = name === 'star' ? 1 : DIM;
+      } else {
+        const r = f - (44 + O + order * 2);
+        if (r >= 4) continue; // peeled off
+        if (r >= 0 && r < 2) o = { dx: bx, dy: by - 6, rot: br + 4, scale: 1.06 };
+        if (r >= 2) o = { dx: bx + 6, dy: by + 34, rot: br + 13, scale: 0.97 };
+      }
+      ctx.save(); ctx.globalAlpha = a; drawImg(ctx, name, box, o); ctx.restore();
     }
   }
 
-  // ---- widget: idle → tap → lift ----
-  function drawWidget(ctx, f) {
-    const s = f === 12 || f === 13 ? 0.97 : f === 14 || f === 15 ? 1.04 : 1;
-    const [x, y, w, h] = WIDGET.box; const { cx, cy } = WIDGET.card;
-    ctx.save(); ctx.translate(cx, cy); ctx.scale(s, s); ctx.drawImage(images['song-widget'], x - cx, y - cy, w, h); ctx.restore();
+  // ---- top bar (avatar, level progress): there with the panels, hops off for the flight ----
+  function drawHud(ctx, f) {
+    let dy = 0;
+    if (f >= 38 && f < 118) { const r = f - 38; if (r < 2) dy = 6; else return; }
+    if (f >= 118 && f < 120) dy = -40;
+    for (const [name, box] of HUD) drawImg(ctx, name, box, { dy });
   }
 
-  // ---- the card's content flakes off (play button, title, bar) and falls ----
-  function drawFlakes(ctx, k, f) {
-    const r = f - 16; if (r < 0 || r >= 8) return;
-    const st = Math.floor(r / 2); const fall = [0, 22, 58, 110][st], spin = [0, 8, 20, 38][st];
-    const { cx, cy } = WIDGET.card; const rad = d => d * Math.PI / 180;
-    const piece = (x, y, a, draw) => { ctx.save(); ctx.translate(x, y); ctx.rotate(rad(a)); draw(); ctx.restore(); };
-    // play button
-    piece(cx - 182, cy + fall * 1.1, -spin, () => {
-      const outer = new Path2D(); outer.arc(0, 0, 58, 0, Math.PI * 2); paper(ctx, k, outer, C.teal, paperGrain);
-      const inner = new Path2D(); inner.arc(0, 0, 48, 0, Math.PI * 2); ctx.fillStyle = '#F2ECDD'; ctx.fill(inner);
-      const tri = new Path2D(); tri.moveTo(-16, -24); tri.lineTo(28, 0); tri.lineTo(-16, 24); tri.closePath(); ctx.fillStyle = C.orange; ctx.fill(tri);
+  // ---- share panel: tap Share, then the card turns transparent in held steps (notes stay) ----
+  function drawCard(ctx, f) {
+    const [x, y, w, h] = CARD, img = images['share-card'];
+    const a = f < 12 ? 1 : [.75, .5, .25, .1][Math.floor((f - 12) / 2)];
+    if (a === undefined) return;
+    ctx.save(); ctx.globalAlpha = a; ctx.drawImage(img, x, y, w, h); ctx.restore();
+    if (f >= 10 && f < 12) { const [bx, by, bw, bh] = SHARE_BTN; const p = new Path2D(); p.roundRect(bx, by, bw, bh, 40); ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fill(p); }
+  }
+
+  // ---- the music notes: float, then squeeze together into a ball ----
+  function drawNotes(ctx, f, cut) {
+    if (f >= 30) return;
+    const bob = f >= 12 ? [0, -4, 2][cut] : 0;
+    NOTES.forEach(([name, box], i) => {
+      const cx = box[0] + box[2] / 2, cy = box[1] + box[3] / 2, side = i ? 1 : -1;
+      let o = { dy: bob, scale: 1, rot: 0 };
+      if (f === 12 || f === 13) o = { dy: -6, scale: 1.08, rot: side * 3 };
+      if (f >= 26) { const t = f >= 28 ? .9 : .5; o = { dx: (NC[0] - cx) * t, dy: (NC[1] - cy) * t + bob, scale: f >= 28 ? .78 : .9, rot: -side * (f >= 28 ? 24 : 12) }; }
+      drawImg(ctx, name, box, o);
     });
-    // title + subtitle strips, progress bar
-    piece(cx + 30, cy - 50 + fall * .8, spin * .7, () => paper(ctx, k, capsule(0, 0, 150, 30, 0), C.teal, paperGrain));
-    piece(cx + 115, cy - 6 + fall * 1.3, -spin * .5, () => paper(ctx, k, capsule(0, 0, 300, 18, 0), '#8F7A28', paperGrain));
-    piece(cx + 120, cy + 45 + fall * .9, spin, () => { paper(ctx, k, capsule(0, 0, 316, 18, 0), '#F2ECDD', paperGrain); ctx.fillStyle = C.pink; ctx.fill(capsule(-89, 0, 138, 18, 0)); });
   }
 
-  // ---- crumple: the blank card folds into the comet's silhouette in held steps ----
-  function drawCrumple(ctx, k, f) {
-    const steps = 9, s = Math.min(steps - 1, Math.floor((f - 16) / 2)), t = s / (steps - 1), e = ease(t);
-    const rnd = rng(100 + s * 7), J = 2 + 15 * Math.sin(Math.PI * t), twist = Math.sin(Math.PI * t) * -14 * Math.PI / 180;
-    const cx = lerp(WIDGET.card.cx, P2[0], e), cy = lerp(WIDGET.card.cy, P2[1], e);
-    const shrink = lerp(1, 0.86, Math.sin(Math.PI * t)); // squeezes smaller mid-crumple, then opens into the comet
-    const pts = CARD_OUTLINE.map((p, i) => { const q = COMET_OUTLINE[i]; let x = lerp(p[0], q[0], e) * shrink, y = lerp(p[1], q[1], e) * shrink;
-      const a = Math.atan2(y, x), j = (rnd() - .5) * 2 * J; x += Math.cos(a) * j; y += Math.sin(a) * j;
-      const c = Math.cos(twist), sn = Math.sin(twist); return [cx + x * c - y * sn, cy + x * sn + y * c]; });
-    const path = smoothPath(pts);
-    // late steps: it already wears the sticker's cream die-cut and orange kiss-cut
-    if (t >= .75) { ctx.save(); ctx.lineJoin = 'round'; ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowOffsetY = 9 * k; ctx.shadowBlur = 12 * k;
-      ctx.strokeStyle = C.orange; ctx.lineWidth = t >= 1 ? 14 : 8; ctx.stroke(path); ctx.restore(); ctx.fillStyle = C.orange; ctx.fill(path);
-      ctx.strokeStyle = C.cream; ctx.lineWidth = t >= 1 ? 6 : 3; ctx.stroke(path); }
-    paper(ctx, k, path, mix(C.light, C.peri, clamp01((t - .3) / .6)), paperGrain, { dy: lerp(9, 6, t), blur: lerp(18, 8, t), alpha: .3 });
-    // fold creases while it is crumpled
-    if (t > .1 && t < 1) { ctx.save(); ctx.clip(path); const cr = rng(500 + s);
-      for (let i = 0; i < 4; i++) { const a = pts[Math.floor(cr() * pts.length)], b = pts[Math.floor(cr() * pts.length)];
-        ctx.strokeStyle = 'rgba(17,47,41,.16)'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
-        ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(a[0] + 2, a[1] + 2); ctx.lineTo(b[0] + 2, b[1] + 2); ctx.stroke(); }
-      ctx.restore(); }
+  // ---- mixed paper blob: two held keyframes (A at the notes, B bigger at the comet spot), boiling, then the comet pops ----
+  function blobLayer(cx, cy, r, seed, n = 9, jit = .16) {
+    const rnd = rng(seed); return smoothPath(Array.from({ length: n }, (_, j) => { const a = j / n * Math.PI * 2, rr = r * (1 - jit + rnd() * jit * 2); return [cx + Math.cos(a) * rr * 1.12, cy + Math.sin(a) * rr * .9]; }));
+  }
+  function drawCrumple(ctx, k, f, cut) {
+    const B = f >= 36; // keyframe B
+    const cx = B ? lerp(NC[0], P2[0], .55) : NC[0], cy = B ? lerp(NC[1], P2[1], .55) : NC[1], R = B ? 74 : 58, rot = (B ? -12 : 8) * Math.PI / 180;
+    const sd = (B ? 900 : 700) + cut * 13; // boil: re-cut every 2 frames
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot); ctx.translate(-cx, -cy);
+    // collage of torn paper scraps: periwinkle base, then the notes' colours folded in
+    paper(ctx, k, blobLayer(cx, cy, R, sd), C.peri, paperGrain, { dy: 8, blur: 10, alpha: .3 });
+    paper(ctx, k, blobLayer(cx - R * .28, cy + R * .12, R * .5, sd + 1, 7, .2), C.orange, paperGrain, { dy: 3, blur: 4, alpha: .22 });
+    paper(ctx, k, blobLayer(cx + R * .25, cy - R * .2, R * .38, sd + 2, 7, .2), C.gold, paperGrain, { dy: 3, blur: 4, alpha: .22 });
+    paper(ctx, k, blobLayer(cx + R * .05, cy + R * .3, R * .26, sd + 3, 6, .22), C.cream, paperGrain, { dy: 2, blur: 3, alpha: .2 });
+    if (B) paper(ctx, k, blobLayer(cx - R * .1, cy - R * .32, R * .3, sd + 4, 6, .22), C.light, paperGrain, { dy: 2, blur: 3, alpha: .2 });
+    ctx.restore();
   }
 
   // ---- comet pose over time ----
   function cometPose(f, cut) {
     const bob = [0, -4, 2][cut], wob = [0, 1.6, -1.2][cut];
+    f -= O;
     if (f < 34) return null;
     if (f < 40) return { x: P2[0], y: P2[1], s: [1.18, 1.18, .94, .94, 1.03, 1.03][f - 34], r: 0 };
     if (f < 44) return { x: P2[0], y: P2[1] + bob, s: 1, r: wob };
@@ -172,7 +180,7 @@ export function createShare({ images, paperGrain }) {
     const img = images['drippy-comet'];
     const ax = BODY.tail[0] - STAR.at[0], ay = BODY.tail[1] - STAR.at[1], th = Math.atan2(ay, ax), L = Math.hypot(ax, ay);
     const hx = STAR.at[0] * Math.cos(th) + STAR.at[1] * Math.sin(th); // star position along the axis
-    const amp = f < 38 ? 0 : (f >= 66 ? 12 + 6 * held(f, 66, 78) : 5 + 7 * held(f, 38, 46)), phase = Math.floor(f / 2) * 1.9;
+    const g = f - O, amp = g < 38 ? 0 : (g >= 66 ? 12 + 6 * held(g, 66, 78) : 5 + 7 * held(g, 38, 46)), phase = Math.floor(f / 2) * 1.9;
     ctx.save(); ctx.translate(pose.x, pose.y); ctx.rotate(pose.r * Math.PI / 180); ctx.scale(pose.s, pose.s); ctx.rotate(th);
     const R = 200, step = 3;
     for (let x = -R; x < R; x += step) {
@@ -192,22 +200,31 @@ export function createShare({ images, paperGrain }) {
 
   function draw(ctx, k, f, cut) {
     drawStickers(ctx, f, cut);
-    if (f < 16) drawWidget(ctx, f);
-    else if (f < 34) { drawCrumple(ctx, k, f); drawFlakes(ctx, k, f); }
+    drawHud(ctx, f);
+    if (f < 20) drawCard(ctx, f);
+    drawNotes(ctx, f, cut);
+    if (f >= 30 && f < 42) drawCrumple(ctx, k, f, cut);
     const pose = cometPose(f, cut);
     if (pose) {
       drawCometWaving(ctx, f, pose);
-      if (f >= 42) drawDashes(ctx, k, f, pose);
+      if (f >= 42 + O) drawDashes(ctx, k, f, pose);
     }
-    burst(ctx, k, f, 34, P2[0], P2[1], 190, 10, 7);
-    if (f >= 82) {
-      const s = [1.45, 1.45, .88, .88, 1.06, 1.06][f - 82] || 1, [dx, dy, dr] = [[0, 0, 0], [1.2, -1, -.7], [-1, 1, .6]][cut];
-      burst(ctx, k, f, 84, 584.5, 339.2, 360, 16, 21);
-      drawLettering(ctx, k, { lines: ['mom got it'], x: 584.5 + dx, y: 339.2 + dy, tilt: -3 + dr, scale: s });
+    burst(ctx, k, f, 34 + O, P2[0], P2[1], 190, 10, 7);
+    const [dx, dy, dr] = [[0, 0, 0], [1.2, -1, -.7], [-1, 1, .6]][cut];
+    if (f >= 82 + O && f < 118) { // "mom got it" slaps in, holds, then peels off
+      const r = f - (82 + O); let s = [1.45, 1.45, .88, .88, 1.06, 1.06][r] || 1, oy = 0, rot = 0;
+      if (f >= 114) { const p = f - 114; s = p < 2 ? 1.06 : .97; oy = p < 2 ? -6 : 40; rot = p < 2 ? 3 : 9; }
+      burst(ctx, k, f, 84 + O, 584.5, 339.2, 360, 16, 21);
+      drawLettering(ctx, k, { lines: ['mom got it'], x: 584.5, y: 339.2 + oy, tilt: -3 + rot, scale: s }); // no boil: holds still once it lands
+    }
+    if (f >= 124) { // result panel (frame 5) slaps in, with "Shared"
+      const s = [1.12, 1.12, .96, .96, 1.02, 1.02][f - 124] || 1, [x, y, w, h] = RESULT;
+      ctx.save(); ctx.translate(x + w / 2 + dx * .5, y + h / 2 + dy * .5); ctx.rotate(dr * .3 * Math.PI / 180); ctx.scale(s, s);
+      ctx.drawImage(images['result-panel'], -w / 2, -h / 2, w, h); ctx.restore();
     }
   }
 
   return { id: 'share', title: 'Share · send to mom', frameCount: N, fps: FPS, phases: SHARE_PHASES, draw };
 }
 
-export const SHARE_ASSETS = ['song-widget', 'drippy-comet', ...STICKERS.map(s => s[0])];
+export const SHARE_ASSETS = ['share-card', 'note-quarter', 'note-beamed', 'avatar', 'progress', 'result-panel', 'drippy-comet', ...STICKERS.map(s => s[0])];
