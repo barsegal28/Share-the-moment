@@ -461,9 +461,9 @@ function VoicePicker() {
   )
 }
 
-const PARAM_LABELS: Record<string, string> = { fps: "Glow-up frame rate", endFrame: "Cut to scatter at frame", loopIdle: "Idle loops", originX: "Scatter from x", originY: "Scatter from y", layoutMs: "Sticker glide (ms)", flyAt: "Fly starts (ms)", flyMs: "Fly time (ms)", playerVolume: "Player volume (on tap)" }
-const PARAM_MAX: Record<string, number> = { playerVolume: 1, fps: 30, endFrame: 107, loopIdle: 4, originX: 1194, originY: 834 }
-const PARAM_STEP: Record<string, number> = { playerVolume: 0.05, fps: 1, endFrame: 1, loopIdle: 1, originX: 1, originY: 1 }
+const PARAM_LABELS: Record<string, string> = { fps: "Glow-up frame rate", endFrame: "Cut to scatter at frame", loopIdle: "Idle loops", originX: "Scatter from x", originY: "Scatter from y", layoutMs: "Sticker glide (ms)", flyAt: "Fly starts (ms)", flyMs: "Fly time (ms)", playerVolume: "Player volume (on tap)", waitMotion: "Sounds start with the scene (1 = on)" }
+const PARAM_MAX: Record<string, number> = { waitMotion: 1, playerVolume: 1, fps: 30, endFrame: 107, loopIdle: 4, originX: 1194, originY: 834 }
+const PARAM_STEP: Record<string, number> = { waitMotion: 1, playerVolume: 0.05, fps: 1, endFrame: 1, loopIdle: 1, originX: 1, originY: 1 }
 
 function ObjectProps({ stepId, id, cfg, onBack }: { stepId: StepId; id: string; cfg: ObjCfg; onBack: () => void }) {
   const flow = useFlow()

@@ -26,7 +26,7 @@ export interface FlowCtx {
   replay: () => void
   restart: () => void
   /** Steps call this when their own animation has finished (advance: "motion"). */
-  signal: (name: "motionDone") => void
+  signal: (name: "motionDone" | "motionStart") => void
   /** Set of steps already played this session. */
   seen: (id: StepId) => boolean
   hold: boolean
@@ -74,6 +74,7 @@ export function FlowProvider({
   const [animate, setAnimate] = useState(true)
   const seenRef = useRef(new Set<StepId>())
   const motionDone = useRef<() => void>(() => {})
+  const motionStart = useRef<() => void>(() => {})
   // Voice lines that have started in this run, and who is waiting for them (objects synced to a line).
   const linesRef = useRef(new Set<number>())
   const lineWaiters = useRef(new Map<number, Set<() => void>>())
@@ -148,22 +149,37 @@ export function FlowProvider({
     else if (rec.mode === "background" || rec.mode === "play") playRecording({ volume: rec.volume, loop: true })
     else if (rec.mode === "keep") setRecordingVolume(rec.volume)
 
-    // Sound cues
-    if (animate) for (const c of s.sounds) timers.push(playSound(c.sound, { volume: c.volume, pitch: c.pitch, delayMs: c.at }) ?? 0)
+    const begin = () => {
+      // Sound cues
+      if (animate) for (const c of s.sounds) timers.push(playSound(c.sound, { volume: c.volume, pitch: c.pitch, delayMs: c.at }) ?? 0)
 
-    // Voice-over: lines in order, each after its own pause.
-    ;(async () => {
-      for (const [i, line] of s.voice.entries()) {
-        await wait(line.delay)
-        if (!alive) return
-        startLine(i)
-        await speak(line.text, line.voice, { rate: line.rate, pitch: line.pitch, claudeVoice: line.claudeVoice })
-        if (!alive) return
+      // Voice-over: lines in order, each after its own pause.
+      ;(async () => {
+        for (const [i, line] of s.voice.entries()) {
+          await wait(line.delay)
+          if (!alive) return
+          startLine(i)
+          await speak(line.text, line.voice, { rate: line.rate, pitch: line.pitch, claudeVoice: line.claudeVoice })
+          if (!alive) return
+        }
+        if (s.advance === "voice") later(s.after, advance)
+      })()
+
+      if (s.advance === "auto") later(s.after, advance)
+    }
+    // Steps that play a motion scene start their sound and voice when its first frame is on screen,
+    // so the cues (set from the scene's frame numbers) land on the right frames.
+    if (s.params.waitMotion) {
+      let begun = false
+      const once = () => {
+        if (begun || !alive) return
+        begun = true
+        begin()
       }
-      if (s.advance === "voice") later(s.after, advance)
-    })()
+      motionStart.current = once
+      later(6000, once) // the scene failed to load: don't hold the step forever
+    } else begin()
 
-    if (s.advance === "auto") later(s.after, advance)
     motionDone.current = () => {
       if (s.advance === "motion") later(s.after, advance)
     }
@@ -171,6 +187,7 @@ export function FlowProvider({
       alive = false
       timers.forEach((t) => cancelLater(t))
       motionDone.current = () => {}
+      motionStart.current = () => {}
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, run, started, hold])
@@ -198,7 +215,7 @@ export function FlowProvider({
       },
       replay,
       restart,
-      signal: (n) => n === "motionDone" && motionDone.current(),
+      signal: (n) => (n === "motionDone" ? motionDone.current() : motionStart.current()),
       seen: (id) => seenRef.current.has(id),
       hold,
       whenLine,

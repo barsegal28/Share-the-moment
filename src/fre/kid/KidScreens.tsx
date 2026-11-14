@@ -10,7 +10,8 @@ import { cn } from "@/lib/utils"
 import { DEMO_SONG } from "@/config"
 import { Obj, EASING } from "../Obj"
 import { useFlow, useRecordingProgress } from "../runtime"
-import { GlowUpCanvas, InkSheetCanvas } from "./canvases"
+import { InkSheetCanvas } from "./canvases"
+import { MotionScene } from "./MotionScene"
 import { ArrowRightIcon, DismissIcon, RibbonIcon, ShareIcon } from "../icons"
 import { DieCutText, KidActionButton, SONG_SECONDS, fmt, useReplyChoice } from "../shared"
 import { playSound } from "../sounds"
@@ -60,17 +61,25 @@ export function KidScreens() {
   const s = flow.step
   const layoutMs = flow.script["k-success"].params.layoutMs ?? 900
 
-  if (s === "k-glow") {
-    const p = flow.script["k-glow"].params
+  if (s === "k-glow" || s === "k-send") {
+    // Motion scenes from the "Share the Moment · motion" artifact, played as-is.
+    const p = flow.script[s].params
     return (
-      <div className="relative h-full w-full" onClick={() => !flow.edit && flow.next()}>
-        <GlowUpCanvas playing fps={p.fps} endFrame={p.endFrame} run={flow.run} onDone={() => flow.signal("motionDone")} />
+      <div className="relative h-full w-full bg-ink" onClick={() => !flow.edit && s === "k-glow" && flow.next()}>
+        <MotionScene
+          scene={s === "k-glow" ? "glowup" : "share"}
+          run={flow.run}
+          fps={p.fps ?? 17}
+          endFrame={s === "k-glow" ? p.endFrame : undefined}
+          onStart={() => flow.signal("motionStart")}
+          onDone={() => flow.signal("motionDone")}
+        />
       </div>
     )
   }
 
   const layout = s === "k-scatter" ? LAYOUT_SCATTER : LAYOUT_CARD
-  const cardState: CardState | null = s === "k-success" ? "success" : s === "k-share" ? "share" : s === "k-send" ? "share" : s === "k-notify" ? "sent" : s === "k-reveal" ? "sent" : null
+  const cardState: CardState | null = s === "k-success" ? "success" : s === "k-share" ? "share" : s === "k-notify" ? "sent" : s === "k-reveal" ? "sent" : null
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-ink font-sans">
@@ -109,7 +118,6 @@ export function KidScreens() {
 
       {cardState && <TopBar />}
       {cardState && <Card state={cardState} />}
-      {s === "k-send" && <SendOverlay />}
       {s === "k-notify" && <ReplyBanner />}
       {s === "k-reveal" && <Reveal />}
     </div>
@@ -303,83 +311,6 @@ function SongPlayer({ active }: { active: boolean }) {
           </div>
         </div>
       </div>
-    </div>
-  )
-}
-
-// ─── Sending: the recording flies to Mom and Dad ───────────────────────────
-const MOM = { cx: 470, cy: 300 }
-const DAD = { cx: 728, cy: 300 }
-const FROM = { cx: 598, cy: 383 }
-
-function SendOverlay() {
-  const flow = useFlow()
-  const p = flow.script["k-send"].params
-  const flyAt = p.flyAt ?? 450
-  const flyMs = p.flyMs ?? 950
-  const a = useRef<HTMLDivElement>(null)
-  const b = useRef<HTMLDivElement>(null)
-  const [landed, setLanded] = useState(!flow.animate)
-  useEffect(() => {
-    if (!flow.animate) return setLanded(true)
-    setLanded(false)
-    const fly = (el: HTMLDivElement | null, to: { cx: number; cy: number }, lift: number, spin: number) =>
-      el?.animate(
-        [
-          { transform: "translate(0,0) scale(1) rotate(0)", opacity: 1 },
-          { transform: `translate(${(to.cx - FROM.cx) / 2}px, ${(to.cy - FROM.cy) / 2 - lift}px) scale(0.85) rotate(${spin / 2}deg)`, opacity: 1, offset: 0.5 },
-          { transform: `translate(${to.cx - FROM.cx}px, ${to.cy - FROM.cy}px) scale(0.25) rotate(${spin}deg)`, opacity: 0 },
-        ],
-        { duration: flyMs, delay: flyAt, easing: EASING.inOut, fill: "both" },
-      )
-    const x = fly(a.current, MOM, 160, -40)
-    const y = fly(b.current, DAD, 190, 40)
-    const t = later(() => setLanded(true), flyAt + flyMs - 80)
-    return () => {
-      x?.cancel()
-      y?.cancel()
-      cancelLater(t)
-    }
-  }, [flow.run, flow.animate, flyAt, flyMs])
-
-  const checkDelay = flow.script["k-send"].objects.checks.motion.delay
-  return (
-    <div className="absolute inset-0 z-10">
-      <Obj step="k-send" id="dim" className="absolute inset-0">
-        <div className="h-full w-full bg-ink/70" />
-      </Obj>
-      {[
-        { who: "mom" as const, at: MOM, tilt: -8 },
-        { who: "dad" as const, at: DAD, tilt: 7 },
-      ].map(({ who, at, tilt }) => (
-        <Obj key={who} step="k-send" id={who} className="absolute" style={{ left: at.cx - 90, top: at.cy - 90, width: 180, height: 180 }}>
-          <div className={cn("relative transition-transform duration-300", landed && "animate-[fre-gulp_420ms_ease-out]")}>
-            <Sticker name={who} size={180} tilt={tilt} />
-            <Obj step="k-send" id="checks" className="absolute -right-2 -bottom-2" style={{ animationDelay: `${checkDelay}ms` }}>
-              <span className="sticker grid size-16 place-items-center rounded-full bg-teal text-cream [--kiss:var(--sticker-orange)]">
-                <Check className="size-9" strokeWidth={4} />
-              </span>
-            </Obj>
-          </div>
-        </Obj>
-      ))}
-      {[a, b].map((r, i) => (
-        <div key={i} ref={r} className="pointer-events-none absolute" style={{ left: FROM.cx - 70, top: FROM.cy - 70, width: 140, height: 140 }}>
-          <Obj step="k-send" id="song">
-            <SongSticker />
-          </Obj>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-/** The recording as a sticker: play button + a tiny song tag. */
-function SongSticker() {
-  return (
-    <div className="relative grid size-[140px] place-items-center">
-      <Sticker name="play" size={118} />
-      <span className="sticker absolute -bottom-1 rounded-full bg-periwinkle px-3 py-0.5 font-display text-[16px] whitespace-nowrap text-teal uppercase [--kiss:var(--sticker-pink)]">{DEMO_SONG.title}</span>
     </div>
   )
 }

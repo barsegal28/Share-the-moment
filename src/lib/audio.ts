@@ -165,7 +165,7 @@ export function useCaption() {
 export type ClaudeVoice = "buttery" | "airy" | "glassy" | "rounded"
 export const CLAUDE_VOICES: ClaudeVoice[] = ["airy", "buttery", "glassy", "rounded"]
 /** Default Claude voice for each role; a voice-over line can pick another. */
-export const ROLE_VOICE: Record<Voice, ClaudeVoice> = { guide: "rounded", mom: "buttery", dad: "glassy", grandma: "airy", kid: "airy" }
+export const ROLE_VOICE: Record<Voice, ClaudeVoice> = { guide: "airy", mom: "rounded", dad: "glassy", grandma: "airy", kid: "airy" }
 type Tts = {
   speak: (what: string, o?: { voice?: ClaudeVoice; rate?: number; language?: string }) => Promise<unknown>
   stop: () => Promise<void>
