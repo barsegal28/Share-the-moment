@@ -1,56 +1,40 @@
 /*
- * Every effect style in the Figma file "Share the moment" (all Paper Cut languages, not just Sticker).
- * Values are copied from Figma. Noise is Figma's monotone NOISE effect: speckles of one colour at
- * `opacity`, covering `density` of the surface, `size` px each. Shadows are DROP_SHADOW (blur = Figma radius).
+ * The Figma effect styles that the Sticker components on "app asets" actually use. Values copied from Figma.
+ * Noise is Figma's monotone NOISE effect: speckles of one colour at `opacity`, covering `density` of the
+ * surface, `size` px each. Shadows are DROP_SHADOW (blur = Figma radius).
  *
- * In code: <FigmaEffect name="…"> applies one to a box, or use the `shadow-pc-*` utilities for the shadow alone.
+ * `status: "outlier"` marks styles from other Paper Cut languages that Sticker components borrow
+ * (see docs/FIGMA-AUDIT.md §3). The sticker lift itself is a token (`--sticker-lift-*`, `shadow-sticker`).
+ *
+ * In code: <FigmaEffect name="…"> applies one to a box.
  */
 export type Noise = { color: string; opacity: number; density: number; size: number }
 export type Shadow = { y: number; blur: number; opacity: number }
-export type FigmaEffectStyle = { figmaName: string; language: "Shared" | "Snip" | "Overprint" | "Scrapbook" | "Sticker"; description: string; shadow?: Shadow; noise: Noise[] }
+export type FigmaEffectStyle = { figmaName: string; status: "system" | "outlier"; description: string; shadow?: Shadow; noise: Noise[] }
 
 export const FIGMA_EFFECTS = {
   risoGrain: {
     figmaName: "Paper Cut/Riso grain",
-    language: "Shared",
-    description: "Over the whole composition. In Sticker it goes on the sheet only; stickers stay clean.",
+    status: "system",
+    description: "On the sheet only (background, Parent.Mobile backgrounds, the main card). Stickers stay clean.",
     noise: [
       { color: "#ffffff", opacity: 0.75, density: 0.3, size: 1 },
       { color: "#000000", opacity: 0.55, density: 0.22, size: 1.2 },
     ],
   },
-  groundGrain: {
-    figmaName: "Paper Cut/Ground grain",
-    language: "Shared",
-    description: "A fine dark grain for the ground.",
-    noise: [{ color: "#000000", opacity: 0.1, density: 0.55, size: 1.1 }],
-  },
-  snipLiftedGrain: {
-    figmaName: "Paper Cut/Snip/Lifted grain",
-    language: "Snip",
-    description: "Snip pieces: lifted shadow plus piece grain.",
-    shadow: { y: 5, blur: 10, opacity: 0.22 },
-    noise: [{ color: "#000000", opacity: 0.14, density: 0.55, size: 1.1 }],
-  },
-  overprintInkGrain: {
-    figmaName: "Paper Cut/Overprint/Ink grain",
-    language: "Overprint",
-    description: "Overprint inks: grain, no shadow.",
-    noise: [{ color: "#000000", opacity: 0.16, density: 0.55, size: 1.1 }],
-  },
   scrapbookLiftedPaper: {
     figmaName: "Paper Cut/Scrapbook/Lifted paper",
-    language: "Scrapbook",
-    description: "Scrapbook pieces on white: lifted shadow plus light grain.",
+    status: "outlier",
+    description: "Scrapbook style used on the main card and Parent.Mobile › Paper.",
     shadow: { y: 5, blur: 10, opacity: 0.2 },
     noise: [{ color: "#000000", opacity: 0.08, density: 0.55, size: 1.1 }],
   },
-  scrapbookLiftedDarkCard: {
-    figmaName: "Paper Cut/Scrapbook/Lifted dark card",
-    language: "Scrapbook",
-    description: "Dark Scrapbook cards: a deeper shadow and grain.",
-    shadow: { y: 5, blur: 10, opacity: 0.28 },
-    noise: [{ color: "#000000", opacity: 0.12, density: 0.55, size: 1.1 }],
+  snipLiftedGrain: {
+    figmaName: "Paper Cut/Snip/Lifted grain",
+    status: "outlier",
+    description: "Snip style used on the Player in main › FRE and the progress scrubber.",
+    shadow: { y: 5, blur: 10, opacity: 0.22 },
+    noise: [{ color: "#000000", opacity: 0.14, density: 0.55, size: 1.1 }],
   },
 } satisfies Record<string, FigmaEffectStyle>
 

@@ -51,7 +51,7 @@ export const NOTES: Note[] = [
   {
     tag: "Visual",
     title: "Sticker language on an ink sheet",
-    body: "Die-cut vinyl stickers: clean vector art, a 9px cream border, a 3.5px kiss-cut edge and a soft lift. Riso grain sits on the sheet only, so stickers stay clean. Bagel Fat One for headlines, DM Sans for text. Built on shadcn/ui with Sticker tokens and kid sizes.",
+    body: "Die-cut vinyl stickers: clean vector art, a 9px cream border, a 3.5px kiss-cut edge and a soft lift. Riso grain sits on the sheet only, so stickers stay clean. Bagel Fat One for titles, DM Mono for text. Built on shadcn/ui with Sticker tokens and kid sizes.",
   },
   {
     tag: "Prototype",

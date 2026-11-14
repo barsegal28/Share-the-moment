@@ -32,7 +32,7 @@ export interface StickerArtProps {
 /**
  * A die-cut vinyl sticker from flat SVG art.
  * Every object gets a 9px cream border following its silhouette, a 3.5px coloured
- * kiss-cut edge outside it, and a soft lift: 7px down, 5px blur, 38% black (20% on light sheets).
+ * kiss-cut edge outside it, and the Figma lift: 7px down, 10px blur, 30% black.
  */
 export function StickerArt({
   children,
@@ -70,7 +70,8 @@ export function StickerArt({
         transform: `rotate(${tilt}deg)`,
         ["--tilt" as string]: `${tilt}deg`,
         animationDelay: delay ? `${delay}ms` : undefined,
-        filter: lift ? "drop-shadow(0 7px 2.5px rgb(0 0 0 / var(--sticker-shadow)))" : undefined,
+        // Figma lift: y 7, blur 10, black 30% (fixed px, like the 9px border)
+        filter: lift ? "drop-shadow(0 var(--sticker-lift-y) var(--sticker-lift-blur) rgb(0 0 0 / var(--sticker-lift-alpha)))" : undefined,
         ...style,
       }}
     >

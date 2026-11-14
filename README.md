@@ -54,7 +54,7 @@ Parent flow: `#/parent?channel=sms|email&first=1`
 - **Language:** Sticker (die-cut vinyl on the ink sheet). Tokens live in `src/index.css`: the raw palette (`--sticker-*`) and the shadcn semantic tokens mapped onto it. See `docs/STICKER-LANGUAGE.md`.
 - **Kid extensions:** `Button` gets a `sticker` variant with `tone`, and `kid` / `kid-lg` / `kid-icon` sizes (80px+ targets). The `sticker` utility die-cuts any box: cream border, kiss-cut edge, lift.
 - **Art:** sticker assets from the Figma file's **app assets** page (`src/art/figma-stickers.ts`), plus a few local hand-drawn ones (`src/art/stickers.tsx`). `<StickerArt>` generates the die-cut from each silhouette.
-- **From Figma:** the Sticker-mode variables as `--pc-*` CSS variables, the shared text styles (`text-pc-body`, `text-pc-label`) and every effect style, other languages' included (`src/lib/effects.ts`, `<FigmaEffect>`). See `docs/STICKER-LANGUAGE.md`.
+- **From Figma:** only what the components on the **app asets** page use: the Sticker primitives (`--sticker-*`) and Sticker-mode variables (`--pc-*`), the type scale measured from the components (Bagel Fat One + DM Mono), the sticker lift and die-cut, radii and the effects in `src/lib/effects.ts`. Value-by-value audit and outliers: `docs/FIGMA-AUDIT.md`.
 
 ## Structure
 

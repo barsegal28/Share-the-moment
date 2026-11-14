@@ -189,7 +189,7 @@ export function Showcase() {
                   <p className="text-sm text-cream/60">Headlines</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-cream">DM Sans</p>
+                  <p className="text-2xl text-cream">DM Mono</p>
                   <p className="text-sm text-cream/60">Text</p>
                 </div>
               </div>

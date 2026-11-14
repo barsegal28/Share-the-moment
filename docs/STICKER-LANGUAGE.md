@@ -12,7 +12,7 @@ Every object is one sticker. It gets a **9px cream border** (`#EDE2C2`) that fol
 In code: `<StickerArt>` for SVG art, the `sticker` utility for boxes (buttons, cards).
 
 ## Lift
-A soft shadow under each sticker: 7px down, 5px blur, 38% black. On light grounds the shadow drops to 20%.
+A soft shadow under each sticker: 7px down, 10px blur, 30% black (Figma: the drop shadow on every sticker's kiss-cut edge). Tokens `--sticker-lift-*`, utility `shadow-sticker`.
 
 ## Sheet
 Stickers are scattered and tilted about ±15°. The ground is ink (`#112F29`, used by this project), plain warm off-white (`#F7F2E6`, used for the parent web pages) or notebook paper (`#FBF9F2` with periwinkle rules, a pink margin and punched holes).
@@ -30,17 +30,21 @@ The riso grain goes on the sheet only. The stickers stay clean. It matches the F
 | `--sticker-pink` | `#EC70BB` | accent 2 and blush |
 | `--sticker-ink` | `#112F29` | ground, eyes and marks |
 | `--sticker-gold` | `#91781E` | detail |
+| `--sticker-paper` | `#F7F2E6` | light sheet |
+| `--sticker-notebook` | `#FBF9F2` | notebook sheet |
+| `--sticker-system-white` | `#FFFDF7` | system surfaces |
 
 ## Faces
 Dot eyes with a small cream highlight, pink blush ovals and a line smile.
 
 ## Type
-Bagel Fat One for headlines, DM Sans for text (both self-hosted via Fontsource).
+Bagel Fat One for display and titles, DM Mono Medium for everything else (both self-hosted via Fontsource). The scale is measured from the Figma components: `text-display`, `text-title-lg|md|sm`, `text-mono-xl|lg|md|sm`. See docs/FIGMA-AUDIT.md.
 
 ## From Figma
 Source: the Figma file "Share the moment".
 
 - **Assets** come only from the **app assets** page, component set **Sticker / Shape**: planets, comets, burst, sparkle, heart, the three rating stars, music notes, treble clef and the play button. They live in `src/art/figma-stickers.ts` (art layers only; `<StickerArt>` regenerates the die-cut). Local hand-drawn stickers (family faces, drum, hands, piano…) fill the gaps.
 - **Variables:** the "Paper Cut" collection in its **Sticker** mode, as `--pc-*` CSS variables with the Figma code-syntax names (`src/index.css`).
-- **Text styles:** the shared ones, Paper Cut/Body and Paper Cut/Label (`text-pc-body`, `text-pc-label`). The other languages' display styles aren't used.
-- **Effects:** every effect style in the file, including other languages': Riso grain, Ground grain, Snip/Lifted grain, Overprint/Ink grain, Scrapbook/Lifted paper, Scrapbook/Lifted dark card (`src/lib/effects.ts`, `<FigmaEffect>`, `shadow-pc-*`).
+- **Type:** the components don't use the file's local text styles (Paper Cut/Body and Label are DM Sans and unused). The scale in code is measured from the components themselves.
+- **Effects:** only the ones the components use: Riso grain, plus two borrowed from other languages and flagged as outliers (Scrapbook/Lifted paper, Snip/Lifted grain) in `src/lib/effects.ts`.
+- **Audit:** everything above, value by value, with the outliers, is in `docs/FIGMA-AUDIT.md`.
