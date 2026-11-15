@@ -34,7 +34,7 @@ export const BLOCK_HINTS: Partial<Record<BlockType, string>> = {
   button: "label | link",
 }
 
-const KEY = "share-the-moment/overview/v2"
+const KEY = "share-the-moment/overview/v3"
 export const DEFAULT_DOC = DEFAULT as Doc
 const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v))
 

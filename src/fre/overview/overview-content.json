@@ -117,6 +117,51 @@
       "text": "One message per song share, no multiple songs in one message\nOne receiver in this version"
     },
     {
+      "id": "b27",
+      "type": "h2",
+      "text": "Future directions and improvements"
+    },
+    {
+      "id": "b28",
+      "type": "sub",
+      "text": "Where this can grow to?"
+    },
+    {
+      "id": "b32",
+      "type": "label",
+      "text": "Feature areas"
+    },
+    {
+      "id": "b29",
+      "type": "ul",
+      "text": "Multiple receivers.\nA sticker notebook (and all messages types) for every completed song.\nA weekly digest for parents."
+    },
+    {
+      "id": "b33",
+      "type": "label",
+      "text": "Research"
+    },
+    {
+      "id": "b34",
+      "type": "ul",
+      "text": "Test action hierarchy logic with users, and validate against KPI’s\nTest parents preferences of ways to reply; Default medium(s), smart defaults, generative AI messages."
+    },
+    {
+      "id": "b35",
+      "type": "label",
+      "text": "Core experience and system"
+    },
+    {
+      "id": "b36",
+      "type": "ul",
+      "text": "Refined animations and sounds.\nSemantic tokens are not defined; Currently tokens (especially colors) are not describing what they should be used for. For example, primary and secondary text colors or sound function on elements."
+    },
+    {
+      "id": "b37",
+      "type": "divider",
+      "text": ""
+    },
+    {
       "id": "b24",
       "type": "h2",
       "text": "Edge cases"
@@ -132,21 +177,6 @@
       "text": "No parent contact yet: \"Ask a grown-up\" behind a parent gate.\nApp is offline: queued, same animation for the kid.\nParent listened, no reply: nothing is shown to the kid."
     },
     {
-      "id": "b27",
-      "type": "h2",
-      "text": "Future directions and improvements"
-    },
-    {
-      "id": "b28",
-      "type": "sub",
-      "text": "Where this can grow to?"
-    },
-    {
-      "id": "b29",
-      "type": "ul",
-      "text": "Multiple receivers.\nA sticker notebook (and all messages types) for every completed song.\nA weekly digest for parents.\nRefined animations and sounds.\nSemantic tokens are not defined; Currently tokens (especially colors) are not describing what they should be used for. For example, primary and secondary text colors."
-    },
-    {
       "id": "b30",
       "type": "h2",
       "text": "Notes"
@@ -154,7 +184,7 @@
     {
       "id": "b31",
       "type": "ul",
-      "text": "I used Claude text to speech capability for time and resources limitations. For a real product, the voice over should sound MUCH MORE natural, and also friendly, encouraging and excited.",
+      "text": "I used Claude text to speech capability for time and resources limitations. Ideally, the voice over would sound MUCH MORE natural, and also friendly, encouraging and excited.",
       "gap": 0
     }
   ]

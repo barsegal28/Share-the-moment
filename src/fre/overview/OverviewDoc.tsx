@@ -32,7 +32,7 @@ function gapAbove(prev: BlockType | undefined, cur: BlockType) {
   if (cur === "lead") return 12
   if (cur === "links") return 24
   if (cur === "sub" && prev === "h2") return 0
-  if (cur === "label") return prev === "h2" ? 20 : 8
+  if (cur === "label") return prev === "h2" || prev === "sub" ? 20 : 8
   if (cur === "ul") return prev === "label" ? 8 : 20
   if (cur === "callout") return prev === "p" ? 40 : 20
   return 20
