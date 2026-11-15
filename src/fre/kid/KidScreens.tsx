@@ -184,7 +184,7 @@ function Card({ state }: { state: CardState }) {
         shared
         slot={(part, node) => {
           if (part === "title") return <Obj step={step} id="title">{node}</Obj>
-          if (part === "next") return <Obj step={step} id="next" className="w-full rounded-[28px]" hint onTap={() => flow.next()}>{node}</Obj>
+          if (part === "next") return <Obj step={step} id="next" className="w-full rounded-[28px]">{node}</Obj>
           if (part === "secondary") return <Obj step={step} id="shared" className="w-full">{node}</Obj>
           if (part === "again") return <Obj step={step} id="again" className="w-full" onTap={() => flow.go("k-glow")}>{node}</Obj>
           return node

@@ -260,7 +260,7 @@ export function ComposerToolbar({ tool, onTool }: { tool: ComposerTool; onTool?:
           aria-label={label}
           aria-pressed={tool === t}
           onClick={() => onTool?.(t)}
-          className={cn("relative grid shrink-0 place-items-center overflow-visible", tool === t ? "size-11 rounded-[12px] bg-gold-light" : "size-8")}
+          className={cn("relative grid shrink-0 place-items-center overflow-visible", tool === t ? "size-11 rounded-[12px] bg-paper" : "size-8")}
         >
           <span className={cn(t === "voice" && "absolute top-0 left-0")}>{icon}</span>
         </button>
@@ -303,7 +303,7 @@ export function ParentSendBack({
           </div>
         </div>,
       )}
-      <div className="flex flex-col items-center gap-7">
+      <div className="flex flex-col items-center gap-5">
         {slot("card", <StickerCard message={message} onMessage={onMessage} sticker={sticker} onSticker={onSticker} tool={tool} slot={slot} />)}
         {slot("toolbar", <ComposerToolbar tool={tool} onTool={setTool} />)}
       </div>

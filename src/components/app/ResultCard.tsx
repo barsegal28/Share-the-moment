@@ -27,11 +27,13 @@ export interface ResultCardProps {
   /** main/default: the song was shared — the Share button reads "Shared ✓". */
   shared?: boolean
   onPlayNext?: () => void
+  /** FRE timeline: the score shown under the stars (Figma 73:3571). */
+  score?: string
   onShare?: () => void
   onPlayAgain?: () => void
   onClose?: () => void
   /** Wrap parts for motion: title, star (index), action (index), illustration, share, close. */
-  slot?: (part: "title" | "stars" | "illustration" | "share" | "close" | "next" | "secondary" | "again", node: ReactNode) => ReactNode
+  slot?: (part: "title" | "stars" | "illustration" | "share" | "close" | "next" | "secondary" | "again" | "score", node: ReactNode) => ReactNode
   /** Override how each star renders (motion). */
   renderStar?: (star: ReactNode, i: number) => ReactNode
   className?: string
@@ -44,6 +46,7 @@ export function ResultCard({
   timeline = "default",
   title = "You are a star!",
   shared = false,
+  score = "85%",
   onPlayNext: _onPlayNext,
   onShare,
   onPlayAgain,
@@ -89,6 +92,7 @@ export function ResultCard({
             </p>,
           )}
           {slot("stars", <StarsRow size="L" renderStar={renderStar} className={timeline === "default" ? "h-[165px] w-[456px]" : undefined} />)}
+          {timeline === "FRE" && slot("score", <p className="text-display text-center text-teal">{score}</p>)}
           {timeline === "default" && (
             <div className="flex w-[240px] flex-col items-center gap-6">
               {slot(
