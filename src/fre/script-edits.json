@@ -393,5 +393,8 @@
       "volume": 0.15
     },
     "after": 1800
+  },
+  "p-sms": {
+    "notes": "If parent didn't open the link, they get a reminder after 24 hours."
   }
 }

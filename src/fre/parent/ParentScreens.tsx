@@ -1,3 +1,4 @@
+import brandComet from "@/fre/overview/brand-comet.svg"
 /**
  * Parent flow, phone web (Figma "Parent.Mobile", 393 × 650 content inside an iPhone + Safari shell).
  * SMS → listen page → listen sheet → send a surprise → sent.
@@ -124,7 +125,7 @@ function SmsThread() {
         <div className="relative flex flex-col items-center gap-1 pt-1">
           <ChevronLeft className="absolute top-3 left-2 size-8 text-[#0a84ff]" />
           <span className="grid size-[54px] place-items-center rounded-full bg-gradient-to-b from-[#b4b4bb] to-[#8e8e93]">
-            <Sticker name="ratingStar1" size={40} lift={false} />
+            <img src={brandComet} alt="" className="w-[42px] -translate-x-px" draggable={false} />
           </span>
           <span className="flex items-center gap-0.5 text-[12px]">
             Piano Pals <ChevronRight className="size-3 text-black/40" />
