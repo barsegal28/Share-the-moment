@@ -81,7 +81,7 @@ function StepNotes() {
   }
   flush()
   return (
-    <aside className="hidden w-[260px] shrink-0 flex-col gap-4 overflow-y-auto py-6 pr-6 lg:flex">
+    <aside className="hidden w-[260px] shrink-0 flex-col gap-4 overflow-y-auto py-6 pr-[60px] lg:flex">
       {out.length > 0 && <>
         <h2 className="text-[14px] leading-5 font-semibold text-[#18181b]">Notes</h2>
         {out}
