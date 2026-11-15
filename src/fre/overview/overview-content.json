@@ -104,7 +104,7 @@
     {
       "id": "b21",
       "type": "ul",
-      "text": "Parents configured their emails and phone numbers in the app in advance. The uses this details by default.\nRecordings are audio only"
+      "text": "Recordings are audio only\nParents configured their emails and phone numbers in the app in advance. The feature use these details by default."
     },
     {
       "id": "b22",
@@ -134,7 +134,7 @@
     {
       "id": "b29",
       "type": "ul",
-      "text": "Multiple receivers.\nA sticker notebook (and all messages types) for every completed song.\nA weekly digest for parents."
+      "text": "Multiple receivers.\nA sticker notebook to collect parent reply cards for every completed song.\nA weekly digest for parents."
     },
     {
       "id": "b33",
@@ -144,7 +144,7 @@
     {
       "id": "b34",
       "type": "ul",
-      "text": "Test action hierarchy logic with users, and validate against KPI’s\nTest parents preferences of ways to reply; Default medium(s), smart defaults, generative AI messages."
+      "text": "Test action hierarchy logic with users, and validate against KPI’s\n  When the kid earns 3 stars after they are familiar with the feature, should this be the primary actions?\n  Do kids want to share even when they didn't get 3 stars yet?\n  Does prompting to share can create the opposite reaction and annoy the kid? \nTest parents preferences of ways to reply; Default medium(s), smart defaults, generative AI messages."
     },
     {
       "id": "b35",
@@ -174,7 +174,7 @@
     {
       "id": "b26",
       "type": "ul",
-      "text": "No parent contact yet: \"Ask a grown-up\" behind a parent gate.\nApp is offline: queued, same animation for the kid.\nParent listened, no reply: nothing is shown to the kid."
+      "text": "No parent contact details yet: \"Ask a grown-up\" behind a parent gate.\nApp is offline: queued, same animation for the kid.\nParent listened, no reply: nothing is shown to the kid."
     },
     {
       "id": "b30",
