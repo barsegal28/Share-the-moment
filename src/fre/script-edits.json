@@ -47,7 +47,8 @@
     "recording": {
       "mode": "off",
       "volume": 0.14
-    }
+    },
+    "notes": "I used Claude text to speech capability for time and resources limitations. Ideally, the voice over would sound natural, friendly and encouraging."
   },
   "k-success": {
     "sounds": [],
@@ -243,10 +244,12 @@
           "enter": "none"
         }
       }
-    }
+    },
+    "notes": "- Tap to change sticker\n- I Assumed stickers as the preferred reply method.\n- **In the future:** The card editor ux can be expanded to provide more editing capabilities as well as mixed media so parents can really customize their reply card."
   },
   "p-sent": {
-    "sounds": []
+    "sounds": [],
+    "notes": "Switch to kid flow\n[Open flow](#/kid)"
   },
   "k-shared": {
     "objects": {
@@ -277,7 +280,8 @@
         }
       }
     },
-    "sounds": []
+    "sounds": [],
+    "notes": "Switch to parent flow\n[Open flow](#/parent)"
   },
   "k-surprise": {
     "sounds": [
@@ -333,8 +337,5 @@
   },
   "p-listen": {
     "sounds": []
-  },
-  "k-scatter": {
-    "notes": "- tap to change sticker (fre out of scope)\n- assumed stickers as the prefered method.\n- in the future: can be mixed media card\n[Go to parent flow](#/parent)"
   }
 }

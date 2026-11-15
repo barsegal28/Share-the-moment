@@ -58,6 +58,7 @@ function StepNotes() {
   const lines = text ? text.split("\n").map((l) => l.trimEnd()).filter(Boolean) : []
   const out: React.ReactNode[] = []
   let bullets: string[] = []
+  const rich = (t: string) => t.split(/(\*\*[^*]+\*\*)/).map((x, i) => (x.startsWith("**") && x.endsWith("**") ? <strong key={i} className="font-semibold">{x.slice(2, -2)}</strong> : x))
   const flush = () => {
     if (!bullets.length) return
     out.push(
@@ -65,7 +66,7 @@ function StepNotes() {
         {bullets.map((b, i) => (
           <li key={i} className="relative pl-[22px] text-[15px] leading-[26px] text-[#3f3f46]">
             <span className="absolute top-[11px] left-[8px] size-[4px] rounded-full bg-[#3f3f46]" />
-            {b}
+            {rich(b)}
           </li>
         ))}
       </ul>,
@@ -77,7 +78,7 @@ function StepNotes() {
     if (l.startsWith("- ")) { bullets.push(l.slice(2)); continue }
     flush()
     if (btn) out.push(<a key={out.length} href={btn[2]} className="inline-flex h-9 w-fit items-center rounded-full bg-[#18181b] px-4 text-[14px] font-medium text-white hover:bg-zinc-700">{btn[1]}</a>)
-    else out.push(<p key={out.length} className="text-[15px] leading-[26px] text-[#3f3f46]">{l}</p>)
+    else out.push(<p key={out.length} className="text-[15px] leading-[26px] text-[#3f3f46]">{rich(l)}</p>)
   }
   flush()
   return (
