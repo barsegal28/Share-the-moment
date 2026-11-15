@@ -124,7 +124,8 @@
     "recording": {
       "mode": "off",
       "volume": 0.15
-    }
+    },
+    "after": 1400
   },
   "k-share": {
     "voice": [
@@ -307,7 +308,7 @@
         "pitch": 1.35
       },
       {
-        "text": "proud of you",
+        "text": "proud of you!",
         "voice": "mom",
         "delay": 200,
         "rate": 1,
@@ -315,7 +316,14 @@
         "claudeVoice": "rounded"
       },
       {
-        "text": "continue where you stoped",
+        "text": "3 stars on playing Jingle bells!",
+        "voice": "guide",
+        "delay": 200,
+        "rate": 1.02,
+        "pitch": 1.35
+      },
+      {
+        "text": "continue where you stopped",
         "voice": "guide",
         "delay": 200,
         "rate": 1.02,
@@ -333,9 +341,57 @@
           "idle": "wiggle"
         }
       }
-    }
+    },
+    "notes": "- For this flow I assumed the kid only shared one song and got a reply not long after, inside the app.\n- More cases to consider: \n  - notification can appear outside the app\n  - Parent reply was sent after few days\n  - Kid got multiple replies for different songs. "
   },
   "p-listen": {
     "sounds": []
+  },
+  "k-scatter": {
+    "sounds": [],
+    "objects": {
+      "avatar": {
+        "motion": {
+          "enter": "none"
+        }
+      },
+      "progress": {
+        "motion": {
+          "enter": "none"
+        }
+      },
+      "striped": {
+        "enterSound": "none"
+      },
+      "ringed": {
+        "enterSound": "none"
+      },
+      "drippy": {
+        "enterSound": "none"
+      },
+      "cloud": {
+        "enterSound": "none"
+      },
+      "burst": {
+        "enterSound": "none"
+      },
+      "heart": {
+        "enterSound": "none"
+      },
+      "spark1": {
+        "enterSound": "none"
+      },
+      "spark2": {
+        "enterSound": "none"
+      },
+      "spark3": {
+        "enterSound": "none"
+      }
+    },
+    "recording": {
+      "mode": "off",
+      "volume": 0.15
+    },
+    "after": 1800
   }
 }
