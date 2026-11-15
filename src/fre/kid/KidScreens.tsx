@@ -232,7 +232,8 @@ function ShareMoment() {
   const [overlayOn, setOverlayOn] = useState(false)
   useEffect(() => setOverlayOn(false), [flow.run, sending])
   const [pressed, setPressed] = useState(false)
-  useEffect(() => setPressed(false), [flow.run, flow.step])
+  // Stays pressed into k-send, until the send animation takes over; only a fresh k-share resets it.
+  useEffect(() => { if (flow.step === "k-share") setPressed(false) }, [flow.run, flow.step])
   if (sending)
     return (
       <div className="relative h-full w-full bg-ink">
@@ -267,7 +268,7 @@ function ShareMoment() {
       <CardSwap key={flow.run} />
       <Obj step="k-share" id="share" hint={!pressed} onTap={() => { if (pressed) return; setPressed(true); later(() => flow.go("k-send"), 220) }} className="rounded-[28px]" style={box(SHARE_HIT.share)}>
         {/* Pressed: sinks and darkens for a beat before the send animation starts */}
-        <Button className={cn("w-[240px] transition-[transform,filter] duration-100 ease-out", pressed && "scale-[0.94] brightness-[0.8]")} iconEnd={<ShareIcon size={BUTTON_ICON_SIZE.xxl} />}>
+        <Button className={cn("w-[240px] transition-[scale,filter] duration-100 ease-out", pressed && "scale-[0.94] brightness-[0.8]")} iconEnd={<ShareIcon size={BUTTON_ICON_SIZE.xxl} />}>
           Share
         </Button>
       </Obj>

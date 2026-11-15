@@ -109,7 +109,18 @@ export function createShare({ images, paperGrain }) {
     if (a === undefined) return;
     ctx.save(); ctx.globalAlpha = a; ctx.drawImage(img, x, y, w, h);
     AVATARS.forEach(([name, [ax, ay, aw, ah]]) => ctx.drawImage(images[name], ax, ay, aw, ah)); ctx.restore();
-    if (f >= 10 && f < 12) { const [bx, by, bw, bh] = SHARE_BTN; const p = new Path2D(); p.roundRect(bx, by, bw, bh, 40); ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fill(p); }
+    // The kid's tap already pressed Share (live button sinks to 94% and darkens): it stays pressed here until the card fades.
+    if (f < 20) {
+      const [bx, by, bw, bh] = SHARE_BTN, k = img.width / w, S = 0.94;
+      const sx = (bx - x) * k, sy = (by - y) * k, sw = bw * k, sh = bh * k;
+      ctx.save(); ctx.globalAlpha = a;
+      const pad = 3, hole = new Path2D(); hole.roundRect(bx - pad, by - pad, bw + pad * 2, bh + pad * 2, 32);
+      ctx.fillStyle = '#f2ecdc'; ctx.fill(hole);
+      const nw = bw * S, nh = bh * S, nx = bx + (bw - nw) / 2, ny = by + (bh - nh) / 2;
+      ctx.drawImage(img, sx, sy, sw, sh, nx, ny, nw, nh);
+      const p = new Path2D(); p.roundRect(nx, ny, nw, nh, 28 * S); ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fill(p);
+      ctx.restore();
+    }
   }
 
   // ---- the music notes: float, then squeeze together into a ball ----
