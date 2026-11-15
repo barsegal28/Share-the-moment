@@ -168,6 +168,8 @@ const BASE_SCRIPT: Script = {
       star1: O("Star 1 · every note", { enter: "stamp", syncLine: 1, delay: 0, duration: 420, ease: "overshoot", scaleFrom: 2.4, rotateFrom: -30, idle: "wiggle", idleAmp: 4, idleSpeed: 2.6 }, { enterSound: "star", enterVolume: 0.8, enterPitch: 1, tapSound: "sparkle" }),
       star2: O("Star 2 · on the beat", { enter: "stamp", syncLine: 2, delay: 0, duration: 420, ease: "overshoot", scaleFrom: 2.4, rotateFrom: 25, idle: "wiggle", idleAmp: 4, idleSpeed: 2.9 }, { enterSound: "star", enterVolume: 0.8, enterPitch: 1.26, tapSound: "sparkle" }),
       star3: O("Star 3 · both hands", { enter: "stamp", syncLine: 3, delay: 0, duration: 420, ease: "overshoot", scaleFrom: 2.4, rotateFrom: -20, idle: "wiggle", idleAmp: 4, idleSpeed: 2.3 }, { enterSound: "star", enterVolume: 0.8, enterPitch: 1.5, tapSound: "sparkle" }),
+      // Shown once the third star has landed; no voice line for it.
+      score: O("Score · 85%", { enter: "pop", syncLine: 3, delay: 700, duration: 480, ease: "overshoot", scaleFrom: 0.5 }, { enterSound: "bubble", enterVolume: 0.45 }),
     },
     params: { layoutMs: 900 },
   }),
