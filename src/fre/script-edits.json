@@ -246,7 +246,7 @@
         }
       }
     },
-    "notes": "- Tap to change sticker\n- I Assumed stickers as the preferred reply method.\n- **In the future:** The card editor ux can be expanded to provide more editing capabilities as well as mixed media so parents can really customize their reply card."
+    "notes": "- Tap to change sticker\n- I Assumed stickers as the preferred reply method.\n- **In the future:** Card editor can be expanded to provide more editing capabilities and allow mixed media, so parents can really customize their reply card."
   },
   "p-sent": {
     "sounds": [],
