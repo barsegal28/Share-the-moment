@@ -57,15 +57,15 @@ function StepNotes() {
   const text = (flow.script[flow.step]?.notes ?? "").trim()
   const lines = text ? text.split("\n").map((l) => l.trimEnd()).filter(Boolean) : []
   const out: React.ReactNode[] = []
-  let bullets: string[] = []
+  let bullets: [string, boolean][] = []
   const rich = (t: string) => t.split(/(\*\*[^*]+\*\*)/).map((x, i) => (x.startsWith("**") && x.endsWith("**") ? <strong key={i} className="font-semibold">{x.slice(2, -2)}</strong> : x))
   const flush = () => {
     if (!bullets.length) return
     out.push(
       <ul key={out.length} className="flex flex-col">
-        {bullets.map((b, i) => (
-          <li key={i} className="relative pl-[22px] text-[15px] leading-[26px] text-[#3f3f46]">
-            <span className="absolute top-[11px] left-[8px] size-[4px] rounded-full bg-[#3f3f46]" />
+        {bullets.map(([b, sub], i) => (
+          <li key={i} className={cn("relative text-[15px] leading-[26px] text-[#3f3f46]", sub ? "pl-[42px]" : "pl-[22px]")}>
+            <span className={cn("absolute top-[11px] size-[4px] rounded-full", sub ? "left-[28px] border border-[#3f3f46]" : "left-[8px] bg-[#3f3f46]")} />
             {rich(b)}
           </li>
         ))}
@@ -75,7 +75,8 @@ function StepNotes() {
   }
   for (const l of lines) {
     const btn = l.match(/^\[(.+?)\]\((.+?)\)$/)
-    if (l.startsWith("- ")) { bullets.push(l.slice(2)); continue }
+    if (/^\s+- /.test(l)) { bullets.push([l.replace(/^\s+- /, ""), true]); continue }
+    if (l.startsWith("- ")) { bullets.push([l.slice(2), false]); continue }
     flush()
     if (btn) out.push(<a key={out.length} href={btn[2]} className="inline-flex h-9 w-fit items-center rounded-full bg-[#18181b] px-4 text-[14px] font-medium text-white hover:bg-zinc-700">{btn[1]}</a>)
     else out.push(<p key={out.length} className="text-[15px] leading-[26px] text-[#3f3f46]">{rich(l)}</p>)
