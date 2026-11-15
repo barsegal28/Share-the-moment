@@ -249,7 +249,7 @@
   },
   "p-sent": {
     "sounds": [],
-    "notes": "Switch to kid flow\n[Open flow](#/kid)"
+    "notes": "Switch to kid flow\n[Open flow](#/kid?step=k-notify)"
   },
   "k-shared": {
     "objects": {
