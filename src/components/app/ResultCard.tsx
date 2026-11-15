@@ -44,7 +44,7 @@ export function ResultCard({
   timeline = "default",
   title = "You are a star!",
   shared = false,
-  onPlayNext,
+  onPlayNext: _onPlayNext,
   onShare,
   onPlayAgain,
   onClose,
@@ -93,7 +93,7 @@ export function ResultCard({
             <div className="flex w-[240px] flex-col items-center gap-6">
               {slot(
                 "next",
-                <Button variant="primary" className="w-full" onClick={onPlayNext} iconStart={<ArrowRightIcon size={BUTTON_ICON_SIZE.xxl} />}>
+                <Button variant="primary" className="pointer-events-none w-full" tabIndex={-1} aria-disabled iconStart={<ArrowRightIcon size={BUTTON_ICON_SIZE.xxl} />}>
                   Play next
                 </Button>,
               )}
