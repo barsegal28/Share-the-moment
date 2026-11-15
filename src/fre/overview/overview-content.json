@@ -104,7 +104,7 @@
     {
       "id": "b21",
       "type": "ul",
-      "text": "Recordings are audio only\nParents configured their emails and phone numbers in the app in advance. The feature use these details by default."
+      "text": "Recordings are audio only\nParents configured their emails and phone numbers in the app in advance. The feature uses these details by default."
     },
     {
       "id": "b22",
@@ -144,7 +144,7 @@
     {
       "id": "b34",
       "type": "ul",
-      "text": "Test action hierarchy logic with users, and validate against KPI’s\n  When the kid earns 3 stars after they are familiar with the feature, should this be the primary actions?\n  Do kids want to share even when they didn't get 3 stars yet?\n  Does prompting to share can create the opposite reaction and annoy the kid? \nTest parents preferences of ways to reply; Default medium(s), smart defaults, generative AI messages."
+      "text": "Test action hierarchy logic with users, and validate against KPI’s\n  When the kid earns 3 stars after they are familiar with the feature, should this be the primary action?\n  Do kids want to share even when they didn't get 3 stars yet?\n  Does prompting to share can create the opposite reaction and annoy the kid? \nTest parents preferences of ways to reply; Default medium(s), smart defaults, generative AI messages."
     },
     {
       "id": "b35",
