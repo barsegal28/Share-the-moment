@@ -82,6 +82,8 @@ export interface StepCfg {
   voice: VoiceLine[]
   sounds: SoundCue[]
   recording: { mode: RecordingMode; volume: number }
+  /** Presenter notes shown beside the screen. "- " lines are bullets; "[Label](#/route)" is a button. */
+  notes?: string
   objects: Record<string, ObjCfg>
   /** Step-specific numbers (frame rate, layout move time…). */
   params: Record<string, number>

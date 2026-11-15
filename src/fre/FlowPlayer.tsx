@@ -1,3 +1,4 @@
+import type React from "react"
 import brandComet from "./overview/brand-comet.svg"
 /**
  * The flow pages: #/overview — the whole first-time flow, kid → parent → kid, following the flow chart;
@@ -37,13 +38,55 @@ export function FlowPlayer({ initial, mode = "overview" }: { initial?: StepId; m
       <div className="ui-root flex h-dvh flex-col bg-white">
         <SoundUnlock />
         <Header mode={mode} />
-        <main className="relative min-h-0 flex-1 bg-white px-6 py-5">
-          <FlowStage />
-          {!started && <StartOverlay onStart={() => { setStarted(true); setPaused(false) }} />}
+        <main className="flex min-h-0 flex-1 bg-white">
+          <div className="relative min-w-0 flex-1 px-6 py-5">
+            <FlowStage />
+            {!started && <StartOverlay onStart={() => { setStarted(true); setPaused(false) }} />}
+          </div>
+          <StepNotes />
         </main>
         <Footer steps={steps} />
       </div>
     </FlowProvider>
+  )
+}
+
+/** Per-screen notes (edited in the Editor's "Notes" field) in a column right of the device. */
+function StepNotes() {
+  const flow = useFlow()
+  const text = (flow.script[flow.step]?.notes ?? "").trim()
+  const lines = text ? text.split("\n").map((l) => l.trimEnd()).filter(Boolean) : []
+  const out: React.ReactNode[] = []
+  let bullets: string[] = []
+  const flush = () => {
+    if (!bullets.length) return
+    out.push(
+      <ul key={out.length} className="flex flex-col">
+        {bullets.map((b, i) => (
+          <li key={i} className="relative pl-[22px] text-[15px] leading-[26px] text-[#3f3f46]">
+            <span className="absolute top-[11px] left-[8px] size-[4px] rounded-full bg-[#3f3f46]" />
+            {b}
+          </li>
+        ))}
+      </ul>,
+    )
+    bullets = []
+  }
+  for (const l of lines) {
+    const btn = l.match(/^\[(.+?)\]\((.+?)\)$/)
+    if (l.startsWith("- ")) { bullets.push(l.slice(2)); continue }
+    flush()
+    if (btn) out.push(<a key={out.length} href={btn[2]} className="inline-flex h-9 w-fit items-center rounded-full bg-[#18181b] px-4 text-[14px] font-medium text-white hover:bg-zinc-700">{btn[1]}</a>)
+    else out.push(<p key={out.length} className="text-[15px] leading-[26px] text-[#3f3f46]">{l}</p>)
+  }
+  flush()
+  return (
+    <aside className="hidden w-[260px] shrink-0 flex-col gap-4 overflow-y-auto py-6 pr-6 lg:flex">
+      {out.length > 0 && <>
+        <h2 className="text-[14px] leading-5 font-semibold text-[#18181b]">Notes</h2>
+        {out}
+      </>}
+    </aside>
   )
 }
 

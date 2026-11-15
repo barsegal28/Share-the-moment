@@ -425,6 +425,16 @@ function StepProps() {
         </div>
       </PanelSection>
 
+      <PanelSection title="Notes">
+        <textarea
+          value={s.notes ?? ""}
+          onChange={(e) => set((st) => ({ ...st, notes: e.target.value }), false)}
+          rows={5}
+          placeholder={"Shown to the right of the screen.\n- a bullet\n[Go to parent flow](#/parent)"}
+          className="w-full resize-y rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] leading-5 text-zinc-800 outline-none focus:border-zinc-400"
+        />
+      </PanelSection>
+
       <PanelSection title="Next step">
         <div className="grid grid-cols-[1fr_96px] gap-1.5">
           <Select value={s.advance} onChange={(e) => set((st) => ({ ...st, advance: e.target.value as Advance }), false)}>
